@@ -2,143 +2,284 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PangaSmart - Dashboard</title>
     <style>
         * {
-    box-sizing: border-box;
-}
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-body {
-    margin: 0;
-    padding: 10px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            padding: 15px;
+            color: #333;
+        }
 
-/* Main Layout Wrapper */
-.container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 10px;
-}
+        /* NAVBAR RESPONSIVE */
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            text-align: center;
+        }
 
-/* Kama una meza ya vyumba/panga (Tables) */
-.table-responsive {
-    width: 100%;
-    overflow-x: auto; /* Inaleta scroll ya pembeni kwenye meza badala ya kuharibu ukurasa wote */
-}
+        .navbar h2 {
+            font-size: 20px;
+        }
 
-/* Kama una Gridi ya vyumba (Card Grid) */
-.room-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Inajipanga yenyewe kwa safu kulingana na kioo */
-    gap: 20px;
-}
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
-        .navbar { background: #2c3e50; color: white; padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar-links { display: flex; align-items: center; gap: 10px; }
-        .nav-btn { color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 14px; font-weight: bold; border: 1px solid transparent; }
-        .nav-btn-profile { border-color: #3498db; background-color: #2980b9; }
+        .navbar-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .nav-btn {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .nav-btn-profile { background-color: #2980b9; }
         .nav-btn-profile:hover { background-color: #3498db; }
         .nav-btn-logout { background-color: #e74c3c; }
         .nav-btn-logout:hover { background-color: #c0392b; }
-        .container { display: flex; gap: 20px; margin-top: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .form-section { flex: 1; }
-        .list-section { flex: 2; }
-        input, select, textarea { width: 100%; padding: 8px; margin: 6px 0 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn { background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
-        .room-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+
+        /* MAIN CONTAINER (FLEX RESPONSIVE) */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            width: 100%;
+        }
+
+        /* FORM STYLES */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .btn:hover { background: #219150; }
+
+        /* SEARCH BAR */
+        .search-box {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ROOM ITEM & MEDIA */
+        .room-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+        }
+
+        .room-item:last-child {
+            border-bottom: none;
+        }
+
         .price { color: #e74c3c; font-weight: bold; }
-        .media-preview { width: 100%; max-height: 250px; object-fit: cover; border-radius: 5px; margin-top: 8px; }
-        .download-btn { display: inline-block; margin-top: 8px; padding: 6px 12px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; }
-        .download-btn:hover { background-color: #2980b9; }
+
+        .media-preview {
+            width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 8px 14px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
         .book-btn { background-color: #f39c12; margin-top: 8px; }
         .book-btn:hover { background-color: #e67e22; }
-        .search-box { background: #eef2f7; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+
+        /* TABLE SCROLL FOR MOBILE */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 450px; /* Inazuia table kubanana sana */
+        }
+
+        /* DESKTOP MEDIA QUERIES (Vioo Vikubwa) */
+        @media (min-width: 768px) {
+            .navbar {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: left;
+            }
+
+            .main-container {
+                flex-direction: row;
+            }
+
+            .form-section { flex: 1; }
+            .list-section { flex: 2; }
+
+            .search-form {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .search-form input {
+                margin: 0;
+                flex: 1;
+            }
+
+            .search-form .btn {
+                width: auto;
+                padding: 10px 20px;
+            }
+        }
     </style>
 </head>
 <body>
 
+<!-- NAVBAR -->
 <div class="navbar">
-    <h2>🏠 PangaSmart Dashboard</h2>
+    <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
-        <span style="margin-right: 10px;"
-              th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">
-            User
-        </span>
-        <!-- KITUFE CHA PROFILE YANGU -->
-        <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile Yangu</a>
-
-        <!-- KITUFE CHA LOGOUT -->
-        <a href="/login" class="nav-btn nav-btn-logout">Logout / Toka</a>
+        <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
+        <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
+        <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
     </div>
 </div>
 
-<div class="container">
+<div class="main-container">
 
-    <!-- DASHBOARD YA LANDLORD (Ataiona LANDLORD pekee) -->
+    <!-- DASHBOARD YA LANDLORD -->
     <div th:if="${session.userRole == 'LANDLORD'}" class="card form-section">
-        <h3>Add Room / <i>Sajili Chumba Kipya</i></h3>
+        <h3>Sajili Chumba Kipya</h3>
         <form th:action="@{/add-room}" method="post" enctype="multipart/form-data">
-            <label>Title / <i>Aina ya Chumba</i>:</label>
-            <input type="text" name="title" required placeholder="Master Bedroom">
+            <label style="font-size: 13px; font-weight: bold;">Aina ya Chumba:</label>
+            <input type="text" name="title" required placeholder="Mfano: Master Bedroom">
 
-            <label>Location / <i>Mahali Ilipo</i>:</label>
+            <label style="font-size: 13px; font-weight: bold;">Mahali Ilipo:</label>
             <input type="text" name="location" required placeholder="Mwenge, Dar">
 
-            <label>Price (TZS) / <i>Kodi kwa Mwezi</i>:</label>
+            <label style="font-size: 13px; font-weight: bold;">Kodi kwa Mwezi (TZS):</label>
             <input type="number" name="price" required placeholder="150000">
 
-            <label>Room Image / <i>Picha ya Chumba</i>:</label>
+            <label style="font-size: 13px; font-weight: bold;">Picha ya Chumba:</label>
             <input type="file" name="imageFile" accept="image/*" required>
 
-            <label>Short Video / <i>Video Fupi</i>:</label>
+            <label style="font-size: 13px; font-weight: bold;">Video Fupi (Option):</label>
             <input type="file" name="videoFile" accept="video/*">
 
-            <label>Description / <i>Maelezo</i>:</label>
-            <textarea name="description" rows="3"></textarea>
+            <label style="font-size: 13px; font-weight: bold;">Maelezo:</label>
+            <textarea name="description" rows="3" placeholder="Maelezo ya ziada..."></textarea>
 
-            <button type="submit" class="btn">Save Room / Hifadhi Chumba</button>
+            <button type="submit" class="btn">Hifadhi Chumba</button>
         </form>
 
-        <!-- Jedwali la Maombi ya Booking kwa Landlord -->
+        <!-- Jedwali la Maombi ya Booking -->
         <div style="margin-top: 30px;">
-            <h3>📋 Maombi ya Booking (Requests)</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" th:if="${bookings != null and not #lists.isEmpty(bookings)}">
-                <thead>
-                <tr style="background: #2c3e50; color: white; text-align: left;">
-                    <th style="padding: 8px;">Chumba</th>
-                    <th style="padding: 8px;">Simu</th>
-                    <th style="padding: 8px;">Hali</th>
-                    <th style="padding: 8px;">Hatua</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="b : ${bookings}" style="border-bottom: 1px solid #ddd;">
-                    <td style="padding: 8px;" th:text="${b.roomTitle}">Chumba</td>
-                    <td style="padding: 8px; font-weight: bold;" th:text="${b.tenantPhone}">07...</td>
-                    <td style="padding: 8px;">
-                        <span th:if="${b.status == 'PENDING'}" style="background: #f39c12; color: white; padding: 3px 6px; border-radius: 3px; font-size: 11px;">PENDING</span>
-                        <span th:if="${b.status == 'APPROVED'}" style="background: #27ae60; color: white; padding: 3px 6px; border-radius: 3px; font-size: 11px;">APPROVED</span>
-                        <span th:if="${b.status == 'REJECTED'}" style="background: #e74c3c; color: white; padding: 3px 6px; border-radius: 3px; font-size: 11px;">REJECTED</span>
-                    </td>
-                    <td style="padding: 8px; display: flex; gap: 4px;">
-                        <form th:action="@{/approve-booking}" method="post" th:if="${b.status == 'PENDING'}">
-                            <input type="hidden" name="bookingId" th:value="${b.id}">
-                            <button type="submit" style="background: #27ae60; color: white; border: none; padding: 4px 6px; border-radius: 3px; cursor: pointer; font-size: 11px;">Kubali</button>
-                        </form>
-                        <form th:action="@{/reject-booking}" method="post" th:if="${b.status == 'PENDING'}">
-                            <input type="hidden" name="bookingId" th:value="${b.id}">
-                            <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 4px 6px; border-radius: 3px; cursor: pointer; font-size: 11px;">Kataa</button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <h3>📋 Maombi ya Booking</h3>
+
+            <div class="table-responsive" th:if="${bookings != null and not #lists.isEmpty(bookings)}">
+                <table>
+                    <thead>
+                    <tr style="background: #2c3e50; color: white; text-align: left;">
+                        <th style="padding: 10px;">Chumba</th>
+                        <th style="padding: 10px;">Simu</th>
+                        <th style="padding: 10px;">Hali</th>
+                        <th style="padding: 10px;">Hatua</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="b : ${bookings}" style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;" th:text="${b.roomTitle}">Chumba</td>
+                        <td style="padding: 10px; font-weight: bold;" th:text="${b.tenantPhone}">07...</td>
+                        <td style="padding: 10px;">
+                            <span th:if="${b.status == 'PENDING'}" style="background: #f39c12; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">PENDING</span>
+                            <span th:if="${b.status == 'APPROVED'}" style="background: #27ae60; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">APPROVED</span>
+                            <span th:if="${b.status == 'REJECTED'}" style="background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">REJECTED</span>
+                        </td>
+                        <td style="padding: 10px;">
+                            <div style="display: flex; gap: 5px;">
+                                <form th:action="@{/approve-booking}" method="post" th:if="${b.status == 'PENDING'}">
+                                    <input type="hidden" name="bookingId" th:value="${b.id}">
+                                    <button type="submit" style="background: #27ae60; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Kubali</button>
+                                </form>
+                                <form th:action="@{/reject-booking}" method="post" th:if="${b.status == 'PENDING'}">
+                                    <input type="hidden" name="bookingId" th:value="${b.id}">
+                                    <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Kataa</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div th:if="${bookings == null or #lists.isEmpty(bookings)}">
-                <p style="color: #7f8c8d; font-size: 13px; background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 10px;">
-                    ℹ️ No booking available / <i>Bado hakuna maombi ya booking kwenye vyumba vyako.</i>
+                <p style="color: #7f8c8d; font-size: 13px; background: #f8f9fa; padding: 12px; border-radius: 5px; margin-top: 10px;">
+                    ℹ️ Bado hakuna maombi ya booking kwenye vyumba vyako.
                 </p>
             </div>
         </div>
@@ -149,28 +290,27 @@ body {
 
         <!-- SEARCH BAR -->
         <div class="search-box">
-            <form th:action="@{/home}" method="get" style="display: flex; gap: 10px; align-items: center;">
+            <form th:action="@{/home}" method="get" class="search-form">
                 <input type="text"
                        name="search"
                        th:value="${searchKeyword}"
-                       placeholder="🔍 Tafuta kwa sehemu (mf. Mwenge, Sinza) au aina ya chumba..."
-                       style="margin: 0; flex: 1; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                       placeholder="🔍 Tafuta eneo au aina ya chumba...">
 
-                <button type="submit" class="btn" style="width: auto; padding: 10px 20px;">Tafuta</button>
+                <button type="submit" class="btn">Tafuta</button>
 
                 <a th:if="${searchKeyword != null and !#strings.isEmpty(searchKeyword)}"
                    th:href="@{/home}"
-                   style="color: #e74c3c; text-decoration: none; font-size: 13px; font-weight: bold; white-space: nowrap;">
+                   style="color: #e74c3c; text-decoration: none; font-size: 13px; font-weight: bold; text-align: center; margin-top: 5px;">
                     ✖️ Ondoa Search
                 </a>
             </form>
         </div>
 
-        <h3>Available Rooms / <i>Vyumba Vilivyopo</i></h3>
+        <h3>Vyumba Vilivyopo</h3>
 
         <div th:each="room : ${rooms}" class="room-item">
             <h4 th:text="${room.title}">Aina ya Chumba</h4>
-            <p>📍 <span th:text="${room.location}">Location</span> | <span class="price">TZS <span th:text="${room.price}">0</span>/Month</span></p>
+            <p style="margin-top: 4px; font-size: 14px;">📍 <span th:text="${room.location}">Location</span> | <span class="price">TZS <span th:text="${room.price}">0</span>/Mwezi</span></p>
 
             <div th:if="${room.imageUrl}" style="margin-top: 10px;">
                 <img th:src="${room.imageUrl}" class="media-preview" alt="Room Image">
@@ -188,13 +328,13 @@ body {
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
             <!-- Kitufe cha Booking (TENANT) -->
-            <div th:if="${session.userRole == 'TENANT'}" style="margin-top: 12px; background: #f9f9f9; padding: 10px; border-radius: 5px;">
+            <div th:if="${session.userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
                 <form th:action="@{/book-room}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
                     <input type="hidden" name="roomTitle" th:value="${room.title}">
 
-                    <label style="font-size: 12px; font-weight: bold;">Unahitaji chumba hiki?</label>
-                    <input type="text" name="tenantPhone" placeholder="Weka Namba yako ya Simu" required style="margin: 5px 0;">
+                    <label style="font-size: 12px; font-weight: bold; display: block;">Unahitaji chumba hiki?</label>
+                    <input type="text" name="tenantPhone" placeholder="Weka Namba yako ya Simu" required style="margin: 6px 0 10px;">
                     <button type="submit" class="btn book-btn">📌 Omba Kupanga (Book Room)</button>
                 </form>
             </div>
@@ -202,24 +342,21 @@ body {
 
         <!-- UJUMBE WAKATI HAKUNA CHUMBA -->
         <div th:if="${rooms == null or #lists.isEmpty(rooms)}" style="text-align: center; padding: 30px 10px;">
-
             <div th:if="${session.userRole == 'LANDLORD'}" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; border: 1px solid #ffeeba;">
                 <h4>⚠️ Hujaweka chumba sokoni!</h4>
-                <p style="margin: 5px 0 0; font-size: 14px;">Tumia fomu iliyopo upande wa kushoto kusajili chumba chako cha kwanza.</p>
+                <p style="margin: 5px 0 0; font-size: 13px;">Tumia fomu kusajili chumba chako cha kwanza.</p>
             </div>
 
             <div th:if="${session.userRole == 'TENANT'}" style="background: #e2e3e5; color: #383d41; padding: 15px; border-radius: 6px;">
                 <h4>ℹ️ Hakuna vyumba vilivyopatikana.</h4>
-                <p style="margin: 5px 0 0; font-size: 14px;">Jaribu kutafuta tena au rudi baadae kuona vyumba vipya.</p>
+                <p style="margin: 5px 0 0; font-size: 13px;">Jaribu kutafuta tena au rudi baadae kuona vyumba vipya.</p>
             </div>
-
         </div>
     </div>
 
 </div>
 
-</body>
-<!-- FOOTER BRANDING: KISANGA TECHNOLOGY -->
+<!-- FOOTER BRANDING -->
 <footer style="text-align: center; margin-top: 40px; padding: 20px 0; border-top: 1px solid #e2e8f0; font-family: sans-serif;">
     <p style="margin: 0; text-transform: lowercase; color: #94a3b8; font-size: 12px;">from</p>
     <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 3px;">
@@ -232,4 +369,6 @@ body {
         </span>
     </div>
 </footer>
+
+</body>
 </html>
