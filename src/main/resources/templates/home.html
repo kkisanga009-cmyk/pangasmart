@@ -4,6 +4,36 @@
     <meta charset="UTF-8">
     <title>PangaSmart - Dashboard</title>
     <style>
+        * {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Main Layout Wrapper */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* Kama una meza ya vyumba/panga (Tables) */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Inaleta scroll ya pembeni kwenye meza badala ya kuharibu ukurasa wote */
+}
+
+/* Kama una Gridi ya vyumba (Card Grid) */
+.room-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Inajipanga yenyewe kwa safu kulingana na kioo */
+    gap: 20px;
+}
         body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
         .navbar { background: #2c3e50; color: white; padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
         .navbar-links { display: flex; align-items: center; gap: 10px; }

@@ -4,6 +4,40 @@
     <meta charset="UTF-8">
     <title>PangaSmart - Register / Jisajili</title>
     <style>
+        * {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #eef2f3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 15px; /* Inazuia fomu kugusa kingo za kioo cha simu */
+}
+
+/* Badilisha class ya kadi yako hapa (mfano .register-card au .form-card) */
+.register-card, .forgot-card, .reset-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;           /* Inajaza 100% kwenye simu */
+    max-width: 450px;      /* Haitazidi pixels 450 kwenye desktop */
+    text-align: center;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
         body { font-family: 'Segoe UI', sans-serif; background-color: #eef2f3; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 360px; }
         .form-group { margin-bottom: 12px; text-align: left; }
