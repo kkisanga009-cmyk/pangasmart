@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PangaSmart - Nyumba na Vyumba vya Kupanga</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+        }
+        .feature-card {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN LAYER (KISANGA TECHNOLOGY) -->
+<div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; color: white; transition: opacity 0.6s ease;">
+    <div style="background: rgba(30, 41, 59, 0.7); padding: 40px 50px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+        <svg width="70" height="70" viewBox="0 0 100 100" fill="none">
+            <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="#1e293b" stroke="#3b82f6" stroke-width="4"/>
+            <path d="M55 15 L35 55 H50 L45 85 L70 45 H55 L65 15 Z" fill="#f59e0b"/>
+        </svg>
+        <h1 style="font-size: 2rem; font-weight: 900; letter-spacing: 3px; margin-top: 10px; color: #ffffff;">KISANGA</h1>
+        <h2 style="font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; color: #3b82f6; margin-top: -5px;">TECHNOLOGY</h2>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3 text-warning" href="/">🏠 PangaSmart</a>
+        <div>
+            <a href="/login" class="btn btn-outline-light me-2 fw-bold">Ingia (Login)</a>
+            <a href="/register" class="btn btn-primary fw-bold">Jisajili (Register)</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Pata Chumba au Nyumba ya Kupanga Kwa Urahisi</h1>
+        <p class="lead mb-4">PangaSmart inawanisha wenye nyumba na wapangaji kwa haraka, usalama na urahisi bila madalali.</p>
+        <a href="/register" class="btn btn-warning btn-lg fw-bold px-4 py-2 me-2">Anza Sasa hivi</a>
+        <a href="/login" class="btn btn-outline-light btn-lg fw-bold px-4 py-2">Tazama Vyumba</a>
+    </div>
+</section>
+
+<!-- HUDUMA ZETU -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Kwanini Utumie PangaSmart?</h2>
+            <p class="text-muted">Mfumo wa kisasa unaokupa uhuru wa kupanga na kuweka vyumba sokoni.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card p-4 feature-card text-center h-100">
+                    <div class="fs-1 text-primary mb-3">🖼️</div>
+                    <h4 class="fw-bold">Picha na Video</h4>
+                    <p class="text-muted">Tazama muonekano halisi wa chumba kwa picha na video fupi kabla ya kufanya maamuzi.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 feature-card text-center h-100">
+                    <div class="fs-1 text-success mb-3">⚡</div>
+                    <h4 class="fw-bold">Booking ya Haraka</h4>
+                    <p class="text-muted">Tuma maombi ya kupanga chumba papo hapo na upate mrejesho wa haraka kupitia SMS.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 feature-card text-center h-100">
+                    <div class="fs-1 text-warning mb-3">🔑</div>
+                    <h4 class="fw-bold">Usimamizi wa Wenye Nyumba</h4>
+                    <p class="text-muted">Wenye nyumba wanaweza kusajili vyumba na kupokea maombi ya wapangaji kwa urahisi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER BRANDING -->
+<footer class="bg-dark text-white text-center py-4">
+    <p class="m-0 text-muted small">from</p>
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-1">
+        <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+            <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="#1e293b" stroke="#3b82f6" stroke-width="6"/>
+            <path d="M55 15 L35 55 H50 L45 85 L70 45 H55 L65 15 Z" fill="#f59e0b"/>
+        </svg>
+        <span class="fw-bold text-white">KISANGA <span class="text-primary">TECHNOLOGY</span></span>
+    </div>
+</footer>
+
+<script>
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(function() {
+                splash.style.display = 'none';
+            }, 600);
+        }, 1500);
+    });
+</script>
+
+</body>
+</html>
