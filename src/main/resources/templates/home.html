@@ -219,7 +219,7 @@
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
         <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
-        <a th:if="${session.userRole == 'ADMIN'}" href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
+        <a th:if="${userRole == 'ADMIN'}" href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
         <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
         <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
     </div>
@@ -228,8 +228,14 @@
 <div class="main-container">
 
     <!-- DASHBOARD YA LANDLORD -->
-    <div th:if="${session.userRole == 'LANDLORD'}" class="card form-section">
+    <div th:if="${userRole == 'LANDLORD'}" class="card form-section">
         <h3>Sajili Chumba Kipya</h3>
+
+        <!-- Menshi ya Ufanisi -->
+        <div th:if="${param.roomAdded}" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
+            ✅ Chumba kimesajiliwa kikamilifu!
+        </div>
+
         <form th:action="@{/add-room}" method="post" enctype="multipart/form-data">
             <label style="font-size: 13px; font-weight: bold;">Aina ya Chumba:</label>
             <input type="text" name="title" required placeholder="Mfano: Master Bedroom">
@@ -238,10 +244,10 @@
             <input type="text" name="location" required placeholder="Mwenge, Dar">
 
             <label style="font-size: 13px; font-weight: bold;">Kodi kwa Mwezi (TZS):</label>
-            <input type="number" name="price" required placeholder="150000">
+            <input type="number" step="any" name="price" required placeholder="150000">
 
             <label style="font-size: 13px; font-weight: bold;">Picha ya Chumba:</label>
-            <input type="file" name="imageFile" accept="image/*" required>
+            <input type="file" name="imageFile" accept="image/*">
 
             <label style="font-size: 13px; font-weight: bold;">Video Fupi (Option):</label>
             <input type="file" name="videoFile" accept="video/*">
@@ -343,7 +349,7 @@
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
             <!-- KITUFE CHA MALIPO YA PESAPAL (TENANT) -->
-            <div th:if="${session.userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+            <div th:if="${userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
                 <form th:action="@{/api/payments/initiate}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
                     <button type="submit" class="pay-btn">
@@ -355,12 +361,12 @@
 
         <!-- UJUMBE WAKATI HAKUNA CHUMBA -->
         <div th:if="${rooms == null or #lists.isEmpty(rooms)}" style="text-align: center; padding: 30px 10px;">
-            <div th:if="${session.userRole == 'LANDLORD'}" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; border: 1px solid #ffeeba;">
+            <div th:if="${userRole == 'LANDLORD'}" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; border: 1px solid #ffeeba;">
                 <h4>⚠️ Hujaweka chumba sokoni!</h4>
                 <p style="margin: 5px 0 0; font-size: 13px;">Tumia fomu kusajili chumba chako cha kwanza.</p>
             </div>
 
-            <div th:if="${session.userRole == 'TENANT'}" style="background: #e2e3e5; color: #383d41; padding: 15px; border-radius: 6px;">
+            <div th:if="${userRole == 'TENANT'}" style="background: #e2e3e5; color: #383d41; padding: 15px; border-radius: 6px;">
                 <h4>ℹ️ Hakuna vyumba vilivyopatikana.</h4>
                 <p style="margin: 5px 0 0; font-size: 13px;">Jaribu kutafuta tena au rudi baadae kuona vyumba vipya.</p>
             </div>

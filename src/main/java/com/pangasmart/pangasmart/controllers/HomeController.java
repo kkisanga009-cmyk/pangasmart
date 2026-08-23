@@ -44,7 +44,6 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        // 1. Hakikisha userRole haibaki null ili kuzuia error 500 kwenye Thymeleaf
         String userRole = (String) session.getAttribute("userRole");
         if (userRole == null && user.getRole() != null) {
             userRole = user.getRole();
@@ -54,7 +53,6 @@ public class HomeController {
         List<Room> roomList;
         List<Booking> bookingList;
 
-        // 2. Leta Data kwa kuzingatia Role ya Mtumiaji
         if ("LANDLORD".equalsIgnoreCase(userRole)) {
             if (search != null && !search.trim().isEmpty()) {
                 roomList = roomRepository.searchLandlordRooms(user.getEmail(), search);
@@ -71,7 +69,6 @@ public class HomeController {
             bookingList = new ArrayList<>();
         }
 
-        // 3. Weka maandalizi ya kuzuia null values kupelekwa kwenye HTML template
         model.addAttribute("currentUser", user);
         model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
         model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
@@ -83,8 +80,8 @@ public class HomeController {
 
     @PostMapping("/add-room")
     public String addRoom(@ModelAttribute Room room,
-                          @RequestParam("imageFile") MultipartFile imageFile,
-                          @RequestParam("videoFile") MultipartFile videoFile,
+                          @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                          @RequestParam(value = "videoFile", required = false) MultipartFile videoFile,
                           HttpSession session) {
 
         User user = (User) session.getAttribute("loggedInUser");
@@ -92,6 +89,7 @@ public class HomeController {
             return "redirect:/login";
         }
 
+        // Weka email ya Landlord aliyelog-in
         room.setLandlordEmail(user.getEmail());
 
         try {
@@ -100,13 +98,15 @@ public class HomeController {
                 Files.createDirectories(uploadPath);
             }
 
-            if (!imageFile.isEmpty()) {
+            // Hifadhi Picha kama ipo
+            if (imageFile != null && !imageFile.isEmpty()) {
                 String imageName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
                 Files.copy(imageFile.getInputStream(), uploadPath.resolve(imageName), StandardCopyOption.REPLACE_EXISTING);
                 room.setImageUrl("/uploads/" + imageName);
             }
 
-            if (!videoFile.isEmpty()) {
+            // Hifadhi Video kama ipo
+            if (videoFile != null && !videoFile.isEmpty()) {
                 String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
                 Files.copy(videoFile.getInputStream(), uploadPath.resolve(videoName), StandardCopyOption.REPLACE_EXISTING);
                 room.setVideoUrl("/uploads/" + videoName);
@@ -115,8 +115,9 @@ public class HomeController {
             e.printStackTrace();
         }
 
+        // Save Room kwenye Database
         roomRepository.save(room);
-        return "redirect:/home";
+        return "redirect:/home?roomAdded=true";
     }
 
     @PostMapping("/book-room")
@@ -136,8 +137,12 @@ public class HomeController {
 
         bookingRepository.save(booking);
 
-        String msg = "PangaSmart: Ombi lako la chumba '" + roomTitle + "' limepokelewa. Mwenye nyumba atakujibu hivi karibuni.";
-        smsService.sendSms(tenantPhone, msg);
+        try {
+            String msg = "PangaSmart: Ombi lako la chumba '" + roomTitle + "' limepokelewa. Mwenye nyumba atakujibu hivi karibuni.";
+            smsService.sendSms(tenantPhone, msg);
+        } catch (Exception e) {
+            System.out.println("SMS error: " + e.getMessage());
+        }
 
         return "redirect:/home?booked=true";
     }
@@ -148,8 +153,12 @@ public class HomeController {
             b.setStatus("APPROVED");
             bookingRepository.save(b);
 
-            String msg = "PangaSmart: Hongera! Ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKUBALIWA na mwenye nyumba.";
-            smsService.sendSms(b.getTenantPhone(), msg);
+            try {
+                String msg = "PangaSmart: Hongera! Ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKUBALIWA na mwenye nyumba.";
+                smsService.sendSms(b.getTenantPhone(), msg);
+            } catch (Exception e) {
+                System.out.println("SMS error: " + e.getMessage());
+            }
         });
         return "redirect:/home";
     }
@@ -160,8 +169,12 @@ public class HomeController {
             b.setStatus("REJECTED");
             bookingRepository.save(b);
 
-            String msg = "PangaSmart: Samahani, ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKATALIWA.";
-            smsService.sendSms(b.getTenantPhone(), msg);
+            try {
+                String msg = "PangaSmart: Samahani, ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKATALIWA.";
+                smsService.sendSms(b.getTenantPhone(), msg);
+            } catch (Exception e) {
+                System.out.println("SMS error: " + e.getMessage());
+            }
         });
         return "redirect:/home";
     }
