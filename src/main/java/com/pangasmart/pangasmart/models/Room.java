@@ -17,6 +17,8 @@ public class Room {
     private String description;
     private String imageUrl;
     private String videoUrl;
+    private String landlordEmail;
+    private String landlordPhone;
 
     public Room() {}
 
@@ -45,15 +47,9 @@ public class Room {
     public String getVideoUrl() { return videoUrl; }
     public void setVideoUrl(String videoUrl) { this.videoUrl = videoUrl; }
 
-    // Ongeza hii field ndani ya Room class
-    private String landlordEmail;
+    public String getLandlordEmail() { return landlordEmail; }
+    public void setLandlordEmail(String landlordEmail) { this.landlordEmail = landlordEmail; }
 
-    // Getters and Setters
-    public String getLandlordEmail() {
-        return landlordEmail;
-    }
-
-    public void setLandlordEmail(String landlordEmail) {
-        this.landlordEmail = landlordEmail;
-    }
+    public String getLandlordPhone() { return landlordPhone; }
+    public void setLandlordPhone(String landlordPhone) { this.landlordPhone = landlordPhone; }
 }

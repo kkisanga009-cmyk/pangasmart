@@ -94,6 +94,13 @@ public class HomeController {
 
         room.setLandlordEmail(user.getEmail());
 
+        // Hifadhi namba ya simu ya Landlord kama ipo kwenye user object
+        if (user.getPhone() != null) {
+            room.setLandlordPhone(user.getPhone());
+        } else if (user.getPhone() != null) {
+            room.setLandlordPhone(user.getPhone());
+        }
+
         try {
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
@@ -124,7 +131,7 @@ public class HomeController {
         return "redirect:/home?roomAdded=true";
     }
 
-    // HANDLER MPYA YA MALIPO YA MPANGAJI (TENANT PAYMENT)
+    // HANDLER YA MALIPO YA MPANGAJI (TENANT PAYMENT)
     @PostMapping("/pay-room")
     public String payForRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");

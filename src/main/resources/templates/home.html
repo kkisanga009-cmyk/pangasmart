@@ -220,8 +220,8 @@
     <div class="navbar-links">
         <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
 
-        <!-- FIX ADMIN BUTTON: Ukaguzi wa Admin pande zote mbili -->
-        <a th:if="${userRole == 'ADMIN' or (session.loggedInUser != null and session.loggedInUser.role == 'ADMIN')}"
+        <!-- FIX ADMIN BUTTON: Ukaguzi uliopanuliwa kwa ajili ya Admin Role/Email -->
+        <a th:if="${userRole == 'ADMIN' or currentUser.role == 'ADMIN' or currentUser.email.contains('admin')}"
            href="/admin/dashboard"
            class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
 
@@ -353,13 +353,16 @@
 
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
-            <!-- FIX SEHEMU YA MALIPO NA MAWASILIANO YA TENANT -->
+            <!-- FIX SEHEMU YA MALIPO NA MAWASILIANO YA TENANT (ONYESHA NAMBA YA SIMU) -->
             <div th:if="${userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
 
                 <!-- Kama Mpangaji Ameshahalipia Chumba Hiki -->
-                <div th:if="${param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)}" style="background: #d1e7dd; color: #0f5132; padding: 10px; border-radius: 5px;">
+                <div th:if="${param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)}" style="background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: 5px;">
                     <p style="font-weight: bold; font-size: 14px;">✅ Malipo Yamekamilika!</p>
-                    <p style="font-size: 13px; margin-top: 4px;">Mawasiliano ya Landlord: <strong th:text="${room.landlordEmail}">email@landlord.com</strong></p>
+                    <p style="font-size: 14px; margin-top: 6px;">
+                        📞 Namba ya Simu ya Landlord:
+                        <strong style="font-size: 16px; color: #0d6efd;" th:text="${room.landlordPhone != null ? room.landlordPhone : room.landlordEmail}">07XXXXXXXX</strong>
+                    </p>
                 </div>
 
                 <!-- Kama Bado Hajalipia, Onyesha Kitufe cha Malipo -->
