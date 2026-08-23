@@ -219,7 +219,12 @@
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
         <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
-        <a th:if="${userRole == 'ADMIN'}" href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
+
+        <!-- FIX ADMIN BUTTON: Ukaguzi wa Admin pande zote mbili -->
+        <a th:if="${userRole == 'ADMIN' or (session.loggedInUser != null and session.loggedInUser.role == 'ADMIN')}"
+           href="/admin/dashboard"
+           class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
+
         <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
         <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
     </div>
@@ -231,7 +236,7 @@
     <div th:if="${userRole == 'LANDLORD'}" class="card form-section">
         <h3>Sajili Chumba Kipya</h3>
 
-        <!-- Menshi ya Ufanisi -->
+        <!-- Ujumbe wa Mafanikio -->
         <div th:if="${param.roomAdded}" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
             ✅ Chumba kimesajiliwa kikamilifu!
         </div>
@@ -348,14 +353,23 @@
 
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
-            <!-- KITUFE CHA MALIPO YA PESAPAL (TENANT) -->
+            <!-- FIX SEHEMU YA MALIPO NA MAWASILIANO YA TENANT -->
             <div th:if="${userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                <form th:action="@{/api/payments/initiate}" method="post">
+
+                <!-- Kama Mpangaji Ameshahalipia Chumba Hiki -->
+                <div th:if="${param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)}" style="background: #d1e7dd; color: #0f5132; padding: 10px; border-radius: 5px;">
+                    <p style="font-weight: bold; font-size: 14px;">✅ Malipo Yamekamilika!</p>
+                    <p style="font-size: 13px; margin-top: 4px;">Mawasiliano ya Landlord: <strong th:text="${room.landlordEmail}">email@landlord.com</strong></p>
+                </div>
+
+                <!-- Kama Bado Hajalipia, Onyesha Kitufe cha Malipo -->
+                <form th:unless="${param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)}" th:action="@{/pay-room}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
                     <button type="submit" class="pay-btn">
                         🔒 Lipia TZS 1,000 Kupata Namba ya Mwenyenyumba
                     </button>
                 </form>
+
             </div>
         </div>
 

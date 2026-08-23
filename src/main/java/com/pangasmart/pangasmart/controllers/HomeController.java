@@ -46,6 +46,7 @@ public class HomeController {
             return "redirect:/login";
         }
 
+        // Hakikisha userRole inasomwa vizuri kwenye session au user object
         String userRole = (String) session.getAttribute("userRole");
         if (userRole == null && user.getRole() != null) {
             userRole = user.getRole();
@@ -101,7 +102,7 @@ public class HomeController {
 
             // Hifadhi Picha kama ipo
             if (imageFile != null && !imageFile.isEmpty()) {
-                String imageName = UUID.randomUUID() + "" + imageFile.getOriginalFilename().replaceAll("\\s+", "");
+                String imageName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename().replaceAll("\\s+", "");
                 Path filePath = uploadPath.resolve(imageName);
                 Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                 room.setImageUrl("/uploads/" + imageName);
@@ -109,7 +110,7 @@ public class HomeController {
 
             // Hifadhi Video kama ipo
             if (videoFile != null && !videoFile.isEmpty()) {
-                String videoName = UUID.randomUUID() + "" + videoFile.getOriginalFilename().replaceAll("\\s+", "");
+                String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename().replaceAll("\\s+", "");
                 Path filePath = uploadPath.resolve(videoName);
                 Files.copy(videoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                 room.setVideoUrl("/uploads/" + videoName);
@@ -121,6 +122,18 @@ public class HomeController {
 
         roomRepository.save(room);
         return "redirect:/home?roomAdded=true";
+    }
+
+    // HANDLER MPYA YA MALIPO YA MPANGAJI (TENANT PAYMENT)
+    @PostMapping("/pay-room")
+    public String payForRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        // Inamrudisha mteja kwenye home ikiwa na parameter ya paidRoomId ili kuonyesha namba ya Landlord
+        return "redirect:/home?paidRoomId=" + roomId;
     }
 
     @PostMapping("/book-room")
