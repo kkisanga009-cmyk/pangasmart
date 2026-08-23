@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -31,7 +32,8 @@ public class HomeController {
     @Autowired
     private SmsService smsService;
 
-    private static final String UPLOAD_DIR = "uploads/";
+    // Njia salama ya kuhifadhi faili
+    private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
 
     @GetMapping("/home")
     public String showHomePage(Model model,
@@ -89,7 +91,6 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        // Weka email ya Landlord aliyelog-in
         room.setLandlordEmail(user.getEmail());
 
         try {
@@ -100,22 +101,24 @@ public class HomeController {
 
             // Hifadhi Picha kama ipo
             if (imageFile != null && !imageFile.isEmpty()) {
-                String imageName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-                Files.copy(imageFile.getInputStream(), uploadPath.resolve(imageName), StandardCopyOption.REPLACE_EXISTING);
+                String imageName = UUID.randomUUID() + "" + imageFile.getOriginalFilename().replaceAll("\\s+", "");
+                Path filePath = uploadPath.resolve(imageName);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                 room.setImageUrl("/uploads/" + imageName);
             }
 
             // Hifadhi Video kama ipo
             if (videoFile != null && !videoFile.isEmpty()) {
-                String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
-                Files.copy(videoFile.getInputStream(), uploadPath.resolve(videoName), StandardCopyOption.REPLACE_EXISTING);
+                String videoName = UUID.randomUUID() + "" + videoFile.getOriginalFilename().replaceAll("\\s+", "");
+                Path filePath = uploadPath.resolve(videoName);
+                Files.copy(videoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                 room.setVideoUrl("/uploads/" + videoName);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.err.println("Upload Error: " + e.getMessage());
             e.printStackTrace();
         }
 
-        // Save Room kwenye Database
         roomRepository.save(room);
         return "redirect:/home?roomAdded=true";
     }
