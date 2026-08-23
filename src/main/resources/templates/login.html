@@ -20,7 +20,6 @@
             padding: 15px;
         }
 
-        /* Responsive Card Fix */
         .login-card {
             background: white;
             padding: 25px;
@@ -97,7 +96,6 @@
             background: #219150;
         }
 
-        /* Responsive Splash Screen */
         .splash-box {
             background: rgba(30, 41, 59, 0.7);
             padding: 30px 20px;
@@ -107,6 +105,15 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             width: 85%;
             max-width: 320px;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -142,10 +149,16 @@
     <h2>🏠 PangaSmart</h2>
     <p class="subtitle">Housing & Room Rental System <br> <i>(Mfumo wa Kupanga Nyumba & Vyumba)</i></p>
 
+    <!-- Onyesha Error Message Kama Login Imefeli -->
+    <div th:if="${param.error}" class="error-msg">
+        Email au Password sio sahihi!
+    </div>
+
     <form th:action="@{/login}" method="post">
         <div class="form-group">
             <label>Email Address / <span>Barua Pepe:</span></label>
-            <input type="email" name="email" required placeholder="example@gmail.com">
+            <!-- Mabadiliko: Tumeweka name="username" badala ya name="email" -->
+            <input type="email" name="username" required placeholder="example@gmail.com">
         </div>
 
         <div class="form-group">
@@ -158,21 +171,21 @@
         </div>
 
         <button type="submit" class="btn-submit">Login / Ingia</button>
-
-        <!-- FOOTER BRANDING -->
-        <footer style="text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-family: sans-serif;">
-            <p style="margin: 0; text-transform: lowercase; color: #94a3b8; font-size: 11px;">from</p>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 3px;">
-                <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="#1e293b" stroke="#3b82f6" stroke-width="6"/>
-                    <path d="M55 15 L35 55 H50 L45 85 L70 45 H55 L65 15 Z" fill="#f59e0b"/>
-                </svg>
-                <span style="font-weight: 900; font-size: 13px; color: #0f172a; letter-spacing: 1px;">
-                    KISANGA <span style="color: #3b82f6;">TECHNOLOGY</span>
-                </span>
-            </div>
-        </footer>
     </form>
+
+    <!-- FOOTER BRANDING -->
+    <footer style="text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-family: sans-serif;">
+        <p style="margin: 0; text-transform: lowercase; color: #94a3b8; font-size: 11px;">from</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 3px;">
+            <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="#1e293b" stroke="#3b82f6" stroke-width="6"/>
+                <path d="M55 15 L35 55 H50 L45 85 L70 45 H55 L65 15 Z" fill="#f59e0b"/>
+            </svg>
+            <span style="font-weight: 900; font-size: 13px; color: #0f172a; letter-spacing: 1px;">
+                KISANGA <span style="color: #3b82f6;">TECHNOLOGY</span>
+            </span>
+        </div>
+    </footer>
 </div>
 
 <script>
