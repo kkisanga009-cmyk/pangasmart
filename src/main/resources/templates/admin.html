@@ -1,0 +1,72 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PangaSmart - Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 15px; }
+        .header { background: #1e293b; color: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stat-card h4 { color: #64748b; font-size: 12px; text-transform: uppercase; }
+        .stat-card p { font-size: 24px; font-weight: bold; color: #0f172a; margin-top: 5px; }
+        .table-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
+        th { background: #f8fafc; }
+        .status { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; }
+        .COMPLETED { background: #22c55e; }
+        .PENDING { background: #eab308; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>📊 PangaSmart Admin</h2>
+    <a href="/home" style="color: white; text-decoration: none; font-size: 13px;">Rudi Home</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h4>Watumiaji Wote</h4>
+        <p th:text="${totalUsers}">0</p>
+    </div>
+    <div class="stat-card">
+        <h4>Vyumba Vilivyopo</h4>
+        <p th:text="${totalRooms}">0</p>
+    </div>
+    <div class="stat-card">
+        <h4>Jumla ya Mapato</h4>
+        <p>TZS <span th:text="${totalRevenue}">0</span></p>
+    </div>
+</div>
+
+<div class="table-card">
+    <h3 style="margin-bottom: 15px; font-size: 16px;">Miamala ya Malipo ya TZS 1,000</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Room ID</th>
+            <th>Kiasi</th>
+            <th>Status</th>
+            <th>Tarehe</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${payments}">
+            <td th:text="${p.id}">1</td>
+            <td th:text="${p.userId}">10</td>
+            <td th:text="${p.roomId}">5</td>
+            <td th:text="'TZS ' + ${p.amount}">TZS 1000</td>
+            <td><span th:class="'status ' + ${p.status}" th:text="${p.status}">COMPLETED</span></td>
+            <td th:text="${p.createdAt}">2026-08-23</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

@@ -56,6 +56,8 @@
 
         .nav-btn-profile { background-color: #2980b9; }
         .nav-btn-profile:hover { background-color: #3498db; }
+        .nav-btn-admin { background-color: #8e44ad; }
+        .nav-btn-admin:hover { background-color: #9b59b6; }
         .nav-btn-logout { background-color: #e74c3c; }
         .nav-btn-logout:hover { background-color: #c0392b; }
 
@@ -150,8 +152,20 @@
             font-weight: bold;
         }
 
-        .book-btn { background-color: #f39c12; margin-top: 8px; }
-        .book-btn:hover { background-color: #e67e22; }
+        .pay-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .pay-btn:hover { background-color: #0369a1; }
 
         /* TABLE SCROLL FOR MOBILE */
         .table-responsive {
@@ -163,10 +177,10 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 450px; /* Inazuia table kubanana sana */
+            min-width: 450px;
         }
 
-        /* DESKTOP MEDIA QUERIES (Vioo Vikubwa) */
+        /* DESKTOP MEDIA QUERIES */
         @media (min-width: 768px) {
             .navbar {
                 flex-direction: row;
@@ -205,6 +219,7 @@
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
         <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
+        <a th:if="${session.userRole == 'ADMIN'}" href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
         <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
         <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
     </div>
@@ -327,15 +342,13 @@
 
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
-            <!-- Kitufe cha Booking (TENANT) -->
+            <!-- KITUFE CHA MALIPO YA PESAPAL (TENANT) -->
             <div th:if="${session.userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                <form th:action="@{/book-room}" method="post">
+                <form th:action="@{/api/payments/initiate}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
-                    <input type="hidden" name="roomTitle" th:value="${room.title}">
-
-                    <label style="font-size: 12px; font-weight: bold; display: block;">Unahitaji chumba hiki?</label>
-                    <input type="text" name="tenantPhone" placeholder="Weka Namba yako ya Simu" required style="margin: 6px 0 10px;">
-                    <button type="submit" class="btn book-btn">📌 Omba Kupanga (Book Room)</button>
+                    <button type="submit" class="pay-btn">
+                        🔒 Lipia TZS 1,000 Kupata Namba ya Mwenyenyumba
+                    </button>
                 </form>
             </div>
         </div>
