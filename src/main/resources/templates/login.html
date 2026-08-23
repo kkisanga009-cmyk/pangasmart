@@ -155,10 +155,11 @@
     </div>
 
     <form th:action="@{/login}" method="post">
+        <!-- Input inayotuma email kama 'email' na 'username' ili kuzuia Error 400 -->
         <div class="form-group">
             <label>Email Address / <span>Barua Pepe:</span></label>
-            <!-- Mabadiliko: Tumeweka name="username" badala ya name="email" -->
-            <input type="email" name="username" required placeholder="example@gmail.com">
+            <input type="email" name="email" id="emailInput" required placeholder="example@gmail.com" oninput="document.getElementById('usernameInput').value = this.value">
+            <input type="hidden" name="username" id="usernameInput">
         </div>
 
         <div class="form-group">
