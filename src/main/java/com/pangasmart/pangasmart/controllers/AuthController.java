@@ -15,10 +15,12 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
     @GetMapping("/")
     public String showLandingPage() {
         return "index";
     }
+
     @GetMapping("/login")
     public String showLoginPage() {
         return "login";
@@ -46,10 +48,11 @@ public class AuthController {
 
         if (user != null && user.getPassword().equals(password)) {
 
-            // 2. Weka data muhimu kwenye Session (MUHIMU SANA)
+            // 2. Weka data zote kwenye Session ili Controller zingine zisione null
+            session.setAttribute("loggedInUser", user);
             session.setAttribute("userId", user.getId());
             session.setAttribute("userEmail", user.getEmail());
-            session.setAttribute("userRole", user.getRole()); // Mfano: 'LANDLORD', 'TENANT', 'ADMIN'
+            session.setAttribute("userRole", user.getRole());
 
             return "redirect:/home";
         }
