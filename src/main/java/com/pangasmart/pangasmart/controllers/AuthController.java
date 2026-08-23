@@ -36,22 +36,25 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestParam String email,
-                            @RequestParam String password,
-                            HttpSession session) {
+    public String handleLogin(@RequestParam("email") String email,
+                              @RequestParam("password") String password,
+                              HttpSession session,
+                              Model model) {
 
-        Optional<User> userOptional = userRepository.findByEmail(email);
+        // 1. Tafuta mtumiaji kwenye Database
+        User user = userRepository.findByEmail(email).orElse(null);
 
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (user.getPassword().equals(password)) {
-                session.setAttribute("loggedInUser", user);
-                session.setAttribute("userRole", user.getRole());
-                return "redirect:/home";
-            }
+        if (user != null && user.getPassword().equals(password)) {
+
+            // 2. Weka data muhimu kwenye Session (MUHIMU SANA)
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("userEmail", user.getEmail());
+            session.setAttribute("userRole", user.getRole()); // Mfano: 'LANDLORD', 'TENANT', 'ADMIN'
+
+            return "redirect:/home";
         }
 
-        return "redirect:/login?error";
+        return "redirect:/login?error=InvalidCredentials";
     }
 
     // --- PASSWORD RESET ENDPOINTS ---

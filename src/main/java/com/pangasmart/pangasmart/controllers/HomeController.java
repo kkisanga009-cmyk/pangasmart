@@ -44,11 +44,18 @@ public class HomeController {
             return "redirect:/login";
         }
 
+        // 1. Hakikisha userRole haibaki null ili kuzuia error 500 kwenye Thymeleaf
         String userRole = (String) session.getAttribute("userRole");
+        if (userRole == null && user.getRole() != null) {
+            userRole = user.getRole();
+            session.setAttribute("userRole", userRole);
+        }
+
         List<Room> roomList;
         List<Booking> bookingList;
 
-        if ("LANDLORD".equals(userRole)) {
+        // 2. Leta Data kwa kuzingatia Role ya Mtumiaji
+        if ("LANDLORD".equalsIgnoreCase(userRole)) {
             if (search != null && !search.trim().isEmpty()) {
                 roomList = roomRepository.searchLandlordRooms(user.getEmail(), search);
             } else {
@@ -64,10 +71,11 @@ public class HomeController {
             bookingList = new ArrayList<>();
         }
 
+        // 3. Weka maandalizi ya kuzuia null values kupelekwa kwenye HTML template
         model.addAttribute("currentUser", user);
-        model.addAttribute("userRole", userRole);
-        model.addAttribute("rooms", roomList);
-        model.addAttribute("bookings", bookingList);
+        model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
+        model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
+        model.addAttribute("bookings", bookingList != null ? bookingList : new ArrayList<>());
         model.addAttribute("searchKeyword", search);
 
         return "home";
