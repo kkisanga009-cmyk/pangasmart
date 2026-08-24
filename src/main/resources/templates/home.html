@@ -28,7 +28,9 @@
         .room-item:last-child { border-bottom: none; }
         .price { color: #e74c3c; font-weight: bold; }
         .media-preview { width: 100%; max-height: 350px; object-fit: cover; border-radius: 6px; margin-top: 8px; }
-        .download-btn { display: inline-block; margin-top: 8px; padding: 8px 14px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .download-btn { display: inline-block; margin-top: 8px; padding: 6px 12px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .delete-btn { display: inline-block; margin-top: 8px; padding: 6px 12px; background-color: #e74c3c; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; margin-left: 5px; }
+        .delete-btn:hover { background-color: #c0392b; }
         .pay-btn { background-color: #0284c7; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px; margin-top: 8px; }
         .pay-btn:hover { background-color: #0369a1; }
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; }
@@ -67,8 +69,18 @@
     <div th:if="${userRole == 'LANDLORD'}" class="card form-section">
         <h3>Sajili Chumba Kipya</h3>
 
+        <!-- TAARIFA ZA MAFANIKIO KWA LANDLORD -->
         <div th:if="${param.roomAdded}" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
             ✅ Chumba kimesajiliwa kikamilifu!
+        </div>
+        <div th:if="${param.imageDeleted}" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
+            🗑️ Picha ya chumba imefutwa kikamilifu!
+        </div>
+        <div th:if="${param.videoDeleted}" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
+            🗑️ Video ya chumba imefutwa kikamilifu!
+        </div>
+        <div th:if="${param.roomDeleted}" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
+            🗑️ Chumba kimefutwa kikamilifu!
         </div>
 
         <form th:action="@{/add-room}" method="post" enctype="multipart/form-data">
@@ -156,23 +168,49 @@
             <h4 th:text="${room.title}">Aina ya Chumba</h4>
             <p style="margin-top: 4px; font-size: 14px;">📍 <span th:text="${room.location}">Location</span> | <span class="price">TZS <span th:text="${room.price}">0</span>/Mwezi</span></p>
 
-            <!-- SHOW IMAGE -->
+            <!-- SHOW IMAGE & OPTIONS -->
             <div th:if="${room.imageUrl != null and !#strings.isEmpty(room.imageUrl)}" style="margin-top: 10px;">
                 <img th:src="${room.imageUrl}" class="media-preview" alt="Room Image">
                 <div>
                     <a th:href="${room.imageUrl}" download="Chumba_PangaSmart.jpg" class="download-btn">📥 Pakua Picha</a>
+
+                    <!-- KITUFE CHA KUFUTA PICHA (LANDLORD PEKEE) -->
+                    <a th:if="${userRole == 'LANDLORD'}"
+                       th:href="@{/landlord/rooms/delete-image/{id}(id=${room.id})}"
+                       class="delete-btn"
+                       onclick="return confirm('Je, una uhakika unataka kufuta picha hii?')">
+                        🗑️ Futa Picha
+                    </a>
                 </div>
             </div>
 
-            <!-- SHOW VIDEO -->
+            <!-- SHOW VIDEO & OPTIONS -->
             <div th:if="${room.videoUrl != null and !#strings.isEmpty(room.videoUrl)}" style="margin-top: 10px;">
                 <video controls class="media-preview" style="background: #000;">
                     <source th:src="${room.videoUrl}">
                     Browser yako haisajili ku-play video hii.
                 </video>
+
+                <!-- KITUFE CHA KUFUTA VIDEO (LANDLORD PEKEE) -->
+                <div th:if="${userRole == 'LANDLORD'}">
+                    <a th:href="@{/landlord/rooms/delete-video/{id}(id=${room.id})}"
+                       class="delete-btn"
+                       onclick="return confirm('Je, una uhakika unataka kufuta video hii?')">
+                        🗑️ Futa Video
+                    </a>
+                </div>
             </div>
 
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
+
+            <!-- KITUFE CHA KUFUTA CHUMBA KIZIMA (LANDLORD PEKEE) -->
+            <div th:if="${userRole == 'LANDLORD'}" style="margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 8px;">
+                <a th:href="@{/landlord/rooms/delete/{id}(id=${room.id})}"
+                   class="delete-btn" style="background: #c0392b;"
+                   onclick="return confirm('Je, una uhakika unataka kufuta chumba hiki kizima?')">
+                    🗑️ Futa Chumba Kizima
+                </a>
+            </div>
 
             <!-- SEHEMU YA TENANT -->
             <div th:if="${userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">

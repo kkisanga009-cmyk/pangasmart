@@ -144,6 +144,70 @@ public class HomeController {
         return "redirect:/home?roomAdded=true";
     }
 
+    // ==========================================
+    // SEHEMU MPYA: UDHIBITI WA PICHA, VIDEO NA VYUMBA KWA LANDLORD
+    // ==========================================
+
+    // 1. ENDPOINT YA KUFUTA PICHA PEKEE YAKE
+    @GetMapping("/landlord/rooms/delete-image/{id}")
+    public String deleteRoomImage(@PathVariable("id") Long id, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/login";
+        }
+
+        Optional<Room> roomOptional = roomRepository.findById(id);
+        if (roomOptional.isPresent()) {
+            Room room = roomOptional.get();
+            if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
+                room.setImageUrl(null); // Inafuta link ya picha
+                roomRepository.save(room);
+            }
+        }
+        return "redirect:/home?imageDeleted=true";
+    }
+
+    // 2. ENDPOINT YA KUFUTA VIDEO PEKEE YAKE
+    @GetMapping("/landlord/rooms/delete-video/{id}")
+    public String deleteRoomVideo(@PathVariable("id") Long id, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/login";
+        }
+
+        Optional<Room> roomOptional = roomRepository.findById(id);
+        if (roomOptional.isPresent()) {
+            Room room = roomOptional.get();
+            if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
+                room.setVideoUrl(null); // Inafuta link ya video
+                roomRepository.save(room);
+            }
+        }
+        return "redirect:/home?videoDeleted=true";
+    }
+
+    // 3. ENDPOINT YA KUFUTA CHUMBA KIZIMA KWA LANDLORD
+    @GetMapping("/landlord/rooms/delete/{id}")
+    public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/login";
+        }
+
+        Optional<Room> roomOptional = roomRepository.findById(id);
+        if (roomOptional.isPresent()) {
+            Room room = roomOptional.get();
+            if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
+                roomRepository.deleteById(id);
+            }
+        }
+        return "redirect:/home?roomDeleted=true";
+    }
+
+    // ==========================================
+    // MALIPO NA BOOKING
+    // ==========================================
+
     @PostMapping("/pay-room")
     public String payForRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
