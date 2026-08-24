@@ -5,6 +5,7 @@ import com.pangasmart.pangasmart.models.Room;
 import com.pangasmart.pangasmart.models.User;
 import com.pangasmart.pangasmart.repositories.BookingRepository;
 import com.pangasmart.pangasmart.repositories.RoomRepository;
+import com.pangasmart.pangasmart.repositories.UserRepository;
 import com.pangasmart.pangasmart.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -30,15 +32,18 @@ public class HomeController {
     private BookingRepository bookingRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private SmsService smsService;
 
-    // Njia salama ya kuhifadhi faili
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
 
     @GetMapping("/home")
     public String showHomePage(Model model,
                                HttpSession session,
-                               @RequestParam(value = "search", required = false) String search) {
+                               @RequestParam(value = "search", required = false) String search,
+                               @RequestParam(value = "paidRoomId", required = false) Long paidRoomId) {
 
         User user = (User) session.getAttribute("loggedInUser");
 
@@ -46,7 +51,6 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        // Hakikisha userRole inasomwa vizuri kwenye session au user object
         String userRole = (String) session.getAttribute("userRole");
         if (userRole == null && user.getRole() != null) {
             userRole = user.getRole();
@@ -72,6 +76,27 @@ public class HomeController {
             bookingList = new ArrayList<>();
         }
 
+        // KAMA MTUMIAJI AMELAPIA CHUMBA, TAFUTA NAMBA YA SIMU YA LANDLORD
+        if (paidRoomId != null) {
+            Optional<Room> roomOpt = roomRepository.findById(paidRoomId);
+            if (roomOpt.isPresent()) {
+                Room paidRoom = roomOpt.get();
+                String phone = paidRoom.getLandlordPhone();
+
+                // Kama namba haipo kwenye Room, tafuta kutoka kwa Mwenye Nyumba (User)
+                if (phone == null || phone.trim().isEmpty()) {
+                    Optional<User> landlordOpt = userRepository.findByEmail(paidRoom.getLandlordEmail());
+                    if (landlordOpt.isPresent() && landlordOpt.get().getPhone() != null) {
+                        phone = landlordOpt.get().getPhone();
+                    } else {
+                        phone = paidRoom.getLandlordEmail(); // fallback ikikosekana kabisa
+                    }
+                }
+                model.addAttribute("paidRoomId", paidRoomId);
+                model.addAttribute("landlordPhone", phone);
+            }
+        }
+
         model.addAttribute("currentUser", user);
         model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
         model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
@@ -94,10 +119,8 @@ public class HomeController {
 
         room.setLandlordEmail(user.getEmail());
 
-        // Hifadhi namba ya simu ya Landlord kama ipo kwenye user object
-        if (user.getPhone() != null) {
-            room.setLandlordPhone(user.getPhone());
-        } else if (user.getPhone() != null) {
+        // Hifadhi namba ya simu ya Landlord wakati wa kuweka chumba
+        if (user.getPhone() != null && !user.getPhone().isEmpty()) {
             room.setLandlordPhone(user.getPhone());
         }
 
@@ -107,7 +130,6 @@ public class HomeController {
                 Files.createDirectories(uploadPath);
             }
 
-            // Hifadhi Picha kama ipo
             if (imageFile != null && !imageFile.isEmpty()) {
                 String imageName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename().replaceAll("\\s+", "");
                 Path filePath = uploadPath.resolve(imageName);
@@ -115,7 +137,6 @@ public class HomeController {
                 room.setImageUrl("/uploads/" + imageName);
             }
 
-            // Hifadhi Video kama ipo
             if (videoFile != null && !videoFile.isEmpty()) {
                 String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename().replaceAll("\\s+", "");
                 Path filePath = uploadPath.resolve(videoName);
@@ -131,7 +152,6 @@ public class HomeController {
         return "redirect:/home?roomAdded=true";
     }
 
-    // HANDLER YA MALIPO YA MPANGAJI (TENANT PAYMENT)
     @PostMapping("/pay-room")
     public String payForRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
@@ -139,7 +159,6 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        // Inamrudisha mteja kwenye home ikiwa na parameter ya paidRoomId ili kuonyesha namba ya Landlord
         return "redirect:/home?paidRoomId=" + roomId;
     }
 
