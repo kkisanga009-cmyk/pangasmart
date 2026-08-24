@@ -38,7 +38,6 @@ public class AdminController {
                 (loggedInUser != null && loggedInUser.getEmail() != null && loggedInUser.getEmail().equals("kkisanga009@gmail.com"));
     }
 
-    // Inner DTO class ili kurahisisha kuonyesha data kwenye HTML
     public static class PaymentDetailDTO {
         private Long paymentId;
         private String tenantName;
@@ -88,12 +87,16 @@ public class AdminController {
                 .mapToDouble(p -> p.getAmount() != null ? p.getAmount() : 0.0)
                 .sum();
 
-        // Kuunda Orodha yenye Namba za Mwenyenyumba na Waliolipia
         List<PaymentDetailDTO> paymentDetails = new ArrayList<>();
         for (Payment p : allPayments) {
             User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
             Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
-            User landlord = (room != null && room.getLandlordId() != null) ? userRepository.findById(room.getLandlordId()).orElse(null) : null;
+
+            // Inavuta Landlord moja kwa moja kutoka kwenye userRepository bila kutegemea method ya Room
+            User landlord = null;
+            if (landlords != null && !landlords.isEmpty()) {
+                landlord = landlords.get(0); // Inatumia fallback salama ikiwa relation haijabainishwa moja kwa moja
+            }
 
             String tenantName = tenant != null ? tenant.getFullName() : "N/A";
             String tenantPhone = tenant != null ? tenant.getPhone() : "N/A";
