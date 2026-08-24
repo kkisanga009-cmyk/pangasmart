@@ -16,6 +16,7 @@ public class Payment {
     private Double amount;
     private String status;
     private String merchantReference;
+    private String orderTrackingId; // Imeongezwa kwa ajili ya Pesapal Order Tracking ID
     private LocalDateTime paymentDate = LocalDateTime.now();
 
     public Payment() {}
@@ -38,6 +39,9 @@ public class Payment {
 
     public String getMerchantReference() { return merchantReference; }
     public void setMerchantReference(String merchantReference) { this.merchantReference = merchantReference; }
+
+    public String getOrderTrackingId() { return orderTrackingId; }
+    public void setOrderTrackingId(String orderTrackingId) { this.orderTrackingId = orderTrackingId; }
 
     public LocalDateTime getPaymentDate() { return paymentDate; }
     public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }
