@@ -8,18 +8,35 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 15px; }
         .header { background: #1e293b; color: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
         .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-card h4 { color: #64748b; font-size: 12px; text-transform: uppercase; }
         .stat-card p { font-size: 24px; font-weight: bold; color: #0f172a; margin-top: 5px; }
+
+        /* Search Bar Styles */
+        .search-container { margin-bottom: 20px; }
+        .search-container input {
+            width: 100%; padding: 12px 15px; font-size: 15px; border: 1px solid #cbd5e1;
+            border-radius: 6px; outline: none; transition: 0.3s;
+        }
+        .search-container input:focus { border-color: #3b82f6; box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+
         .table-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 25px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
         th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
         th { background: #f8fafc; color: #475569; }
+
         .status { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; }
         .COMPLETED, .SUCCESS { background: #22c55e; }
         .PENDING { background: #eab308; }
         .pass-text { font-family: monospace; color: #dc2626; font-weight: bold; }
+
+        /* Action Buttons */
+        .btn-edit { background: #3b82f6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 5px; }
+        .btn-delete { background: #ef4444; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; }
+        .btn-edit:hover { background: #2563eb; }
+        .btn-delete:hover { background: #dc2626; }
     </style>
 </head>
 <body>
@@ -44,10 +61,15 @@
     </div>
 </div>
 
+<!-- SEARCH BAR -->
+<div class="search-container">
+    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="🔍 Tafuta mtumiaji kwa jina, email, au namba ya simu...">
+</div>
+
 <!-- TABLE YA WAPANGAJI (TENANTS) -->
 <div class="table-card">
     <h3 style="margin-bottom: 15px; font-size: 16px; color: #0284c7;">👤 Orodha ya Wapangaji (Tenants)</h3>
-    <table>
+    <table class="searchable-table">
         <thead>
         <tr>
             <th>ID</th>
@@ -55,6 +77,7 @@
             <th>Email</th>
             <th>Namba ya Simu</th>
             <th>Password</th>
+            <th>Vitendo</th>
         </tr>
         </thead>
         <tbody>
@@ -64,9 +87,14 @@
             <td th:text="${t.email}">tenant@gmail.com</td>
             <td th:text="${t.phone != null ? t.phone : 'N/A'}">0712345678</td>
             <td class="pass-text" th:text="${t.password}">****</td>
+            <td>
+                <!-- Vitufe vya kurekebisha (Badilisha / Futa) -->
+                <a href="#" class="btn-edit" th:onclick="'alert(\'Ukurasa wa ku-edit mtumiaji ID: ' + ${t.id} + ' utafuata!\')'">Edit</a>
+                <a href="#" class="btn-delete" th:onclick="'alert(\'Ukurasa wa kufuta mtumiaji ID: ' + ${t.id} + ' utafuata!\')'">Futa</a>
+            </td>
         </tr>
         <tr th:if="${#lists.isEmpty(tenants)}">
-            <td colspan="5" style="text-align: center; color: #94a3b8;">Hakuna Mpangaji aliyesajiliwa bado.</td>
+            <td colspan="6" style="text-align: center; color: #94a3b8;">Hakuna Mpangaji aliyesajiliwa.</td>
         </tr>
         </tbody>
     </table>
@@ -75,7 +103,7 @@
 <!-- TABLE YA WENYE NYUMBA (LANDLORDS) -->
 <div class="table-card">
     <h3 style="margin-bottom: 15px; font-size: 16px; color: #16a34a;">🏠 Orodha ya Wenye Nyumba (Landlords)</h3>
-    <table>
+    <table class="searchable-table">
         <thead>
         <tr>
             <th>ID</th>
@@ -83,6 +111,7 @@
             <th>Email</th>
             <th>Namba ya Simu</th>
             <th>Password</th>
+            <th>Vitendo</th>
         </tr>
         </thead>
         <tbody>
@@ -92,40 +121,42 @@
             <td th:text="${l.email}">landlord@gmail.com</td>
             <td th:text="${l.phone != null ? l.phone : 'N/A'}">0789654321</td>
             <td class="pass-text" th:text="${l.password}">****</td>
+            <td>
+                <a href="#" class="btn-edit" th:onclick="'alert(\'Ukurasa wa ku-edit mtumiaji ID: ' + ${l.id} + ' utafuata!\')'">Edit</a>
+                <a href="#" class="btn-delete" th:onclick="'alert(\'Ukurasa wa kufuta mtumiaji ID: ' + ${l.id} + ' utafuata!\')'">Futa</a>
+            </td>
         </tr>
         <tr th:if="${#lists.isEmpty(landlords)}">
-            <td colspan="5" style="text-align: center; color: #94a3b8;">Hakuna Mwenye Nyumba aliyesajiliwa bado.</td>
+            <td colspan="6" style="text-align: center; color: #94a3b8;">Hakuna Mwenye Nyumba aliyesajiliwa.</td>
         </tr>
         </tbody>
     </table>
 </div>
 
-<!-- TABLE YA MIAMALA YA MALIPO -->
-<div class="table-card">
-    <h3 style="margin-bottom: 15px; font-size: 16px; color: #334155;">💳 Miamala ya Malipo ya TZS 1,000</h3>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>User ID</th>
-            <th>Room ID</th>
-            <th>Kiasi</th>
-            <th>Status</th>
-            <th>Tarehe</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${payments}">
-            <td th:text="${p.id}">1</td>
-            <td th:text="${p.userId}">10</td>
-            <td th:text="${p.roomId}">5</td>
-            <td th:text="'TZS ' + ${p.amount}">TZS 1000</td>
-            <td><span th:class="'status ' + ${p.status}" th:text="${p.status}">COMPLETED</span></td>
-            <td th:text="${p.createdAt}">2026-08-23</td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+<!-- SCRIPT YA SEARCH BAR -->
+<script>
+    function searchTable() {
+        // Pata neno unalolitafuta
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let tables = document.querySelectorAll(".searchable-table");
+
+        // Zunguka kwenye kila table yenye class ya 'searchable-table'
+        tables.forEach(table => {
+            let trs = table.getElementsByTagName("tr");
+            for (let i = 1; i < trs.length; i++) { // Anza na 1 ili kuruka kichwa cha habari (thead)
+                let row = trs[i];
+                let text = row.innerText.toLowerCase();
+
+                // Kama neno lipo kwenye mstari husika, onyesha; kama halipo, ficha
+                if (text.includes(input)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
+    }
+</script>
 
 </body>
 </html>
