@@ -8,6 +8,7 @@ import com.pangasmart.pangasmart.repositories.BookingRepository;
 import com.pangasmart.pangasmart.repository.PaymentRepository;
 import com.pangasmart.pangasmart.repositories.RoomRepository;
 import com.pangasmart.pangasmart.repositories.UserRepository;
+import com.pangasmart.pangasmart.services.PesapalService;
 import com.pangasmart.pangasmart.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 public class HomeController {
@@ -38,6 +40,9 @@ public class HomeController {
 
     @Autowired
     private SmsService smsService;
+
+    @Autowired
+    private PesapalService pesapalService; // Tumeongeza PesapalService hapa
 
     @GetMapping("/home")
     public String showHomePage(Model model,
@@ -76,22 +81,26 @@ public class HomeController {
             bookingList = new ArrayList<>();
         }
 
+        // Kagua kama mtumiaji alishalipia chumba hiki huko nyuma (COMPLETED status)
         if (paidRoomId != null) {
-            Optional<Room> roomOpt = roomRepository.findById(paidRoomId);
-            if (roomOpt.isPresent()) {
-                Room paidRoom = roomOpt.get();
-                String phone = paidRoom.getLandlordPhone();
+            boolean isPaid = paymentRepository.existsByUserIdAndRoomIdAndStatus(user.getId(), paidRoomId, "COMPLETED");
+            if (isPaid) {
+                Optional<Room> roomOpt = roomRepository.findById(paidRoomId);
+                if (roomOpt.isPresent()) {
+                    Room paidRoom = roomOpt.get();
+                    String phone = paidRoom.getLandlordPhone();
 
-                if (phone == null || phone.trim().isEmpty()) {
-                    Optional<User> landlordOpt = userRepository.findByEmail(paidRoom.getLandlordEmail());
-                    if (landlordOpt.isPresent() && landlordOpt.get().getPhone() != null) {
-                        phone = landlordOpt.get().getPhone();
-                    } else {
-                        phone = paidRoom.getLandlordEmail();
+                    if (phone == null || phone.trim().isEmpty()) {
+                        Optional<User> landlordOpt = userRepository.findByEmail(paidRoom.getLandlordEmail());
+                        if (landlordOpt.isPresent() && landlordOpt.get().getPhone() != null) {
+                            phone = landlordOpt.get().getPhone();
+                        } else {
+                            phone = paidRoom.getLandlordEmail();
+                        }
                     }
+                    model.addAttribute("paidRoomId", paidRoomId);
+                    model.addAttribute("landlordPhone", phone);
                 }
-                model.addAttribute("paidRoomId", paidRoomId);
-                model.addAttribute("landlordPhone", phone);
             }
         }
 
@@ -122,14 +131,12 @@ public class HomeController {
         }
 
         try {
-            // GEUZA PICHA KUWA BASE64 DATA STRING
             if (imageFile != null && !imageFile.isEmpty()) {
                 String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
                 String imageUrl = "data:" + imageFile.getContentType() + ";base64," + base64Image;
                 room.setImageUrl(imageUrl);
             }
 
-            // GEUZA VIDEO KUWA BASE64 DATA STRING
             if (videoFile != null && !videoFile.isEmpty()) {
                 String base64Video = Base64.getEncoder().encodeToString(videoFile.getBytes());
                 String videoUrl = "data:" + videoFile.getContentType() + ";base64," + base64Video;
@@ -144,11 +151,6 @@ public class HomeController {
         return "redirect:/home?roomAdded=true";
     }
 
-    // ==========================================
-    // SEHEMU MPYA: UDHIBITI WA PICHA, VIDEO NA VYUMBA KWA LANDLORD
-    // ==========================================
-
-    // 1. ENDPOINT YA KUFUTA PICHA PEKEE YAKE
     @GetMapping("/landlord/rooms/delete-image/{id}")
     public String deleteRoomImage(@PathVariable("id") Long id, HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -160,14 +162,13 @@ public class HomeController {
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();
             if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
-                room.setImageUrl(null); // Inafuta link ya picha
+                room.setImageUrl(null);
                 roomRepository.save(room);
             }
         }
         return "redirect:/home?imageDeleted=true";
     }
 
-    // 2. ENDPOINT YA KUFUTA VIDEO PEKEE YAKE
     @GetMapping("/landlord/rooms/delete-video/{id}")
     public String deleteRoomVideo(@PathVariable("id") Long id, HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -179,14 +180,13 @@ public class HomeController {
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();
             if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
-                room.setVideoUrl(null); // Inafuta link ya video
+                room.setVideoUrl(null);
                 roomRepository.save(room);
             }
         }
         return "redirect:/home?videoDeleted=true";
     }
 
-    // 3. ENDPOINT YA KUFUTA CHUMBA KIZIMA KWA LANDLORD
     @GetMapping("/landlord/rooms/delete/{id}")
     public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -205,7 +205,7 @@ public class HomeController {
     }
 
     // ==========================================
-    // MALIPO NA BOOKING
+    // MALIPO NA BOOKING (REKEBISHO LILILOFANYIKA HAPA)
     // ==========================================
 
     @PostMapping("/pay-room")
@@ -215,14 +215,38 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        Payment payment = new Payment();
-        payment.setUserId(user.getId());
-        payment.setRoomId(roomId);
-        payment.setAmount(1000.00);
-        payment.setStatus("COMPLETED");
-        paymentRepository.save(payment);
+        try {
+            // 1. Omba Auth Token kutoka Pesapal
+            String token = pesapalService.getAuthToken();
+            if (token == null) {
+                return "redirect:/home?error=pesapal_auth_failed";
+            }
 
-        return "redirect:/home?paidRoomId=" + roomId;
+            // 2. Kutengeneza Reference ya kipekee
+            String merchantRef = "PS-" + UUID.randomUUID().toString().substring(0, 8);
+            Double amount = 1000.00;
+
+            // 3. Omba redirect URL kutoka Pesapal
+            String redirectUrl = pesapalService.submitOrder(token, merchantRef, amount, user.getEmail(), user.getPhone());
+
+            if (redirectUrl != null) {
+                // 4. Hifadhi PENDING Payment kwenye Database
+                Payment payment = new Payment();
+                payment.setUserId(user.getId());
+                payment.setRoomId(roomId);
+                payment.setAmount(amount);
+                payment.setMerchantReference(merchantRef);
+                payment.setStatus("PENDING"); // Hatusave COMPLETED tena hapa!
+                paymentRepository.save(payment);
+
+                // 5. Elekeza mtumiaji kwenda Pesapal kulipa
+                return "redirect:" + redirectUrl;
+            }
+        } catch (Exception e) {
+            System.err.println("Pay Room Error: " + e.getMessage());
+        }
+
+        return "redirect:/home?error=payment_failed";
     }
 
     @PostMapping("/book-room")

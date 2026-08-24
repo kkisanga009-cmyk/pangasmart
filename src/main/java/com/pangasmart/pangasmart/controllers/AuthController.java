@@ -40,15 +40,13 @@ public class AuthController {
     @PostMapping("/login")
     public String handleLogin(@RequestParam("email") String email,
                               @RequestParam("password") String password,
-                              HttpSession session,
-                              Model model) {
+                              HttpSession session) {
 
-        // 1. Tafuta mtumiaji kwenye Database
+        // Tafuta mtumiaji kwenye Database
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user != null && user.getPassword().equals(password)) {
-
-            // 2. Weka data zote kwenye Session ili Controller zingine zisione null
+            // Weka data kwenye Session kwa ajili ya Controllers zingine
             session.setAttribute("loggedInUser", user);
             session.setAttribute("userId", user.getId());
             session.setAttribute("userEmail", user.getEmail());
@@ -58,6 +56,12 @@ public class AuthController {
         }
 
         return "redirect:/login?error=InvalidCredentials";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login?logout";
     }
 
     // --- PASSWORD RESET ENDPOINTS ---
