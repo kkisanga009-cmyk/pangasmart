@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +32,15 @@ public class AdminController {
 
     private boolean checkIsAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            loggedInUser = (User) session.getAttribute("currentUser"); // Fallback kama session inatumia currentUser
+        }
+
         String role = (String) session.getAttribute("userRole");
 
         return (role != null && role.equalsIgnoreCase("ADMIN")) ||
                 (loggedInUser != null && loggedInUser.getRole() != null && loggedInUser.getRole().equalsIgnoreCase("ADMIN")) ||
-                (loggedInUser != null && loggedInUser.getEmail() != null && loggedInUser.getEmail().equals("kkisanga009@gmail.com"));
+                (loggedInUser != null && loggedInUser.getEmail() != null && loggedInUser.getEmail().equalsIgnoreCase("kkisanga009@gmail.com"));
     }
 
     public static class PaymentDetailDTO {
@@ -63,7 +66,6 @@ public class AdminController {
             this.status = status;
             this.date = date;
 
-            // Format tarehe kuwa vizuri (Mfano: 24/08/2026 14:30)
             if (date != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                 this.formattedDate = date.format(formatter);
@@ -84,66 +86,79 @@ public class AdminController {
         public String getFormattedDate() { return formattedDate; }
     }
 
-    @GetMapping("/admin/dashboard")
+    @GetMapping({"/admin", "/admin/dashboard"})
     public String adminDashboard(HttpSession session, Model model) {
         if (!checkIsAdmin(session)) {
-            return "redirect:/home";
+            return "redirect:/login";
         }
+
+        User loggedUser = (User) session.getAttribute("loggedInUser");
+        if (loggedUser == null) {
+            loggedUser = (User) session.getAttribute("currentUser");
+        }
+
+        // Pass users kwa ajili ya Thymeleaf Navigation checks
+        model.addAttribute("currentUser", loggedUser);
+        model.addAttribute("loggedInUser", loggedUser);
 
         List<User> tenants = userRepository.findByRole("TENANT");
         List<User> landlords = userRepository.findByRole("LANDLORD");
         List<Room> rooms = roomRepository.findAll();
         List<Payment> allPayments = paymentRepository.findAll();
 
-        // Kupanga malipo kuanzia ya hivi karibuni (Latest First)
-        allPayments.sort((p1, p2) -> {
-            if (p1.getPaymentDate() == null) return 1;
-            if (p2.getPaymentDate() == null) return -1;
-            return p2.getPaymentDate().compareTo(p1.getPaymentDate());
-        });
+        if (allPayments != null && !allPayments.isEmpty()) {
+            allPayments.sort((p1, p2) -> {
+                if (p1.getPaymentDate() == null) return 1;
+                if (p2.getPaymentDate() == null) return -1;
+                return p2.getPaymentDate().compareTo(p1.getPaymentDate());
+            });
+        }
 
-        Double totalRevenue = allPayments.stream()
-                .filter(p -> "SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus()))
+        Double totalRevenue = (allPayments != null) ? allPayments.stream()
+                .filter(p -> p != null && ("SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus())))
                 .mapToDouble(p -> p.getAmount() != null ? p.getAmount() : 0.0)
-                .sum();
+                .sum() : 0.0;
 
         List<PaymentDetailDTO> paymentDetails = new ArrayList<>();
-        for (Payment p : allPayments) {
-            User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
-            Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
+        if (allPayments != null) {
+            for (Payment p : allPayments) {
+                if (p == null) continue;
+                User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
+                Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
-            User landlord = null;
-            if (landlords != null && !landlords.isEmpty()) {
-                landlord = landlords.get(0);
+                User landlord = null;
+                if (landlords != null && !landlords.isEmpty()) {
+                    landlord = landlords.get(0);
+                }
+
+                String tenantName = tenant != null ? tenant.getFullName() : "N/A";
+                String tenantPhone = tenant != null ? tenant.getPhone() : "N/A";
+                String roomTitle = room != null ? room.getTitle() : "Chumba ID: " + p.getRoomId();
+                String landlordName = landlord != null ? landlord.getFullName() : "N/A";
+                String landlordPhone = landlord != null ? landlord.getPhone() : "N/A";
+
+                paymentDetails.add(new PaymentDetailDTO(
+                        p.getId(), tenantName, tenantPhone, roomTitle, landlordName, landlordPhone,
+                        p.getAmount(), p.getStatus(), p.getPaymentDate()
+                ));
             }
-
-            String tenantName = tenant != null ? tenant.getFullName() : "N/A";
-            String tenantPhone = tenant != null ? tenant.getPhone() : "N/A";
-            String roomTitle = room != null ? room.getTitle() : "Chumba ID: " + p.getRoomId();
-            String landlordName = landlord != null ? landlord.getFullName() : "N/A";
-            String landlordPhone = landlord != null ? landlord.getPhone() : "N/A";
-
-            paymentDetails.add(new PaymentDetailDTO(
-                    p.getId(), tenantName, tenantPhone, roomTitle, landlordName, landlordPhone,
-                    p.getAmount(), p.getStatus(), p.getPaymentDate()
-            ));
         }
 
         model.addAttribute("totalUsers", userRepository.count());
         model.addAttribute("totalRooms", roomRepository.count());
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("paymentDetails", paymentDetails);
-        model.addAttribute("tenants", tenants);
-        model.addAttribute("landlords", landlords);
-        model.addAttribute("rooms", rooms);
+        model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
+        model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
+        model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
 
-        return "admin";
+        return "admin"; // Inafungua admin.html
     }
 
     @GetMapping("/admin/rooms/delete/{id}")
     public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAdmin(session)) {
-            return "redirect:/home";
+            return "redirect:/login";
         }
         roomRepository.deleteById(id);
         return "redirect:/admin/dashboard?roomDeleted=true";
@@ -152,7 +167,7 @@ public class AdminController {
     @GetMapping("/admin/users/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAdmin(session)) {
-            return "redirect:/home";
+            return "redirect:/login";
         }
         userRepository.deleteById(id);
         return "redirect:/admin/dashboard";
@@ -161,7 +176,7 @@ public class AdminController {
     @GetMapping("/admin/users/edit/{id}")
     public String showEditForm(@PathVariable("id") Long id, HttpSession session, Model model) {
         if (!checkIsAdmin(session)) {
-            return "redirect:/home";
+            return "redirect:/login";
         }
 
         Optional<User> userOptional = userRepository.findById(id);
@@ -176,7 +191,7 @@ public class AdminController {
     @PostMapping("/admin/users/update")
     public String updateUser(@ModelAttribute("user") User updatedUser, HttpSession session) {
         if (!checkIsAdmin(session)) {
-            return "redirect:/home";
+            return "redirect:/login";
         }
 
         Optional<User> existingUserOpt = userRepository.findById(updatedUser.getId());
