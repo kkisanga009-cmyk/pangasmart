@@ -220,7 +220,7 @@
     <div class="navbar-links">
         <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
 
-        <!-- FIX ADMIN BUTTON: Ukaguzi uliopanuliwa kwa ajili ya Admin Role/Email -->
+        <!-- ADMIN BUTTON -->
         <a th:if="${userRole == 'ADMIN' or currentUser.role == 'ADMIN' or currentUser.email.contains('admin')}"
            href="/admin/dashboard"
            class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
@@ -353,7 +353,7 @@
 
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
-            <!-- FIX SEHEMU YA MALIPO NA MAWASILIANO YA TENANT (ONYESHA NAMBA YA SIMU) -->
+            <!-- SEHEMU YA MALIPO NA MAWASILIANO YA TENANT (ILIYOREKEBISHWA) -->
             <div th:if="${userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
 
                 <!-- Kama Mpangaji Ameshahalipia Chumba Hiki -->
@@ -361,7 +361,10 @@
                     <p style="font-weight: bold; font-size: 14px;">✅ Malipo Yamekamilika!</p>
                     <p style="font-size: 14px; margin-top: 6px;">
                         📞 Namba ya Simu ya Landlord:
-                        <strong style="font-size: 16px; color: #0d6efd;" th:text="${room.landlordPhone != null ? room.landlordPhone : room.landlordEmail}">07XXXXXXXX</strong>
+                        <strong style="font-size: 16px; color: #0d6efd;"
+                                th:text="${landlordPhone != null ? landlordPhone : (room.landlordPhone != null ? room.landlordPhone : room.landlordEmail)}">
+                            07XXXXXXXX
+                        </strong>
                     </p>
                 </div>
 
