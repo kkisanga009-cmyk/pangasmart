@@ -25,7 +25,6 @@ public class AdminController {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    // Helper Method ya Kukagua kama Mtu ni Admin
     private boolean checkIsAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         String role = (String) session.getAttribute("userRole");
@@ -41,11 +40,9 @@ public class AdminController {
             return "redirect:/home";
         }
 
-        // Tenganisha Watumiaji kwa Role
         List<User> tenants = userRepository.findByRole("TENANT");
         List<User> landlords = userRepository.findByRole("LANDLORD");
 
-        // Hesabu Mapato ya SUCCESS au COMPLETED
         Double totalRevenue = paymentRepository.findAll().stream()
                 .filter(p -> "SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus()))
                 .mapToDouble(p -> p.getAmount() != null ? p.getAmount() : 0.0)
@@ -55,24 +52,23 @@ public class AdminController {
         model.addAttribute("totalRooms", roomRepository.count());
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("payments", paymentRepository.findAll());
-
         model.addAttribute("tenants", tenants);
         model.addAttribute("landlords", landlords);
 
         return "admin";
     }
 
-    // 1. KUFUTA MTUMIAJI (DELETE USER)
+    // 1. KUFUTA MTUMIAJI
     @GetMapping("/admin/users/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAdmin(session)) {
             return "redirect:/home";
         }
         userRepository.deleteById(id);
-        return "redirect:/admin/dashboard?deleted=true";
+        return "redirect:/admin/dashboard";
     }
 
-    // 2. KUFUNGUA FORM YA EDIT USER
+    // 2. KUFUNGUA PAGE YA EDIT
     @GetMapping("/admin/users/edit/{id}")
     public String showEditForm(@PathVariable("id") Long id, HttpSession session, Model model) {
         if (!checkIsAdmin(session)) {
@@ -82,13 +78,13 @@ public class AdminController {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
             model.addAttribute("user", userOptional.get());
-            return "edit-user"; // Tutaunda ukurasa mdogo wa edit-user.html au Modal
+            return "edit-user"; // Inaelekeza kwenye edit-user.html
         }
 
         return "redirect:/admin/dashboard";
     }
 
-    // 3. KUHIFADHI MABADILIKO YA MTUMIAJI (SAVE EDITED USER)
+    // 3. KUHIFADHI MABADILIKO
     @PostMapping("/admin/users/update")
     public String updateUser(@ModelAttribute("user") User updatedUser, HttpSession session) {
         if (!checkIsAdmin(session)) {
@@ -107,6 +103,6 @@ public class AdminController {
             userRepository.save(existingUser);
         }
 
-        return "redirect:/admin/dashboard?updated=true";
+        return "redirect:/admin/dashboard";
     }
 }
