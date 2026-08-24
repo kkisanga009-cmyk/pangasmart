@@ -68,6 +68,27 @@
             font-size: 14px;
         }
 
+        /* Password Wrapper & Toggle Eye Styles */
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-container input {
+            padding-right: 40px; /* Nafasi ili maandishi yasifunikwe na jicho */
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            top: 55%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 16px;
+            user-select: none;
+            color: #64748b;
+        }
+
         .forgot-link {
             text-align: right;
             margin-bottom: 15px;
@@ -162,9 +183,13 @@
             <input type="hidden" name="username" id="usernameInput">
         </div>
 
+        <!-- Uwanja wa Password wenye Jicho -->
         <div class="form-group">
             <label>Password / <span>Neno la Siri:</span></label>
-            <input type="password" name="password" required placeholder="••••••••">
+            <div class="password-container">
+                <input type="password" id="passwordInput" name="password" required placeholder="••••••••">
+                <span class="toggle-password-btn" id="toggleIcon" onclick="togglePasswordVisibility()">👁️</span>
+            </div>
         </div>
 
         <div class="forgot-link">
@@ -190,6 +215,7 @@
 </div>
 
 <script>
+    // Splash Screen Timer
     window.addEventListener('load', function() {
         setTimeout(function() {
             var splash = document.getElementById('splash-screen');
@@ -199,6 +225,20 @@
             }, 600);
         }, 1500);
     });
+
+    // Toggle Password Visibility Function
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById("passwordInput");
+        const toggleIcon = document.getElementById("toggleIcon");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleIcon.textContent = "🙈";
+        } else {
+            passwordInput.type = "password";
+            toggleIcon.textContent = "👁️";
+        }
+    }
 </script>
 </body>
 </html>
