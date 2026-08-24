@@ -33,8 +33,8 @@
         .pass-text { font-family: monospace; color: #dc2626; font-weight: bold; }
 
         /* Action Buttons */
-        .btn-edit { background: #3b82f6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 5px; }
-        .btn-delete { background: #ef4444; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; }
+        .btn-edit { background: #3b82f6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 5px; display: inline-block; }
+        .btn-delete { background: #ef4444; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; display: inline-block; }
         .btn-edit:hover { background: #2563eb; }
         .btn-delete:hover { background: #dc2626; }
     </style>
@@ -86,11 +86,11 @@
             <td th:text="${t.fullName != null ? t.fullName : 'N/A'}">Jina</td>
             <td th:text="${t.email}">tenant@gmail.com</td>
             <td th:text="${t.phone != null ? t.phone : 'N/A'}">0712345678</td>
-            <td class="pass-text" th:text="${t.password}">****</td>
+            <td class="pass-text" th:text="${t.password}">**</td>
             <td>
-                <!-- Vitufe vya kurekebisha (Badilisha / Futa) -->
-                <a href="#" class="btn-edit" th:onclick="'alert(\'Ukurasa wa ku-edit mtumiaji ID: ' + ${t.id} + ' utafuata!\')'">Edit</a>
-                <a href="#" class="btn-delete" th:onclick="'alert(\'Ukurasa wa kufuta mtumiaji ID: ' + ${t.id} + ' utafuata!\')'">Futa</a>
+                <!-- Links halisi za ku-edit na ku-delete -->
+                <a th:href="@{/admin/users/edit/{id}(id=${t.id})}" class="btn-edit">Edit</a>
+                <a th:href="@{/admin/users/delete/{id}(id=${t.id})}" class="btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(tenants)}">
@@ -120,10 +120,11 @@
             <td th:text="${l.fullName != null ? l.fullName : 'N/A'}">Jina</td>
             <td th:text="${l.email}">landlord@gmail.com</td>
             <td th:text="${l.phone != null ? l.phone : 'N/A'}">0789654321</td>
-            <td class="pass-text" th:text="${l.password}">****</td>
+            <td class="pass-text" th:text="${l.password}">**</td>
             <td>
-                <a href="#" class="btn-edit" th:onclick="'alert(\'Ukurasa wa ku-edit mtumiaji ID: ' + ${l.id} + ' utafuata!\')'">Edit</a>
-                <a href="#" class="btn-delete" th:onclick="'alert(\'Ukurasa wa kufuta mtumiaji ID: ' + ${l.id} + ' utafuata!\')'">Futa</a>
+                <!-- Links halisi za ku-edit na ku-delete -->
+                <a th:href="@{/admin/users/edit/{id}(id=${l.id})}" class="btn-edit">Edit</a>
+                <a th:href="@{/admin/users/delete/{id}(id=${l.id})}" class="btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(landlords)}">
@@ -136,18 +137,15 @@
 <!-- SCRIPT YA SEARCH BAR -->
 <script>
     function searchTable() {
-        // Pata neno unalolitafuta
         let input = document.getElementById("searchInput").value.toLowerCase();
         let tables = document.querySelectorAll(".searchable-table");
 
-        // Zunguka kwenye kila table yenye class ya 'searchable-table'
         tables.forEach(table => {
             let trs = table.getElementsByTagName("tr");
-            for (let i = 1; i < trs.length; i++) { // Anza na 1 ili kuruka kichwa cha habari (thead)
+            for (let i = 1; i < trs.length; i++) {
                 let row = trs[i];
                 let text = row.innerText.toLowerCase();
 
-                // Kama neno lipo kwenye mstari husika, onyesha; kama halipo, ficha
                 if (text.includes(input)) {
                     row.style.display = "";
                 } else {
