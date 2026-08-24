@@ -23,6 +23,8 @@
         .btn-submit:hover { background: #219150; }
         .splash-box { background: rgba(30, 41, 59, 0.7); padding: 30px 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 85%; max-width: 320px; }
         .error-msg { color: #e74c3c; background: #fadbd8; padding: 8px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; }
+        .success-msg { color: #155724; background: #d4edda; padding: 8px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; }
+        .user-welcome-info { background: #e0f2fe; color: #0369a1; padding: 8px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; }
         .help-btn-login { background-color: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-bottom: 15px; }
     </style>
 </head>
@@ -63,16 +65,27 @@
         ❓ Help / Msaada wa Haraka
     </button>
 
+    <!-- SAFE CHECK YA CURRENT USER ILI KUZUIA THYMELEAF NULL ERROR -->
+    <div th:if="${currentUser != null}" class="user-welcome-info">
+        Karibu tena, <b th:text="${currentUser?.email}"></b>! Ingiza password yako kuendelea.
+    </div>
+
     <!-- Onyesha Error Message Kama Login Imefeli -->
     <div th:if="${param.error}" class="error-msg">
         Email au Password sio sahihi!
     </div>
 
+    <!-- Onyesha Message ya Mafanikio (k.m Logout au Registration) -->
+    <div th:if="${param.logout}" class="success-msg">
+        Umetoka kwenye mfumo kikamilifu.
+    </div>
+    <div th:if="${message}" class="success-msg" th:text="${message}"></div>
+
     <form th:action="@{/login}" method="post">
         <div class="form-group">
             <label>Email Address / <span>Barua Pepe:</span></label>
-            <input type="email" name="email" id="emailInput" required placeholder="example@gmail.com" oninput="document.getElementById('usernameInput').value = this.value">
-            <input type="hidden" name="username" id="usernameInput">
+            <input type="email" name="email" id="emailInput" th:value="${currentUser?.email}" required placeholder="example@gmail.com" oninput="document.getElementById('usernameInput').value = this.value">
+            <input type="hidden" name="username" id="usernameInput" th:value="${currentUser?.email}">
         </div>
 
         <div class="form-group">
@@ -89,6 +102,10 @@
 
         <button type="submit" class="btn-submit">Login / Ingia</button>
     </form>
+
+    <div style="margin-top: 15px; font-size: 13px;">
+        Huna akaunti? <a th:href="@{/register}" style="color: #3b82f6; text-decoration: none; font-weight: bold;">Jisajili hapa</a>
+    </div>
 
     <!-- FOOTER BRANDING -->
     <footer style="text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-family: sans-serif;">
