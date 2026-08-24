@@ -72,6 +72,27 @@
             border-color: #27ae60;
         }
 
+        /* Password Container and Toggle Eye */
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-container input {
+            padding-right: 40px;
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 16px;
+            user-select: none;
+            color: #64748b;
+        }
+
         .btn {
             width: 100%;
             background: #27ae60;
@@ -118,10 +139,16 @@
             <label>Email / <i>Barua Pepe</i>:</label>
             <input type="email" name="email" required placeholder="example@gmail.com">
         </div>
+
+        <!-- Uwanja wa Password wenye Jicho -->
         <div class="form-group">
             <label>Password / <i>Neno la Siri</i>:</label>
-            <input type="password" name="password" required placeholder="••••••••">
+            <div class="password-container">
+                <input type="password" id="registerPassword" name="password" required placeholder="••••••••">
+                <span class="toggle-password-btn" id="toggleIcon" onclick="toggleRegisterPassword()">👁️</span>
+            </div>
         </div>
+
         <div class="form-group">
             <label>Register As / <i>Aina ya Akaunti</i>:</label>
             <select name="role">
@@ -146,6 +173,21 @@
         </span>
     </div>
 </footer>
+
+<script>
+    function toggleRegisterPassword() {
+        const passwordInput = document.getElementById("registerPassword");
+        const toggleIcon = document.getElementById("toggleIcon");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleIcon.textContent = "🙈";
+        } else {
+            passwordInput.type = "password";
+            toggleIcon.textContent = "👁️";
+        }
+    }
+</script>
 
 </body>
 </html>
