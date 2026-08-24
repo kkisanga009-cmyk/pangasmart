@@ -49,30 +49,18 @@
 </head>
 <body>
 
-<!-- NAVBar-->
+<!-- NAVBAR -->
 <div class="navbar">
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
-        <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
+        <span th:if="${currentUser != null}" th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
 
-        <!-- 1. WEKA KITUFE HIKI HAPA -->
+        <!-- KITUFE CHA MSAADA -->
         <button onclick="openHelpModal()" class="nav-btn" style="background-color: #f39c12; border: none; cursor: pointer;">
             ❓ Help / Msaada
         </button>
 
-        <a th:if="${userRole == 'ADMIN' or currentUser.role == 'ADMIN' or currentUser.email.contains('admin')}"
-           href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
-
-        <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
-        <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
-    </div>
-</div>
-<div class="navbar">
-    <h2>🏠 PangaSmart</h2>
-    <div class="navbar-links">
-        <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
-
-        <a th:if="${userRole == 'ADMIN' or currentUser.role == 'ADMIN' or currentUser.email.contains('admin')}"
+        <a th:if="${userRole == 'ADMIN' or (currentUser != null and currentUser.role == 'ADMIN') or (currentUser != null and currentUser.email != null and currentUser.email.contains('admin'))}"
            href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
 
         <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
@@ -271,7 +259,8 @@
         </span>
     </div>
 </footer>
-<!-- 2. WEKA POP-UP YA MSAADA NA SCRIPT HAPA (KABLA YA </body>) -->
+
+<!-- POP-UP YA MSAADA NA SCRIPT -->
 <div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
         <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
@@ -282,13 +271,11 @@
             Wasiliana na Admin kwa msaada wa haraka kupitia namba hii:
         </p>
 
-        <!-- BADILISHA 0700000000 NA NAMBA YAKO HALISI -->
         <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
             📱 <a href="tel:0700000000" style="color: #0369a1; text-decoration: none;">0700 000 000</a>
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: center;">
-            <!-- BADILISHA 255700000000 NA NAMBA YAKO YA WHATSAPP -->
             <a href="https://wa.me/255700000000?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
                 💬 WhatsApp
             </a>
@@ -313,9 +300,6 @@
         }
     }
 </script>
-
-</body>
-</html>
 
 </body>
 </html>

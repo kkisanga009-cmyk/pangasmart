@@ -5,37 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - PangaSmart</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .nav-btn { color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 13px; font-weight: bold; display: inline-block; }
+        .nav-btn-admin { background-color: #8e44ad; }
+        .nav-btn-admin:hover { background-color: #9b59b6; color: white; }
+    </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-    !-- NAVBAR -->
-    <div class="navbar">
-        <h2>🏠 PangaSmart</h2>
-        <div class="navbar-links">
-            <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand fw-bold" href="/home">🏠 PangaSmart</a>
 
-            <!-- 1. WEKA KITUFE HIKI HAPA -->
-            <button onclick="openHelpModal()" class="nav-btn" style="background-color: #f39c12; border: none; cursor: pointer;">
-                ❓ Help / Msaada
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-white small me-2 d-none d-md-inline"
+                  th:if="${currentUser != null}"
+                  th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
+
+            <!-- KITUFE CHA MSAADA -->
+            <button onclick="openHelpModal()" class="btn btn-warning btn-sm fw-bold">
+                ❓ Msaada
             </button>
 
-            <a th:if="${userRole == 'ADMIN' or currentUser.role == 'ADMIN' or currentUser.email.contains('admin')}"
-               href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
+            <!-- DASHBOARD YA ADMIN -->
+            <a th:if="${userRole == 'ADMIN' or (currentUser != null and currentUser.role == 'ADMIN') or (currentUser != null and currentUser.email != null and currentUser.email.contains('admin'))}"
+               href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin</a>
 
-            <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
-            <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
-        </div>
-    </div>
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="/home">PangaSmart</a>
-        <div class="d-flex gap-2">
             <a href="/home" class="btn btn-outline-light btn-sm">Nyumbani</a>
-            <a href="/login" class="btn btn-danger btn-sm">Ondoka (Logout)</a>
+            <a href="/login" class="btn btn-danger btn-sm">Logout</a>
         </div>
     </div>
 </nav>
 
+<!-- CONTENT -->
 <div class="container flex-grow-1 px-3">
     <div class="row justify-content-center">
         <div class="col-12 col-sm-10 col-md-8 col-lg-6">
@@ -50,23 +53,23 @@
                     <form th:action="@{/profile/update}" method="post">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Jina Kamili:</label>
-                            <input type="text" name="fullName" class="form-control" th:value="${user.fullName}" required>
+                            <input type="text" name="fullName" class="form-control" th:value="${user != null ? user.fullName : ''}" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Barua Pepe (Email):</label>
-                            <input type="email" class="form-control" th:value="${user.email}" readonly style="background-color: #e9ecef;">
+                            <input type="email" class="form-control" th:value="${user != null ? user.email : ''}" readonly style="background-color: #e9ecef;">
                             <small class="text-muted d-block mt-1">Email haiwezi kubadilishwa.</small>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Namba ya Simu:</label>
-                            <input type="text" name="phone" class="form-control" th:value="${user.phone}" required>
+                            <input type="text" name="phone" class="form-control" th:value="${user != null ? user.phone : ''}" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Aina ya Mtumiaji (Role):</label>
-                            <input type="text" class="form-control text-uppercase" th:value="${user.role}" readonly style="background-color: #e9ecef;">
+                            <input type="text" class="form-control text-uppercase" th:value="${user != null ? user.role : ''}" readonly style="background-color: #e9ecef;">
                         </div>
 
                         <div class="mb-3">
@@ -96,7 +99,8 @@
         </span>
     </div>
 </footer>
-<!-- 2. WEKA POP-UP YA MSAADA NA SCRIPT HAPA (KABLA YA </body>) -->
+
+<!-- POP-UP YA MSAADA -->
 <div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
         <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
@@ -107,13 +111,11 @@
             Wasiliana na Admin kwa msaada wa haraka kupitia namba hii:
         </p>
 
-        <!-- BADILISHA 0700000000 NA NAMBA YAKO HALISI -->
         <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
             📱 <a href="tel:0700000000" style="color: #0369a1; text-decoration: none;">0700 000 000</a>
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: center;">
-            <!-- BADILISHA 255700000000 NA NAMBA YAKO YA WHATSAPP -->
             <a href="https://wa.me/255700000000?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
                 💬 WhatsApp
             </a>
@@ -138,9 +140,6 @@
         }
     }
 </script>
-
-</body>
-</html>
 
 </body>
 </html>

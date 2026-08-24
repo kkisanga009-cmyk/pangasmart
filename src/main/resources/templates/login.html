@@ -5,158 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PangaSmart - Login / Ingia</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #eef2f3;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 15px;
-        }
-
-        .login-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-        }
-
-        .login-card h2 {
-            color: #2c3e50;
-            margin-bottom: 5px;
-            font-size: 24px;
-        }
-
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            font-size: 13px;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .form-group label span {
-            color: #7f8c8d;
-            font-weight: normal;
-            font-size: 12px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        /* Password Wrapper & Toggle Eye Styles */
-        .password-container {
-            position: relative;
-            width: 100%;
-        }
-
-        .password-container input {
-            padding-right: 40px; /* Nafasi ili maandishi yasifunikwe na jicho */
-        }
-
-        .toggle-password-btn {
-            position: absolute;
-            right: 12px;
-            top: 55%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 16px;
-            user-select: none;
-            color: #64748b;
-        }
-
-        .forgot-link {
-            text-align: right;
-            margin-bottom: 15px;
-        }
-
-        .forgot-link a {
-            font-size: 13px;
-            color: #3b82f6;
-            text-decoration: none;
-        }
-
-        .btn-submit {
-            width: 100%;
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 15px;
-            transition: 0.3s;
-        }
-
-        .btn-submit:hover {
-            background: #219150;
-        }
-
-        .splash-box {
-            background: rgba(30, 41, 59, 0.7);
-            padding: 30px 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 85%;
-            max-width: 320px;
-        }
-
-        .error-msg {
-            color: #e74c3c;
-            background: #fadbd8;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+        .login-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 380px; text-align: center; margin-top: 10px; }
+        .login-card h2 { color: #2c3e50; margin-bottom: 5px; font-size: 24px; }
+        .subtitle { color: #7f8c8d; font-size: 13px; margin-bottom: 20px; }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        .form-group label { font-size: 13px; color: #333; font-weight: bold; }
+        .form-group label span { color: #7f8c8d; font-weight: normal; font-size: 12px; }
+        .form-group input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        .password-container { position: relative; width: 100%; }
+        .password-container input { padding-right: 40px; }
+        .toggle-password-btn { position: absolute; right: 12px; top: 55%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none; color: #64748b; }
+        .forgot-link { text-align: right; margin-bottom: 15px; }
+        .forgot-link a { font-size: 13px; color: #3b82f6; text-decoration: none; }
+        .btn-submit { width: 100%; background: #27ae60; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; }
+        .btn-submit:hover { background: #219150; }
+        .splash-box { background: rgba(30, 41, 59, 0.7); padding: 30px 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 85%; max-width: 320px; }
+        .error-msg { color: #e74c3c; background: #fadbd8; padding: 8px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; }
+        .help-btn-login { background-color: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-<!-- NAVBAR -->
-<div class="navbar">
-    <h2>🏠 PangaSmart</h2>
-    <div class="navbar-links">
-        <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
 
-        <!-- 1. WEKA KITUFE HIKI HAPA -->
-        <button onclick="openHelpModal()" class="nav-btn" style="background-color: #f39c12; border: none; cursor: pointer;">
-            ❓ Help / Msaada
-        </button>
-
-        <a th:if="${userRole == 'ADMIN' or currentUser.role == 'ADMIN' or currentUser.email.contains('admin')}"
-           href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
-
-        <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
-        <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
-    </div>
-</div>
 <!-- SPLASH SCREEN LAYER -->
 <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; color: white; transition: opacity 0.6s ease;">
     <div class="splash-box">
@@ -187,20 +58,23 @@
     <h2>🏠 PangaSmart</h2>
     <p class="subtitle">Housing & Room Rental System <br> <i>(Mfumo wa Kupanga Nyumba & Vyumba)</i></p>
 
+    <!-- KITUFE CHA MSAADA -->
+    <button onclick="openHelpModal()" class="help-btn-login">
+        ❓ Help / Msaada wa Haraka
+    </button>
+
     <!-- Onyesha Error Message Kama Login Imefeli -->
     <div th:if="${param.error}" class="error-msg">
         Email au Password sio sahihi!
     </div>
 
     <form th:action="@{/login}" method="post">
-        <!-- Input inayotuma email kama 'email' na 'username' ili kuzuia Error 400 -->
         <div class="form-group">
             <label>Email Address / <span>Barua Pepe:</span></label>
             <input type="email" name="email" id="emailInput" required placeholder="example@gmail.com" oninput="document.getElementById('usernameInput').value = this.value">
             <input type="hidden" name="username" id="usernameInput">
         </div>
 
-        <!-- Uwanja wa Password wenye Jicho -->
         <div class="form-group">
             <label>Password / <span>Neno la Siri:</span></label>
             <div class="password-container">
@@ -231,19 +105,47 @@
     </footer>
 </div>
 
+<!-- POP-UP YA MSAADA -->
+<div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
+        <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
+
+        <div style="font-size: 40px; margin-bottom: 10px;">📞</div>
+        <h3 style="color: #2c3e50; margin-bottom: 10px;">Msaada wa Haraka</h3>
+        <p style="font-size: 14px; color: #555; margin-bottom: 15px;">
+            Wasiliana na Admin kwa msaada wa haraka kupitia namba hii:
+        </p>
+
+        <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
+            📱 <a href="tel:0700000000" style="color: #0369a1; text-decoration: none;">0700 000 000</a>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <a href="https://wa.me/255700000000?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
+                💬 WhatsApp
+            </a>
+            <button onclick="closeHelpModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                Funga
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     // Splash Screen Timer
     window.addEventListener('load', function() {
         setTimeout(function() {
             var splash = document.getElementById('splash-screen');
-            splash.style.opacity = '0';
-            setTimeout(function() {
-                splash.style.display = 'none';
-            }, 600);
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(function() {
+                    splash.style.display = 'none';
+                }, 600);
+            }
         }, 1500);
     });
 
-    // Toggle Password Visibility Function
+    // Toggle Password Visibility
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById("passwordInput");
         const toggleIcon = document.getElementById("toggleIcon");
@@ -256,36 +158,8 @@
             toggleIcon.textContent = "👁️";
         }
     }
-</script>
-<!-- 2. WEKA POP-UP YA MSAADA NA SCRIPT HAPA (KABLA YA </body>) -->
-<div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
-        <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
 
-        <div style="font-size: 40px; margin-bottom: 10px;">📞</div>
-        <h3 style="color: #2c3e50; margin-bottom: 10px;">Msaada wa Haraka</h3>
-        <p style="font-size: 14px; color: #555; margin-bottom: 15px;">
-            Wasiliana na Admin kwa msaada wa haraka kupitia namba hii:
-        </p>
-
-        <!-- BADILISHA 0700000000 NA NAMBA YAKO HALISI -->
-        <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
-            📱 <a href="tel:0700000000" style="color: #0369a1; text-decoration: none;">0700 000 000</a>
-        </div>
-
-        <div style="display: flex; gap: 10px; justify-content: center;">
-            <!-- BADILISHA 255700000000 NA NAMBA YAKO YA WHATSAPP -->
-            <a href="https://wa.me/255700000000?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
-                💬 WhatsApp
-            </a>
-            <button onclick="closeHelpModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
-                Funga
-            </button>
-        </div>
-    </div>
-</div>
-
-<script>
+    // Help Modal Controls
     function openHelpModal() {
         document.getElementById("helpModal").style.display = "flex";
     }
@@ -300,7 +174,5 @@
     }
 </script>
 
-</body>
-</html>
 </body>
 </html>

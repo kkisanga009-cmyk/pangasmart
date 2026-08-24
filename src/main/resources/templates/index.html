@@ -23,7 +23,7 @@
         }
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
 <!-- SPLASH SCREEN LAYER (KISANGA TECHNOLOGY) -->
 <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; color: white; transition: opacity 0.6s ease;">
@@ -39,22 +39,28 @@
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
-    <div class="container">
+    <div class="container d-flex justify-content-between align-items-center">
         <a class="navbar-brand fw-bold fs-3 text-warning" href="/">🏠 PangaSmart</a>
-        <div>
-            <a href="/login" class="btn btn-outline-light me-2 fw-bold">Ingia (Login)</a>
-            <a href="/register" class="btn btn-primary fw-bold">Jisajili (Register)</a>
+        <div class="d-flex gap-2 align-items-center">
+            <!-- KITUFE CHA MSAADA -->
+            <button onclick="openHelpModal()" class="btn btn-warning btn-sm fw-bold">
+                ❓ Help / Msaada
+            </button>
+            <a href="/login" class="btn btn-outline-light btn-sm fw-bold">Ingia (Login)</a>
+            <a href="/register" class="btn btn-primary btn-sm fw-bold">Jisajili (Register)</a>
         </div>
     </div>
 </nav>
 
 <!-- HERO SECTION -->
-<section class="hero-section text-center">
+<section class="hero-section text-center flex-grow-1 d-flex align-items-center">
     <div class="container">
         <h1 class="display-4 fw-bold mb-3">Pata Chumba au Nyumba ya Kupanga Kwa Urahisi</h1>
         <p class="lead mb-4">PangaSmart inawanisha wenye nyumba na wapangaji kwa haraka, usalama na urahisi bila madalali.</p>
-        <a href="/register" class="btn btn-warning btn-lg fw-bold px-4 py-2 me-2">Anza Sasa hivi</a>
-        <a href="/login" class="btn btn-outline-light btn-lg fw-bold px-4 py-2">Tazama Vyumba</a>
+        <div class="d-flex justify-content-center gap-2">
+            <a href="/register" class="btn btn-warning btn-lg fw-bold px-4 py-2">Anza Sasa hivi</a>
+            <a href="/login" class="btn btn-outline-light btn-lg fw-bold px-4 py-2">Tazama Vyumba</a>
+        </div>
     </div>
 </section>
 
@@ -103,16 +109,57 @@
     </div>
 </footer>
 
+<!-- POP-UP YA MSAADA -->
+<div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
+        <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
+
+        <div style="font-size: 40px; margin-bottom: 10px;">📞</div>
+        <h3 style="color: #2c3e50; margin-bottom: 10px;">Msaada wa Haraka</h3>
+        <p style="font-size: 14px; color: #555; margin-bottom: 15px;">
+            Wasiliana na Admin kwa msaada wa haraka kupitia namba hii:
+        </p>
+
+        <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
+            📱 <a href="tel:0700000000" style="color: #0369a1; text-decoration: none;">0700 000 000</a>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <a href="https://wa.me/255700000000?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
+                💬 WhatsApp
+            </a>
+            <button onclick="closeHelpModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                Funga
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     window.addEventListener('load', function() {
         setTimeout(function() {
             var splash = document.getElementById('splash-screen');
-            splash.style.opacity = '0';
-            setTimeout(function() {
-                splash.style.display = 'none';
-            }, 600);
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(function() {
+                    splash.style.display = 'none';
+                }, 600);
+            }
         }, 1500);
     });
+
+    function openHelpModal() {
+        document.getElementById("helpModal").style.display = "flex";
+    }
+    function closeHelpModal() {
+        document.getElementById("helpModal").style.display = "none";
+    }
+    window.onclick = function(event) {
+        let modal = document.getElementById("helpModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 </script>
 
 </body>
