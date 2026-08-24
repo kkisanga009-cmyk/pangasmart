@@ -1,11 +1,11 @@
 package com.pangasmart.pangasmart.controllers;
 
 import com.pangasmart.pangasmart.models.Booking;
-import com.pangasmart.pangasmart.models.Payment; // 1. IMEONGEZWA
+import com.pangasmart.pangasmart.models.Payment;
 import com.pangasmart.pangasmart.models.Room;
 import com.pangasmart.pangasmart.models.User;
 import com.pangasmart.pangasmart.repositories.BookingRepository;
-import com.pangasmart.pangasmart.repository.PaymentRepository; // 2. IMEONGEZWA
+import com.pangasmart.pangasmart.repository.PaymentRepository;
 import com.pangasmart.pangasmart.repositories.RoomRepository;
 import com.pangasmart.pangasmart.repositories.UserRepository;
 import com.pangasmart.pangasmart.services.SmsService;
@@ -16,13 +16,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Controller
 public class HomeController {
@@ -37,12 +34,10 @@ public class HomeController {
     private UserRepository userRepository;
 
     @Autowired
-    private PaymentRepository paymentRepository; // 3. IMEONGEZWA
+    private PaymentRepository paymentRepository;
 
     @Autowired
     private SmsService smsService;
-
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
 
     @GetMapping("/home")
     public String showHomePage(Model model,
@@ -81,20 +76,18 @@ public class HomeController {
             bookingList = new ArrayList<>();
         }
 
-        // KAMA MTUMIAJI AMELAPIA CHUMBA, TAFUTA NAMBA YA SIMU YA LANDLORD
         if (paidRoomId != null) {
             Optional<Room> roomOpt = roomRepository.findById(paidRoomId);
             if (roomOpt.isPresent()) {
                 Room paidRoom = roomOpt.get();
                 String phone = paidRoom.getLandlordPhone();
 
-                // Kama namba haipo kwenye Room, tafuta kutoka kwa Mwenye Nyumba (User)
                 if (phone == null || phone.trim().isEmpty()) {
                     Optional<User> landlordOpt = userRepository.findByEmail(paidRoom.getLandlordEmail());
                     if (landlordOpt.isPresent() && landlordOpt.get().getPhone() != null) {
                         phone = landlordOpt.get().getPhone();
                     } else {
-                        phone = paidRoom.getLandlordEmail(); // fallback ikikosekana kabisa
+                        phone = paidRoom.getLandlordEmail();
                     }
                 }
                 model.addAttribute("paidRoomId", paidRoomId);
@@ -124,32 +117,26 @@ public class HomeController {
 
         room.setLandlordEmail(user.getEmail());
 
-        // Hifadhi namba ya simu ya Landlord wakati wa kuweka chumba
         if (user.getPhone() != null && !user.getPhone().isEmpty()) {
             room.setLandlordPhone(user.getPhone());
         }
 
         try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
+            // GEUZA PICHA KUWA BASE64 DATA STRING
             if (imageFile != null && !imageFile.isEmpty()) {
-                String imageName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename().replaceAll("\\s+", "");
-                Path filePath = uploadPath.resolve(imageName);
-                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                room.setImageUrl("/uploads/" + imageName);
+                String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
+                String imageUrl = "data:" + imageFile.getContentType() + ";base64," + base64Image;
+                room.setImageUrl(imageUrl);
             }
 
+            // GEUZA VIDEO KUWA BASE64 DATA STRING
             if (videoFile != null && !videoFile.isEmpty()) {
-                String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename().replaceAll("\\s+", "");
-                Path filePath = uploadPath.resolve(videoName);
-                Files.copy(videoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                room.setVideoUrl("/uploads/" + videoName);
+                String base64Video = Base64.getEncoder().encodeToString(videoFile.getBytes());
+                String videoUrl = "data:" + videoFile.getContentType() + ";base64," + base64Video;
+                room.setVideoUrl(videoUrl);
             }
         } catch (Exception e) {
-            System.err.println("Upload Error: " + e.getMessage());
+            System.err.println("Base64 Encoding Error: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -164,11 +151,10 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        // Hifadhi au sasisha taarifa za malipo kwenye Database
         Payment payment = new Payment();
         payment.setUserId(user.getId());
         payment.setRoomId(roomId);
-        payment.setAmount(1000.00); // TZS 1,000
+        payment.setAmount(1000.00);
         payment.setStatus("COMPLETED");
         paymentRepository.save(payment);
 

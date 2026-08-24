@@ -14,9 +14,19 @@ public class Room {
     private String location;
     private Double price;
     private String status;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String videoUrl;
+
     private String landlordEmail;
     private String landlordPhone;
 
