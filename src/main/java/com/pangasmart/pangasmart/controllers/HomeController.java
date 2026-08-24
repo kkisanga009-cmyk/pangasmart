@@ -1,9 +1,11 @@
 package com.pangasmart.pangasmart.controllers;
 
 import com.pangasmart.pangasmart.models.Booking;
+import com.pangasmart.pangasmart.models.Payment; // 1. IMEONGEZWA
 import com.pangasmart.pangasmart.models.Room;
 import com.pangasmart.pangasmart.models.User;
 import com.pangasmart.pangasmart.repositories.BookingRepository;
+import com.pangasmart.pangasmart.repository.PaymentRepository; // 2. IMEONGEZWA
 import com.pangasmart.pangasmart.repositories.RoomRepository;
 import com.pangasmart.pangasmart.repositories.UserRepository;
 import com.pangasmart.pangasmart.services.SmsService;
@@ -33,6 +35,9 @@ public class HomeController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository; // 3. IMEONGEZWA
 
     @Autowired
     private SmsService smsService;
@@ -158,6 +163,14 @@ public class HomeController {
         if (user == null) {
             return "redirect:/login";
         }
+
+        // Hifadhi au sasisha taarifa za malipo kwenye Database
+        Payment payment = new Payment();
+        payment.setUserId(user.getId());
+        payment.setRoomId(roomId);
+        payment.setAmount(1000.00); // TZS 1,000
+        payment.setStatus("COMPLETED");
+        paymentRepository.save(payment);
 
         return "redirect:/home?paidRoomId=" + roomId;
     }

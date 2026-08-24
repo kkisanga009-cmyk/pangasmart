@@ -1,6 +1,6 @@
 package com.pangasmart.pangasmart.repository;
 
-import com.pangasmart.pangasmart.entity.Payment;
+import com.pangasmart.pangasmart.models.Payment; // Tumesahihisha import hapa kwenda models
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
