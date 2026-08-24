@@ -80,6 +80,7 @@ public class AdminController {
 
         List<User> tenants = userRepository.findByRole("TENANT");
         List<User> landlords = userRepository.findByRole("LANDLORD");
+        List<Room> rooms = roomRepository.findAll(); // Inavuta vyumba vyote
         List<Payment> allPayments = paymentRepository.findAll();
 
         Double totalRevenue = allPayments.stream()
@@ -92,10 +93,9 @@ public class AdminController {
             User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
             Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
-            // Inavuta Landlord moja kwa moja kutoka kwenye userRepository bila kutegemea method ya Room
             User landlord = null;
             if (landlords != null && !landlords.isEmpty()) {
-                landlord = landlords.get(0); // Inatumia fallback salama ikiwa relation haijabainishwa moja kwa moja
+                landlord = landlords.get(0);
             }
 
             String tenantName = tenant != null ? tenant.getFullName() : "N/A";
@@ -116,8 +116,19 @@ public class AdminController {
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants);
         model.addAttribute("landlords", landlords);
+        model.addAttribute("rooms", rooms); // Inaongezwa kwenye model
 
         return "admin";
+    }
+
+    // MAPOKEO YA KUFUTA CHUMBA KUTOKA ADMIN DASHBOARD
+    @GetMapping("/admin/rooms/delete/{id}")
+    public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAdmin(session)) {
+            return "redirect:/home";
+        }
+        roomRepository.deleteById(id);
+        return "redirect:/admin/dashboard?roomDeleted=true";
     }
 
     @GetMapping("/admin/users/delete/{id}")
