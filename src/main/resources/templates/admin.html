@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -11,13 +12,14 @@
         .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-card h4 { color: #64748b; font-size: 12px; text-transform: uppercase; }
         .stat-card p { font-size: 24px; font-weight: bold; color: #0f172a; margin-top: 5px; }
-        .table-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        .table-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
-        th { background: #f8fafc; }
+        th { background: #f8fafc; color: #475569; }
         .status { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; }
-        .COMPLETED { background: #22c55e; }
+        .COMPLETED, .SUCCESS { background: #22c55e; }
         .PENDING { background: #eab308; }
+        .pass-text { font-family: monospace; color: #dc2626; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -42,8 +44,65 @@
     </div>
 </div>
 
+<!-- TABLE YA WAPANGAJI (TENANTS) -->
 <div class="table-card">
-    <h3 style="margin-bottom: 15px; font-size: 16px;">Miamala ya Malipo ya TZS 1,000</h3>
+    <h3 style="margin-bottom: 15px; font-size: 16px; color: #0284c7;">👤 Orodha ya Wapangaji (Tenants)</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Jina</th>
+            <th>Email</th>
+            <th>Namba ya Simu</th>
+            <th>Password</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="t : ${tenants}">
+            <td th:text="${t.id}">1</td>
+            <td th:text="${t.fullName != null ? t.fullName : 'N/A'}">Jina</td>
+            <td th:text="${t.email}">tenant@gmail.com</td>
+            <td th:text="${t.phone != null ? t.phone : 'N/A'}">0712345678</td>
+            <td class="pass-text" th:text="${t.password}">****</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(tenants)}">
+            <td colspan="5" style="text-align: center; color: #94a3b8;">Hakuna Mpangaji aliyesajiliwa bado.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- TABLE YA WENYE NYUMBA (LANDLORDS) -->
+<div class="table-card">
+    <h3 style="margin-bottom: 15px; font-size: 16px; color: #16a34a;">🏠 Orodha ya Wenye Nyumba (Landlords)</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Jina</th>
+            <th>Email</th>
+            <th>Namba ya Simu</th>
+            <th>Password</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="l : ${landlords}">
+            <td th:text="${l.id}">1</td>
+            <td th:text="${l.fullName != null ? l.fullName : 'N/A'}">Jina</td>
+            <td th:text="${l.email}">landlord@gmail.com</td>
+            <td th:text="${l.phone != null ? l.phone : 'N/A'}">0789654321</td>
+            <td class="pass-text" th:text="${l.password}">****</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(landlords)}">
+            <td colspan="5" style="text-align: center; color: #94a3b8;">Hakuna Mwenye Nyumba aliyesajiliwa bado.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- TABLE YA MIAMALA YA MALIPO -->
+<div class="table-card">
+    <h3 style="margin-bottom: 15px; font-size: 16px; color: #334155;">💳 Miamala ya Malipo ya TZS 1,000</h3>
     <table>
         <thead>
         <tr>
