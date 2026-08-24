@@ -24,83 +24,94 @@ public class PesapalService {
     private final String BASE_URL = "https://pay.pesapal.com/v3/api";
 
     public String getAuthToken() {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = BASE_URL + "/Auth/RequestToken";
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = BASE_URL + "/Auth/RequestToken";
 
-        Map<String, String> request = new HashMap<>();
-        request.put("consumer_key", consumerKey);
-        request.put("consumer_secret", consumerSecret);
+            Map<String, String> request = new HashMap<>();
+            request.put("consumer_key", consumerKey);
+            request.put("consumer_secret", consumerSecret);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
 
-        if (response.getBody() != null && response.getBody().get("token") != null) {
-            return (String) response.getBody().get("token");
+            if (response.getBody() != null && response.getBody().get("token") != null) {
+                return (String) response.getBody().get("token");
+            }
+        } catch (Exception e) {
+            System.err.println("Pesapal Auth Error: " + e.getMessage());
         }
         return null;
     }
 
-    // Method ya kusajili IPN URL kiotomatiki kama notification_id haijatengenezwa
     public String registerIpnUrl(String token) {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = BASE_URL + "/URLSetup/RegisterIPN";
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = BASE_URL + "/URLSetup/RegisterIPN";
 
-        Map<String, Object> request = new HashMap<>();
-        request.put("url", "https://pangasmart-production.up.railway.app/payments/callback");
-        request.put("ipn_notification_type", "POST");
+            Map<String, Object> request = new HashMap<>();
+            request.put("url", "https://pangasmart-production.up.railway.app/payments/callback");
+            request.put("ipn_notification_type", "POST");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
 
-        if (response.getBody() != null && response.getBody().get("ipn_id") != null) {
-            return (String) response.getBody().get("ipn_id");
+            if (response.getBody() != null && response.getBody().get("ipn_id") != null) {
+                return (String) response.getBody().get("ipn_id");
+            }
+        } catch (Exception e) {
+            System.err.println("Pesapal IPN Register Error: " + e.getMessage());
         }
         return null;
     }
 
     public String submitOrder(String token, String merchantRef, Double amount, String email, String phone) {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = BASE_URL + "/Transactions/SubmitOrderRequest";
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = BASE_URL + "/Transactions/SubmitOrderRequest";
 
-        String activeNotificationId = notificationId;
-        if (activeNotificationId == null || activeNotificationId.equals("YOUR_NOTIFICATION_ID") || activeNotificationId.equals("PENDING")) {
-            activeNotificationId = registerIpnUrl(token);
-        }
+            String activeNotificationId = notificationId;
+            if (activeNotificationId == null || activeNotificationId.equals("YOUR_NOTIFICATION_ID") || activeNotificationId.equals("PENDING")) {
+                activeNotificationId = registerIpnUrl(token);
+            }
 
-        Map<String, Object> request = new HashMap<>();
-        request.put("id", merchantRef);
-        request.put("currency", "TZS");
-        request.put("amount", amount);
-        request.put("description", "Malipo ya Kuona Mawasiliano - PangaSmart");
-        request.put("callback_url", "https://pangasmart-production.up.railway.app/payments/callback");
-        request.put("notification_id", activeNotificationId);
+            Map<String, Object> request = new HashMap<>();
+            request.put("id", merchantRef);
+            request.put("currency", "TZS");
+            request.put("amount", amount);
+            request.put("description", "Malipo ya Kuona Mawasiliano - PangaSmart");
+            request.put("callback_url", "https://pangasmart-production.up.railway.app/payments/callback");
+            request.put("notification_id", activeNotificationId);
 
-        Map<String, String> billingAddress = new HashMap<>();
-        billingAddress.put("email_address", (email != null && !email.isEmpty()) ? email : "customer@pangasmart.com");
-        billingAddress.put("phone_number", (phone != null && !phone.isEmpty()) ? phone : "0700000000");
-        request.put("billing_address", billingAddress);
+            Map<String, String> billingAddress = new HashMap<>();
+            billingAddress.put("email_address", (email != null && !email.isEmpty()) ? email : "customer@pangasmart.com");
+            billingAddress.put("phone_number", (phone != null && !phone.isEmpty()) ? phone : "0700000000");
+            request.put("billing_address", billingAddress);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
 
-        if (response.getBody() != null && response.getBody().get("redirect_url") != null) {
-            return (String) response.getBody().get("redirect_url");
+            if (response.getBody() != null && response.getBody().get("redirect_url") != null) {
+                return (String) response.getBody().get("redirect_url");
+            }
+        } catch (Exception e) {
+            System.err.println("Pesapal Submit Order Error: " + e.getMessage());
         }
         return null;
     }
 
-    // Method mpya ya kuhakiki kama malipo yameingia kweli Pesapal
+    // Method ya kuangalia status halisi kutoka Pesapal
     public String getTransactionStatus(String token, String orderTrackingId) {
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -108,17 +119,22 @@ public class PesapalService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
             headers.setBearerAuth(token);
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
 
-            if (response.getBody() != null && response.getBody().get("payment_status_description") != null) {
-                return (String) response.getBody().get("payment_status_description");
+            if (response.getBody() != null) {
+                Object statusDesc = response.getBody().get("payment_status_description");
+                if (statusDesc != null) {
+                    System.out.println("Pesapal Real Status: " + statusDesc.toString());
+                    return statusDesc.toString();
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Pesapal Get Status Error: " + e.getMessage());
         }
-        return "PENDING";
+        return "UNKNOWN";
     }
 }
