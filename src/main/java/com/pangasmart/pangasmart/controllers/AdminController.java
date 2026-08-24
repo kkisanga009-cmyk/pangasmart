@@ -13,7 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +50,7 @@ public class AdminController {
         private Double amount;
         private String status;
         private LocalDateTime date;
+        private String formattedDate;
 
         public PaymentDetailDTO(Long paymentId, String tenantName, String tenantPhone, String roomTitle, String landlordName, String landlordPhone, Double amount, String status, LocalDateTime date) {
             this.paymentId = paymentId;
@@ -59,6 +62,14 @@ public class AdminController {
             this.amount = amount;
             this.status = status;
             this.date = date;
+
+            // Format tarehe kuwa vizuri (Mfano: 24/08/2026 14:30)
+            if (date != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                this.formattedDate = date.format(formatter);
+            } else {
+                this.formattedDate = "N/A";
+            }
         }
 
         public Long getPaymentId() { return paymentId; }
@@ -70,6 +81,7 @@ public class AdminController {
         public Double getAmount() { return amount; }
         public String getStatus() { return status; }
         public LocalDateTime getDate() { return date; }
+        public String getFormattedDate() { return formattedDate; }
     }
 
     @GetMapping("/admin/dashboard")
@@ -80,8 +92,15 @@ public class AdminController {
 
         List<User> tenants = userRepository.findByRole("TENANT");
         List<User> landlords = userRepository.findByRole("LANDLORD");
-        List<Room> rooms = roomRepository.findAll(); // Inavuta vyumba vyote
+        List<Room> rooms = roomRepository.findAll();
         List<Payment> allPayments = paymentRepository.findAll();
+
+        // Kupanga malipo kuanzia ya hivi karibuni (Latest First)
+        allPayments.sort((p1, p2) -> {
+            if (p1.getPaymentDate() == null) return 1;
+            if (p2.getPaymentDate() == null) return -1;
+            return p2.getPaymentDate().compareTo(p1.getPaymentDate());
+        });
 
         Double totalRevenue = allPayments.stream()
                 .filter(p -> "SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus()))
@@ -116,12 +135,11 @@ public class AdminController {
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants);
         model.addAttribute("landlords", landlords);
-        model.addAttribute("rooms", rooms); // Inaongezwa kwenye model
+        model.addAttribute("rooms", rooms);
 
         return "admin";
     }
 
-    // MAPOKEO YA KUFUTA CHUMBA KUTOKA ADMIN DASHBOARD
     @GetMapping("/admin/rooms/delete/{id}")
     public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAdmin(session)) {

@@ -129,13 +129,14 @@
     </table>
 </div>
 
-<!-- MEZA YA MALIPO NA NAMBA ZA WENYE NYUMBA -->
+<!-- MEZA YA MALIPO NA NAMBA ZA WENYE NYUMBA (YENYE TAREHE NA MUDA) -->
 <div class="table-card">
     <h3 style="margin-bottom: 15px; font-size: 16px; color: #8b5cf6;">💳 Orodha ya Waliolipia & Namba za Wenye Nyumba</h3>
     <table class="searchable-table">
         <thead>
         <tr>
             <th>ID</th>
+            <th>Tarehe & Muda</th>
             <th>Mpangaji (Jina & Simu)</th>
             <th>Chumba</th>
             <th>Mwenye Nyumba</th>
@@ -147,6 +148,9 @@
         <tbody>
         <tr th:each="p : ${paymentDetails}">
             <td th:text="${p.paymentId}">1</td>
+            <td>
+                <span style="font-weight: bold; color: #475569;" th:text="${p.formattedDate != null ? p.formattedDate : (p.date != null ? p.date : 'N/A')}">24/08/2026 14:30</span>
+            </td>
             <td>
                 <b th:text="${p.tenantName}">Jina</b><br>
                 <small style="color: #64748b;" th:text="${p.tenantPhone}">0700000000</small>
@@ -162,7 +166,7 @@
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(paymentDetails)}">
-            <td colspan="7" style="text-align: center; color: #94a3b8;">Hakuna malipo yoyote yaliyofanyika bado.</td>
+            <td colspan="8" style="text-align: center; color: #94a3b8;">Hakuna malipo yoyote yaliyofanyika bado.</td>
         </tr>
         </tbody>
     </table>
