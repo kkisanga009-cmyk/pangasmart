@@ -14,7 +14,6 @@
         .stat-card h4 { color: #64748b; font-size: 12px; text-transform: uppercase; }
         .stat-card p { font-size: 24px; font-weight: bold; color: #0f172a; margin-top: 5px; }
 
-        /* Search Bar Styles */
         .search-container { margin-bottom: 20px; }
         .search-container input {
             width: 100%; padding: 12px 15px; font-size: 15px; border: 1px solid #cbd5e1;
@@ -27,12 +26,13 @@
         th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
         th { background: #f8fafc; color: #475569; }
 
-        .status { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; }
+        .status { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; display: inline-block; }
         .COMPLETED, .SUCCESS { background: #22c55e; }
         .PENDING { background: #eab308; }
+        .FAILED { background: #ef4444; }
         .pass-text { font-family: monospace; color: #dc2626; font-weight: bold; }
 
-        /* Action Buttons */
+        .phone-highlight { background: #e0f2fe; color: #0369a1; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
         .btn-edit { background: #3b82f6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 5px; display: inline-block; }
         .btn-delete { background: #ef4444; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; display: inline-block; }
         .btn-edit:hover { background: #2563eb; }
@@ -61,9 +61,47 @@
     </div>
 </div>
 
-<!-- SEARCH BAR -->
 <div class="search-container">
-    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="🔍 Tafuta mtumiaji kwa jina, email, au namba ya simu...">
+    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="🔍 Tafuta mtumiaji, chumba, au namba ya simu...">
+</div>
+
+<!-- MEZA YA MALIPO NA NAMBA ZA WENYE NYUMBA -->
+<div class="table-card">
+    <h3 style="margin-bottom: 15px; font-size: 16px; color: #8b5cf6;">💳 Orodha ya Waliolipia & Namba za Wenye Nyumba</h3>
+    <table class="searchable-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Mpangaji (Jina & Simu)</th>
+            <th>Chumba</th>
+            <th>Mwenye Nyumba</th>
+            <th>Simu ya Mwenye Nyumba</th>
+            <th>Kiasi (TZS)</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${paymentDetails}">
+            <td th:text="${p.paymentId}">1</td>
+            <td>
+                <b th:text="${p.tenantName}">Jina</b><br>
+                <small style="color: #64748b;" th:text="${p.tenantPhone}">0700000000</small>
+            </td>
+            <td th:text="${p.roomTitle}">Chumba</td>
+            <td th:text="${p.landlordName}">Landlord Name</td>
+            <td>
+                <span class="phone-highlight" th:text="${p.landlordPhone}">0789654321</span>
+            </td>
+            <td th:text="${p.amount}">0.0</td>
+            <td>
+                <span th:class="'status ' + ${p.status != null ? p.status.toUpperCase() : 'PENDING'}" th:text="${p.status}">PENDING</span>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(paymentDetails)}">
+            <td colspan="7" style="text-align: center; color: #94a3b8;">Hakuna malipo yoyote yaliyofanyika bado.</td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
 <!-- TABLE YA WAPANGAJI (TENANTS) -->
@@ -88,7 +126,6 @@
             <td th:text="${t.phone != null ? t.phone : 'N/A'}">0712345678</td>
             <td class="pass-text" th:text="${t.password}">**</td>
             <td>
-                <!-- Links halisi za ku-edit na ku-delete -->
                 <a th:href="@{/admin/users/edit/{id}(id=${t.id})}" class="btn-edit">Edit</a>
                 <a th:href="@{/admin/users/delete/{id}(id=${t.id})}" class="btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
             </td>
@@ -122,7 +159,6 @@
             <td th:text="${l.phone != null ? l.phone : 'N/A'}">0789654321</td>
             <td class="pass-text" th:text="${l.password}">**</td>
             <td>
-                <!-- Links halisi za ku-edit na ku-delete -->
                 <a th:href="@{/admin/users/edit/{id}(id=${l.id})}" class="btn-edit">Edit</a>
                 <a th:href="@{/admin/users/delete/{id}(id=${l.id})}" class="btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
             </td>
@@ -134,7 +170,6 @@
     </table>
 </div>
 
-<!-- SCRIPT YA SEARCH BAR -->
 <script>
     function searchTable() {
         let input = document.getElementById("searchInput").value.toLowerCase();
