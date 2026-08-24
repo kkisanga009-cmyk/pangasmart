@@ -1,6 +1,6 @@
 package com.pangasmart.pangasmart.repository;
 
-import com.pangasmart.pangasmart.models.Payment; // Lazima isome .models.Payment na sio .entity.Payment
+import com.pangasmart.pangasmart.models.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
