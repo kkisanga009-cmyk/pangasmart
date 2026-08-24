@@ -49,7 +49,7 @@ public class PesapalService {
         String url = BASE_URL + "/URLSetup/RegisterIPN";
 
         Map<String, Object> request = new HashMap<>();
-        request.put("url", "https://pangasmart-production.up.railway.app/api/payments/callback");
+        request.put("url", "https://pangasmart-production.up.railway.app/payments/callback");
         request.put("ipn_notification_type", "POST");
 
         HttpHeaders headers = new HttpHeaders();
@@ -69,7 +69,6 @@ public class PesapalService {
         RestTemplate restTemplate = new RestTemplate();
         String url = BASE_URL + "/Transactions/SubmitOrderRequest";
 
-        // Kama notificationId haina thamani halisi, mfumo unasajili IPN hapo hapo kupitia API
         String activeNotificationId = notificationId;
         if (activeNotificationId == null || activeNotificationId.equals("YOUR_NOTIFICATION_ID") || activeNotificationId.equals("PENDING")) {
             activeNotificationId = registerIpnUrl(token);
@@ -80,7 +79,7 @@ public class PesapalService {
         request.put("currency", "TZS");
         request.put("amount", amount);
         request.put("description", "Malipo ya Kuona Mawasiliano - PangaSmart");
-        request.put("callback_url", "https://pangasmart-production.up.railway.app/api/payments/callback");
+        request.put("callback_url", "https://pangasmart-production.up.railway.app/payments/callback");
         request.put("notification_id", activeNotificationId);
 
         Map<String, String> billingAddress = new HashMap<>();
@@ -99,5 +98,27 @@ public class PesapalService {
             return (String) response.getBody().get("redirect_url");
         }
         return null;
+    }
+
+    // Method mpya ya kuhakiki kama malipo yameingia kweli Pesapal
+    public String getTransactionStatus(String token, String orderTrackingId) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = BASE_URL + "/Transactions/GetTransactionStatus?orderTrackingId=" + orderTrackingId;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+
+            if (response.getBody() != null && response.getBody().get("payment_status_description") != null) {
+                return (String) response.getBody().get("payment_status_description");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "PENDING";
     }
 }

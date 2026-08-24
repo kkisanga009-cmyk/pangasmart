@@ -28,28 +28,22 @@ public class PaymentController {
                                   @RequestParam(required = false) String phone,
                                   Model model) {
         try {
-            // Hatua ya A: Pata Token kutoka Pesapal
             String token = pesapalService.getAuthToken();
             if (token == null) {
                 model.addAttribute("error", "Imefeli kupata mawasiliano na mfumo wa Pesapal.");
                 return "error";
             }
 
-            // Hatua ya B: Tengeneza Reference ya kipekee ya Muamala
             String merchantRef = "PS-" + UUID.randomUUID().toString().substring(0, 8);
-
-            // Hatua ya C: Tuma ombi la oda Pesapal na upate Redirect Link
             String redirectUrl = pesapalService.submitOrder(token, merchantRef, amount, email, phone);
 
             if (redirectUrl != null) {
-                // Hifadhi Taarifa za Awali za Malipo kwenye Database (Status: PENDING)
                 Payment payment = new Payment();
                 payment.setAmount(amount);
                 payment.setMerchantReference(merchantRef);
                 payment.setStatus("PENDING");
                 paymentRepository.save(payment);
 
-                // Elekeza mteja kwenye ukurasa wa malipo wa Pesapal
                 return "redirect:" + redirectUrl;
             } else {
                 model.addAttribute("error", "Imefeli kutengeneza ombi la malipo Pesapal.");
@@ -67,17 +61,32 @@ public class PaymentController {
     public String handleCallback(@RequestParam(value = "OrderTrackingId", required = false) String orderTrackingId,
                                  @RequestParam(value = "OrderMerchantReference", required = false) String merchantRef) {
 
-        if (merchantRef != null) {
+        if (merchantRef != null && orderTrackingId != null) {
+            // Pata Auth Token kwanza
+            String token = pesapalService.getAuthToken();
+
+            // Uliza Pesapal Status ya Muamala huu halisi
+            String actualStatus = pesapalService.getTransactionStatus(token, orderTrackingId);
+
             Optional<Payment> paymentOpt = paymentRepository.findByMerchantReference(merchantRef);
             if (paymentOpt.isPresent()) {
                 Payment payment = paymentOpt.get();
                 payment.setOrderTrackingId(orderTrackingId);
-                payment.setStatus("COMPLETED");
-                paymentRepository.save(payment);
+
+                // Badilisha status tu kama Pesapal imethibitisha kuwa "Completed"
+                if ("Completed".equalsIgnoreCase(actualStatus)) {
+                    payment.setStatus("COMPLETED");
+                    paymentRepository.save(payment);
+                    return "redirect:/dashboard?payment=success";
+                } else {
+                    payment.setStatus("FAILED");
+                    paymentRepository.save(payment);
+                    return "redirect:/dashboard?payment=failed";
+                }
             }
         }
 
-        return "redirect:/dashboard?payment=success";
+        return "redirect:/dashboard?payment=pending";
     }
 
     // 3. Save Payment ya kawaida
