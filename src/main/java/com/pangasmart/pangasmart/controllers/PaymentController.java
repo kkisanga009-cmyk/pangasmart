@@ -55,7 +55,8 @@ public class PaymentController {
         }
     }
 
-    @GetMapping("/callback")
+    // RUHUSU GET NA POST ILI KUEPUKA HTTP REQUEST METHOD NOT SUPPORTED ERROR
+    @RequestMapping(value = "/callback", method = {RequestMethod.GET, RequestMethod.POST})
     public String handleCallback(@RequestParam(value = "OrderTrackingId", required = false) String orderTrackingId,
                                  @RequestParam(value = "OrderMerchantReference", required = false) String merchantRef,
                                  @RequestParam(value = "orderTrackingId", required = false) String altTrackingId,
@@ -71,13 +72,13 @@ public class PaymentController {
             String token = pesapalService.getAuthToken();
             String actualStatus = pesapalService.getTransactionStatus(token, trackingId);
 
+            System.out.println("Pesapal Real Status: " + actualStatus);
+
             Optional<Payment> paymentOpt = paymentRepository.findByMerchantReference(ref);
             if (paymentOpt.isPresent()) {
                 Payment payment = paymentOpt.get();
                 payment.setOrderTrackingId(trackingId);
 
-                // HAPA NDIPO ULINZI ULIPO:
-                // Tutaweka status kuwa COMPLETED iwapo tu Pesapal imethibitisha ni "COMPLETED"
                 if ("COMPLETED".equalsIgnoreCase(actualStatus)) {
                     payment.setStatus("COMPLETED");
                     paymentRepository.save(payment);
@@ -87,7 +88,6 @@ public class PaymentController {
                     paymentRepository.save(payment);
                     return "redirect:/dashboard?payment=failed";
                 } else {
-                    // Kama status bado ni PENDING au haijatambulika, HATUSAVE COMPLETED!
                     payment.setStatus("PENDING");
                     paymentRepository.save(payment);
                     return "redirect:/dashboard?payment=pending";
