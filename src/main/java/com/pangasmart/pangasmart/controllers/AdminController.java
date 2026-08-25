@@ -125,14 +125,19 @@ public class AdminController {
                 User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
                 Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
-                // Tafuta Landlord bila kusababisha kosa la compilation
-                User landlord = findLandlordForRoom(room, landlords);
+                // Tafuta Landlord kupitia email iliyopo kwenye Room bila Reflection
+                User landlord = null;
+                if (room != null && room.getLandlordEmail() != null) {
+                    landlord = userRepository.findByEmail(room.getLandlordEmail()).orElse(null);
+                }
 
                 String tenantName = tenant != null ? tenant.getFullName() : "N/A";
                 String tenantPhone = tenant != null ? tenant.getPhone() : "N/A";
                 String roomTitle = room != null ? room.getTitle() : "Chumba ID: " + p.getRoomId();
                 String landlordName = landlord != null ? landlord.getFullName() : "N/A";
-                String landlordPhone = landlord != null ? landlord.getPhone() : "N/A";
+                String landlordPhone = (room != null && room.getLandlordPhone() != null && !room.getLandlordPhone().isEmpty())
+                        ? room.getLandlordPhone()
+                        : (landlord != null ? landlord.getPhone() : "N/A");
 
                 paymentDetails.add(new PaymentDetailDTO(
                         p.getId(), tenantName, tenantPhone, roomTitle, landlordName, landlordPhone,
@@ -150,34 +155,6 @@ public class AdminController {
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
 
         return "admin";
-    }
-
-    // Method hii inahakikisha hupati error ikiwa Room haina getLandlord/getLandlordId
-    private User findLandlordForRoom(Room room, List<User> landlords) {
-        if (room == null) {
-            return (landlords != null && !landlords.isEmpty()) ? landlords.get(0) : null;
-        }
-
-        try {
-            // Jaribu kuangalia getLandlordId
-            java.lang.reflect.Method methodId = room.getClass().getMethod("getLandlordId");
-            Object idObj = methodId.invoke(room);
-            if (idObj instanceof Long) {
-                Optional<User> u = userRepository.findById((Long) idObj);
-                if (u.isPresent()) return u.get();
-            }
-        } catch (Exception ignored) {}
-
-        try {
-            // Jaribu kuangalia getLandlord
-            java.lang.reflect.Method methodUser = room.getClass().getMethod("getLandlord");
-            Object userObj = methodUser.invoke(room);
-            if (userObj instanceof User) {
-                return (User) userObj;
-            }
-        } catch (Exception ignored) {}
-
-        return (landlords != null && !landlords.isEmpty()) ? landlords.get(0) : null;
     }
 
     @GetMapping("/admin/users/approve/{id}")

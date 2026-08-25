@@ -81,7 +81,6 @@ public class HomeController {
             bookingList = new ArrayList<>();
         }
 
-        // 1. Chukua Vyumba VYOTE ambavyo mtumiaji alishalipia na vikakamilika (COMPLETED)
         List<Payment> userCompletedPayments = paymentRepository.findByUserIdAndStatus(user.getId(), "COMPLETED");
         List<Long> paidRoomIds = new ArrayList<>();
         if (userCompletedPayments != null) {
@@ -92,7 +91,6 @@ public class HomeController {
             }
         }
 
-        // 2. Kagua kama mtumiaji alishalipia chumba hiki kilichopo kwenye URL (paidRoomId)
         if (paidRoomId != null) {
             boolean isPaid = paymentRepository.existsByUserIdAndRoomIdAndStatus(user.getId(), paidRoomId, "COMPLETED");
             if (isPaid) {
@@ -120,7 +118,7 @@ public class HomeController {
         model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
         model.addAttribute("bookings", bookingList != null ? bookingList : new ArrayList<>());
         model.addAttribute("searchKeyword", search);
-        model.addAttribute("paidRoomIds", paidRoomIds); // Tumeongeza hii hapa kwa ajili ya HTML
+        model.addAttribute("paidRoomIds", paidRoomIds);
 
         return "home";
     }
