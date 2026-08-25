@@ -42,7 +42,7 @@ public class AuthController {
 
             // Kutengeneza Link ya WhatsApp kuwasiliana na Admin
             String message = "Habari Admin, nimejisajili kama Landlord kwenye PangaSmart. Naomba kibali cha akaunti yangu. Jina: "
-                    + user.getFullName() + ", Email: " + user.getEmail();
+                    + (user.getFullName() != null ? user.getFullName() : "") + ", Email: " + user.getEmail();
             String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
             String whatsappUrl = "https://wa.me/255747466962?text=" + encodedMessage;
 
@@ -58,9 +58,18 @@ public class AuthController {
         }
     }
 
-    // Ukurasa wa taarifa na WhatsApp kwa Landlord Mpya
+    // Ukurasa wa taarifa na WhatsApp kwa Landlord Mpya (IMEBORESHWA KUZUIA ERROR 500)
     @GetMapping("/pending-approval")
-    public String showPendingApprovalPage() {
+    public String showPendingApprovalPage(Model model) {
+        // Mfumo ukiingia hapa bila flash attributes, tunaweka default link kuzuia NullPointerException
+        if (!model.containsAttribute("whatsappUrl")) {
+            String defaultMessage = "Habari Admin, naomba kibali cha akaunti yangu ya Landlord kwenye PangaSmart.";
+            String encodedMessage = URLEncoder.encode(defaultMessage, StandardCharsets.UTF_8);
+            model.addAttribute("whatsappUrl", "https://wa.me/255747466962?text=" + encodedMessage);
+        }
+        if (!model.containsAttribute("landlordName")) {
+            model.addAttribute("landlordName", "Mwenye Nyumba");
+        }
         return "pending-approval";
     }
 
