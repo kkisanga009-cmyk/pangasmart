@@ -137,6 +137,27 @@
             font-weight: bold;
         }
 
+        .error-msg {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .landlord-note {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            margin-top: 5px;
+            display: none;
+        }
+
         /* FOOTER STYLES */
         footer {
             text-align: center;
@@ -157,6 +178,12 @@
     <button onclick="openHelpModal()" class="help-btn-register">
         ❓ Help / Msaada wa Haraka
     </button>
+
+    <!-- ONYESHA ERROR KAMA zipo -->
+    <div th:if="${param.error}" class="error-msg">
+        Usajili umefeli! Email au Namba ya simu tayari inatumika.
+    </div>
+    <div th:if="${errorMessage}" class="error-msg" th:text="${errorMessage}"></div>
 
     <form th:action="@{/register}" method="post">
         <div class="form-group">
@@ -183,10 +210,13 @@
 
         <div class="form-group">
             <label>Register As / <i>Aina ya Akaunti</i>:</label>
-            <select name="role">
+            <select name="role" id="roleSelect" onchange="checkRoleNotice()">
                 <option value="TENANT">Tenant / Mpangaji</option>
                 <option value="LANDLORD">Landlord / Mwenyenyumba</option>
             </select>
+            <div id="landlordNotice" class="landlord-note">
+                ⚠️ Akaunti ya <b>Landlord</b> itahitaji kuidhinishwa (Approved) na Admin kabla ya kuweza kuingia kwenye mfumo.
+            </div>
         </div>
         <button type="submit" class="btn">Register / Jisajili</button>
     </form>
@@ -247,6 +277,16 @@
         } else {
             passwordInput.type = "password";
             toggleIcon.textContent = "👁️";
+        }
+    }
+
+    function checkRoleNotice() {
+        const roleSelect = document.getElementById("roleSelect");
+        const notice = document.getElementById("landlordNotice");
+        if (roleSelect.value === "LANDLORD") {
+            notice.style.display = "block";
+        } else {
+            notice.style.display = "none";
         }
     }
 

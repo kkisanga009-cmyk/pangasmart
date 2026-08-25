@@ -7,6 +7,14 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 15px; }
+
+        .navbar { background: #1e293b; color: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .navbar-links { display: flex; align-items: center; gap: 10px; }
+        .nav-btn { text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; color: white; font-weight: bold; }
+        .nav-btn-admin { background: #8b5cf6; }
+        .nav-btn-profile { background: #3b82f6; }
+        .nav-btn-logout { background: #ef4444; }
+
         .header { background: #1e293b; color: white; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
@@ -26,30 +34,38 @@
         th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; vertical-align: middle; }
         th { background: #f8fafc; color: #475569; }
 
+        /* STATUS BADGES */
         .status { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; display: inline-block; }
-        .COMPLETED, .SUCCESS { background: #22c55e; }
+        .COMPLETED, .SUCCESS, .APPROVED { background: #22c55e; }
         .PENDING { background: #eab308; }
-        .FAILED { background: #ef4444; }
+        .FAILED, .REJECTED { background: #ef4444; }
         .pass-text { font-family: monospace; color: #dc2626; font-weight: bold; }
 
         .phone-highlight { background: #e0f2fe; color: #0369a1; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
-        .btn-edit { background: #3b82f6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 5px; display: inline-block; }
+
+        /* ACTION BUTTONS */
+        .btn-edit { background: #3b82f6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 3px; display: inline-block; }
         .btn-delete { background: #ef4444; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; display: inline-block; }
+        .btn-approve { background: #16a34a; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 3px; display: inline-block; }
+        .btn-reject { background: #dc2626; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 11px; margin-right: 3px; display: inline-block; }
+
         .btn-edit:hover { background: #2563eb; }
-        .btn-delete:hover { background: #dc2626; }
+        .btn-delete:hover { background: #b91c1c; }
+        .btn-approve:hover { background: #15803d; }
+        .btn-reject:hover { background: #991b1b; }
 
         .media-img { width: 70px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
         .media-video { width: 110px; height: 60px; background: #000; border-radius: 4px; }
     </style>
 </head>
 <body>
+
 <!-- NAVBAR -->
 <div class="navbar">
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
         <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
 
-        <!-- 1. WEKA KITUFE HIKI HAPA -->
         <button onclick="openHelpModal()" class="nav-btn" style="background-color: #f39c12; border: none; cursor: pointer;">
             ❓ Help / Msaada
         </button>
@@ -61,6 +77,7 @@
         <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
     </div>
 </div>
+
 <div class="header">
     <h2>📊 PangaSmart Admin</h2>
     <a href="/home" style="color: white; text-decoration: none; font-size: 13px;">Rudi Home</a>
@@ -90,7 +107,15 @@
     🗑️ Chumba na picha/video zake zimefutwa kikamilifu!
 </div>
 
-<!-- TABLE MPYA: UDHIBITI WA VYUMBA NA MEDIA (ADMIN) -->
+<!-- UJUMBE WA APPROVAL / REJECTION -->
+<div th:if="${param.approved}" style="background: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;">
+    ✅ Landlord ameidhinishwa kikamilifu kuingia kwenye mfumo!
+</div>
+<div th:if="${param.rejected}" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;">
+    ❌ Ombi la Landlord limekataliwa.
+</div>
+
+<!-- TABLE: UDHIBITI WA VYUMBA NA MEDIA -->
 <div class="table-card">
     <h3 style="margin-bottom: 15px; font-size: 16px; color: #d97706;">🏠 Udhibiti wa Vyumba, Picha na Video</h3>
     <table class="searchable-table">
@@ -115,14 +140,12 @@
             <td th:text="${r.price}">0.0</td>
             <td th:text="${r.landlordEmail}">landlord@gmail.com</td>
 
-            <!-- PICHA -->
             <td>
                 <img th:if="${r.imageUrl != null and !#strings.isEmpty(r.imageUrl)}"
                      th:src="${r.imageUrl}" class="media-img" alt="Picha">
                 <span th:unless="${r.imageUrl != null and !#strings.isEmpty(r.imageUrl)}" style="color: #94a3b8; font-size: 11px;">Haina Picha</span>
             </td>
 
-            <!-- VIDEO -->
             <td>
                 <video th:if="${r.videoUrl != null and !#strings.isEmpty(r.videoUrl)}"
                        controls class="media-video">
@@ -131,7 +154,6 @@
                 <span th:unless="${r.videoUrl != null and !#strings.isEmpty(r.videoUrl)}" style="color: #94a3b8; font-size: 11px;">Haina Video</span>
             </td>
 
-            <!-- KITUFE CHA KUFUTA CHUMBA -->
             <td>
                 <a th:href="@{/admin/rooms/delete/{id}(id=${r.id})}" class="btn-delete"
                    onclick="return confirm('Je, una uhakika unataka kufuta chumba hiki na media zake zote?')">
@@ -146,7 +168,7 @@
     </table>
 </div>
 
-<!-- MEZA YA MALIPO NA NAMBA ZA WENYE NYUMBA (YENYE TAREHE NA MUDA) -->
+<!-- TABLE: MALIPO -->
 <div class="table-card">
     <h3 style="margin-bottom: 15px; font-size: 16px; color: #8b5cf6;">💳 Orodha ya Waliolipia & Namba za Wenye Nyumba</h3>
     <table class="searchable-table">
@@ -189,7 +211,7 @@
     </table>
 </div>
 
-<!-- TABLE YA WAPANGAJI (TENANTS) -->
+<!-- TABLE: WAPANGAJI (TENANTS) -->
 <div class="table-card">
     <h3 style="margin-bottom: 15px; font-size: 16px; color: #0284c7;">👤 Orodha ya Wapangaji (Tenants)</h3>
     <table class="searchable-table">
@@ -222,7 +244,7 @@
     </table>
 </div>
 
-<!-- TABLE YA WENYE NYUMBA (LANDLORDS) -->
+<!-- TABLE: WENYE NYUMBA (LANDLORDS) INCL. APPROVAL / REJECTION -->
 <div class="table-card">
     <h3 style="margin-bottom: 15px; font-size: 16px; color: #16a34a;">🏠 Orodha ya Wenye Nyumba (Landlords)</h3>
     <table class="searchable-table">
@@ -232,6 +254,7 @@
             <th>Jina</th>
             <th>Email</th>
             <th>Namba ya Simu</th>
+            <th>Status</th>
             <th>Password</th>
             <th>Vitendo</th>
         </tr>
@@ -242,17 +265,56 @@
             <td th:text="${l.fullName != null ? l.fullName : 'N/A'}">Jina</td>
             <td th:text="${l.email}">landlord@gmail.com</td>
             <td th:text="${l.phone != null ? l.phone : 'N/A'}">0789654321</td>
+            <td>
+                <span th:class="'status ' + ${l.status != null ? l.status.toUpperCase() : 'PENDING'}"
+                      th:text="${l.status != null ? l.status : 'PENDING'}">PENDING</span>
+            </td>
             <td class="pass-text" th:text="${l.password}">**</td>
             <td>
+                <!-- Vitufe vya Approve na Reject -->
+                <a th:if="${l.status == 'PENDING' or l.status == 'REJECTED' or l.status == null}"
+                   th:href="@{/admin/users/approve/{id}(id=${l.id})}" class="btn-approve"
+                   onclick="return confirm('Je, una uhakika unataka kumruhusu Landlord huyu?')">Ruhusu</a>
+
+                <a th:if="${l.status == 'PENDING' or l.status == 'APPROVED' or l.status == null}"
+                   th:href="@{/admin/users/reject/{id}(id=${l.id})}" class="btn-reject"
+                   onclick="return confirm('Je, una uhakika unataka kumkataa Landlord huyu?')">Kataa</a>
+
                 <a th:href="@{/admin/users/edit/{id}(id=${l.id})}" class="btn-edit">Edit</a>
                 <a th:href="@{/admin/users/delete/{id}(id=${l.id})}" class="btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(landlords)}">
-            <td colspan="6" style="text-align: center; color: #94a3b8;">Hakuna Mwenye Nyumba aliyesajiliwa.</td>
+            <td colspan="7" style="text-align: center; color: #94a3b8;">Hakuna Mwenye Nyumba aliyesajiliwa.</td>
         </tr>
         </tbody>
     </table>
+</div>
+
+<!-- POP-UP YA MSAADA -->
+<div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
+        <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
+
+        <div style="font-size: 40px; margin-bottom: 10px;">📞</div>
+        <h3 style="color: #2c3e50; margin-bottom: 10px;">Msaada wa Haraka</h3>
+        <p style="font-size: 14px; color: #555; margin-bottom: 15px;">
+            Wasiliana na Admin kwa msaada wa haraka kupitia namba hii:
+        </p>
+
+        <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
+            📱 <a href="tel:0747466962" style="color: #0369a1; text-decoration: none;">0747466962</a>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <a href="https://wa.me/255747466962?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
+                💬 WhatsApp
+            </a>
+            <button onclick="closeHelpModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                Funga
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -274,36 +336,7 @@
             }
         });
     }
-</script>
-<!-- 2. WEKA POP-UP YA MSAADA NA SCRIPT HAPA (KABLA YA </body>) -->
-<div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
-        <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
 
-        <div style="font-size: 40px; margin-bottom: 10px;">📞</div>
-        <h3 style="color: #2c3e50; margin-bottom: 10px;">Msaada wa Haraka</h3>
-        <p style="font-size: 14px; color: #555; margin-bottom: 15px;">
-            Wasiliana na Admin kwa msaada wa haraka kupitia namba hii:
-        </p>
-
-        <!-- BADILISHA 0700000000 NA NAMBA YAKO HALISI -->
-        <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
-            📱 <a href="tel:0747466962" style="color: #0369a1; text-decoration: none;">0747466962</a>
-        </div>
-
-        <div style="display: flex; gap: 10px; justify-content: center;">
-            <!-- BADILISHA 255700000000 NA NAMBA YAKO YA WHATSAPP -->
-            <a href="https://wa.me/255747466962?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
-                💬 WhatsApp
-            </a>
-            <button onclick="closeHelpModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
-                Funga
-            </button>
-        </div>
-    </div>
-</div>
-
-<script>
     function openHelpModal() {
         document.getElementById("helpModal").style.display = "flex";
     }
@@ -318,7 +351,5 @@
     }
 </script>
 
-</body>
-</html>
 </body>
 </html>

@@ -155,6 +155,38 @@ public class AdminController {
         return "admin"; // Inafungua admin.html
     }
 
+    // --- LANDLORD APPROVAL & REJECTION ENDPOINTS ---
+
+    @GetMapping("/admin/users/approve/{id}")
+    public String approveLandlord(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAdmin(session)) {
+            return "redirect:/login";
+        }
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setStatus("APPROVED");
+            userRepository.save(user);
+        }
+        return "redirect:/admin/dashboard?approved=true";
+    }
+
+    @GetMapping("/admin/users/reject/{id}")
+    public String rejectLandlord(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAdmin(session)) {
+            return "redirect:/login";
+        }
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setStatus("REJECTED");
+            userRepository.save(user);
+        }
+        return "redirect:/admin/dashboard?rejected=true";
+    }
+
+    // --- USER MANAGEMENT ENDPOINTS ---
+
     @GetMapping("/admin/rooms/delete/{id}")
     public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAdmin(session)) {
@@ -202,6 +234,11 @@ public class AdminController {
             existingUser.setPhone(updatedUser.getPhone());
             existingUser.setPassword(updatedUser.getPassword());
             existingUser.setRole(updatedUser.getRole());
+
+            // Unahakikisha status haipotei wakati wa ku-update
+            if (updatedUser.getStatus() != null && !updatedUser.getStatus().isEmpty()) {
+                existingUser.setStatus(updatedUser.getStatus());
+            }
 
             userRepository.save(existingUser);
         }

@@ -23,9 +23,11 @@
         .btn-submit:hover { background: #219150; }
         .splash-box { background: rgba(30, 41, 59, 0.7); padding: 30px 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 85%; max-width: 320px; }
         .error-msg { color: #e74c3c; background: #fadbd8; padding: 8px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; }
+        .warning-msg { color: #856404; background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; text-align: center; }
         .success-msg { color: #155724; background: #d4edda; padding: 8px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; }
         .user-welcome-info { background: #e0f2fe; color: #0369a1; padding: 8px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; }
         .help-btn-login { background-color: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-bottom: 15px; }
+        .btn-whatsapp-link { display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -65,19 +67,33 @@
         ❓ Help / Msaada wa Haraka
     </button>
 
-    <!-- SAFE CHECK YA CURRENT USER ILI KUZUIA THYMELEAF NULL ERROR -->
+    <!-- SAFE CHECK YA CURRENT USER -->
     <div th:if="${currentUser != null}" class="user-welcome-info">
         Karibu tena, <b th:text="${currentUser?.email}"></b>! Ingiza password yako kuendelea.
     </div>
 
-    <!-- Onyesha Error Message Kama Login Imefeli -->
+    <!-- ERROR MESSAGES -->
     <div th:if="${param.error}" class="error-msg">
         Email au Password sio sahihi!
     </div>
 
-    <!-- Onyesha Message ya Mafanikio (k.m Logout au Registration) -->
+    <!-- LANDLORD PENDING APPROVAL ALERT -->
+    <div th:if="${errorPending}" class="warning-msg">
+        ⏳ Akaunti yako ya Landlord inasubiri kuidhinishwa na Admin.<br>
+        <a th:href="${whatsappUrl}" target="_blank" class="btn-whatsapp-link">
+            💬 Omba Ruhusa Kupitia WhatsApp
+        </a>
+    </div>
+
+    <!-- LANDLORD REJECTED ALERT -->
+    <div th:if="${errorRejected}" class="error-msg" th:text="${errorRejected}"></div>
+
+    <!-- SUCCESS MESSAGES -->
     <div th:if="${param.logout}" class="success-msg">
         Umetoka kwenye mfumo kikamilifu.
+    </div>
+    <div th:if="${param.success}" class="success-msg">
+        Usajili umefanikiwa! Ingiza taarifa zako hapa kuingia.
     </div>
     <div th:if="${message}" class="success-msg" th:text="${message}"></div>
 

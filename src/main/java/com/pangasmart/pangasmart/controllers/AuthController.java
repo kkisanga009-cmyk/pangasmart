@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Controller
@@ -32,21 +34,53 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user) {
-        userRepository.save(user);
-        return "redirect:/login?success";
+    public String registerUser(@ModelAttribute User user, Model model) {
+        if ("LANDLORD".equalsIgnoreCase(user.getRole())) {
+            user.setStatus("PENDING");
+            userRepository.save(user);
+
+            // Kutengeneza Link ya WhatsApp kuwasiliana na Admin
+            String message = "Habari Admin, naomba kibali cha kujisajili kama Landlord kwenye PangaSmart. Jina langu ni "
+                    + user.getFullName() + " na Email yangu ni " + user.getEmail();
+            String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
+            String whatsappUrl = "https://wa.me/255747466962?text=" + encodedMessage;
+
+            model.addAttribute("pendingApproval", true);
+            model.addAttribute("whatsappUrl", whatsappUrl);
+            return "register";
+        } else {
+            user.setStatus("APPROVED");
+            userRepository.save(user);
+            return "redirect:/login?success";
+        }
     }
 
     @PostMapping("/login")
     public String handleLogin(@RequestParam("email") String email,
                               @RequestParam("password") String password,
-                              HttpSession session) {
+                              HttpSession session,
+                              Model model) {
 
-        // Tafuta mtumiaji kwenye Database
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user != null && user.getPassword().equals(password)) {
-            // Weka data kwenye Session kwa ajili ya Controllers zingine
+
+            // Angalia status ikiwa ni Landlord
+            if ("LANDLORD".equalsIgnoreCase(user.getRole())) {
+                if ("PENDING".equalsIgnoreCase(user.getStatus())) {
+                    String message = "Habari Admin, naomba kibali cha akaunti yangu ya Landlord kwenye PangaSmart. Email: " + user.getEmail();
+                    String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
+
+                    model.addAttribute("errorPending", true);
+                    model.addAttribute("whatsappUrl", "https://wa.me/255747466962?text=" + encodedMessage);
+                    return "login";
+                } else if ("REJECTED".equalsIgnoreCase(user.getStatus())) {
+                    model.addAttribute("errorRejected", "Hujakidhi vigezo, hivyo huwezi kujisajili wala kuingia kama Landlord.");
+                    return "login";
+                }
+            }
+
+            // Mruhusu kuingia ikiwa ni TENANT, ADMIN, au APPROVED LANDLORD
             session.setAttribute("loggedInUser", user);
             session.setAttribute("userId", user.getId());
             session.setAttribute("userEmail", user.getEmail());
