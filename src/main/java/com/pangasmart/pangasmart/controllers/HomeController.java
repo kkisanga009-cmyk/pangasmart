@@ -42,7 +42,7 @@ public class HomeController {
     private SmsService smsService;
 
     @Autowired
-    private PesapalService pesapalService; // Tumeongeza PesapalService hapa
+    private PesapalService pesapalService;
 
     @GetMapping("/home")
     public String showHomePage(Model model,
@@ -81,7 +81,18 @@ public class HomeController {
             bookingList = new ArrayList<>();
         }
 
-        // Kagua kama mtumiaji alishalipia chumba hiki huko nyuma (COMPLETED status)
+        // 1. Chukua Vyumba VYOTE ambavyo mtumiaji alishalipia na vikakamilika (COMPLETED)
+        List<Payment> userCompletedPayments = paymentRepository.findByUserIdAndStatus(user.getId(), "COMPLETED");
+        List<Long> paidRoomIds = new ArrayList<>();
+        if (userCompletedPayments != null) {
+            for (Payment p : userCompletedPayments) {
+                if (p.getRoomId() != null) {
+                    paidRoomIds.add(p.getRoomId());
+                }
+            }
+        }
+
+        // 2. Kagua kama mtumiaji alishalipia chumba hiki kilichopo kwenye URL (paidRoomId)
         if (paidRoomId != null) {
             boolean isPaid = paymentRepository.existsByUserIdAndRoomIdAndStatus(user.getId(), paidRoomId, "COMPLETED");
             if (isPaid) {
@@ -109,6 +120,7 @@ public class HomeController {
         model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
         model.addAttribute("bookings", bookingList != null ? bookingList : new ArrayList<>());
         model.addAttribute("searchKeyword", search);
+        model.addAttribute("paidRoomIds", paidRoomIds); // Tumeongeza hii hapa kwa ajili ya HTML
 
         return "home";
     }
@@ -204,10 +216,6 @@ public class HomeController {
         return "redirect:/home?roomDeleted=true";
     }
 
-    // ==========================================
-    // MALIPO NA BOOKING (REKEBISHO LILILOFANYIKA HAPA)
-    // ==========================================
-
     @PostMapping("/pay-room")
     public String payForRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
@@ -216,30 +224,25 @@ public class HomeController {
         }
 
         try {
-            // 1. Omba Auth Token kutoka Pesapal
             String token = pesapalService.getAuthToken();
             if (token == null) {
                 return "redirect:/home?error=pesapal_auth_failed";
             }
 
-            // 2. Kutengeneza Reference ya kipekee
             String merchantRef = "PS-" + UUID.randomUUID().toString().substring(0, 8);
             Double amount = 1000.00;
 
-            // 3. Omba redirect URL kutoka Pesapal
             String redirectUrl = pesapalService.submitOrder(token, merchantRef, amount, user.getEmail(), user.getPhone());
 
             if (redirectUrl != null) {
-                // 4. Hifadhi PENDING Payment kwenye Database
                 Payment payment = new Payment();
                 payment.setUserId(user.getId());
                 payment.setRoomId(roomId);
                 payment.setAmount(amount);
                 payment.setMerchantReference(merchantRef);
-                payment.setStatus("PENDING"); // Hatusave COMPLETED tena hapa!
+                payment.setStatus("PENDING");
                 paymentRepository.save(payment);
 
-                // 5. Elekeza mtumiaji kwenda Pesapal kulipa
                 return "redirect:" + redirectUrl;
             }
         } catch (Exception e) {

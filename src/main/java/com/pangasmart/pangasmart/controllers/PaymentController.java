@@ -55,14 +55,12 @@ public class PaymentController {
         }
     }
 
-    // RUHUSU GET NA POST ILI KUEPUKA HTTP REQUEST METHOD NOT SUPPORTED ERROR
     @RequestMapping(value = "/callback", method = {RequestMethod.GET, RequestMethod.POST})
     public String handleCallback(@RequestParam(value = "OrderTrackingId", required = false) String orderTrackingId,
                                  @RequestParam(value = "OrderMerchantReference", required = false) String merchantRef,
                                  @RequestParam(value = "orderTrackingId", required = false) String altTrackingId,
                                  @RequestParam(value = "orderMerchantReference", required = false) String altMerchantRef) {
 
-        // Kuchukua parameters ziwe kwa herufi kubwa au ndogo
         String trackingId = (orderTrackingId != null) ? orderTrackingId : altTrackingId;
         String ref = (merchantRef != null) ? merchantRef : altMerchantRef;
 
@@ -82,25 +80,27 @@ public class PaymentController {
                 if ("COMPLETED".equalsIgnoreCase(actualStatus)) {
                     payment.setStatus("COMPLETED");
                     paymentRepository.save(payment);
-                    return "redirect:/dashboard?payment=success";
+
+                    // TUNAMREJESHA KWENYE /home NA KUPITISHA paidRoomId
+                    return "redirect:/home?paidRoomId=" + payment.getRoomId() + "&payment=success";
                 } else if ("FAILED".equalsIgnoreCase(actualStatus) || "INVALID".equalsIgnoreCase(actualStatus)) {
                     payment.setStatus("FAILED");
                     paymentRepository.save(payment);
-                    return "redirect:/dashboard?payment=failed";
+                    return "redirect:/home?payment=failed";
                 } else {
                     payment.setStatus("PENDING");
                     paymentRepository.save(payment);
-                    return "redirect:/dashboard?payment=pending";
+                    return "redirect:/home?payment=pending";
                 }
             }
         }
 
-        return "redirect:/dashboard?payment=invalid";
+        return "redirect:/home?payment=invalid";
     }
 
     @PostMapping("/save")
     public String savePayment(@ModelAttribute Payment payment) {
         paymentRepository.save(payment);
-        return "redirect:/dashboard";
+        return "redirect:/home";
     }
 }

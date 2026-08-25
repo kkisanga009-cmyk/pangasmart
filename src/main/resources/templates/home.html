@@ -217,17 +217,22 @@
                 </a>
             </div>
 
-            <!-- SEHEMU YA TENANT -->
+            <!-- SEHEMU YA TENANT (REKEBISHO LILILOFANYIKA HAPA) -->
             <div th:if="${userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-                <div th:if="${param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)}" style="background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: 5px;">
+
+                <!-- IKIKUBALIWA NA PARAMETER AU IKIPO KWENYE ORODHA YA PAIDROOMIDS -->
+                <div th:if="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
+                     style="background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: 5px;">
                     <p style="font-weight: bold; font-size: 14px;">✅ Malipo Yamekamilika!</p>
                     <p style="font-size: 14px; margin-top: 6px;">
                         📞 Namba ya Simu ya Landlord:
-                        <strong style="font-size: 16px; color: #0d6efd;" th:text="${landlordPhone != null ? landlordPhone : (room.landlordPhone != null ? room.landlordPhone : room.landlordEmail)}">07XXXXXXXX</strong>
+                        <strong style="font-size: 16px; color: #0d6efd;" th:text="${paidRoomId == room.id and landlordPhone != null ? landlordPhone : (room.landlordPhone != null ? room.landlordPhone : room.landlordEmail)}">07XXXXXXXX</strong>
                     </p>
                 </div>
 
-                <form th:unless="${param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)}" th:action="@{/pay-room}" method="post">
+                <!-- KAMA HUJALIPA BADO -->
+                <form th:unless="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
+                      th:action="@{/pay-room}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
                     <button type="submit" class="pay-btn">🔒 Lipia TZS 1,000 Kupata Namba ya Mwenyenyumba</button>
                 </form>
