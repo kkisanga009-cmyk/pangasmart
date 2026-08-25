@@ -49,29 +49,34 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
+<!-- NAVBAR (IMEBORESHWA KUZUIA NULL POINTER EXCEPTION) -->
 <div class="navbar">
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
-        <span th:if="${currentUser != null}" th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
+        <!-- Kinga iwapo session au model haina currentUser au loggedInUser -->
+        <span th:if="${session.loggedInUser != null}"
+              th:text="'Karibu, ' + ${session.loggedInUser.email} + (${userRole != null} ? ' (' + ${userRole} + ')' : '')">User</span>
+        <span th:if="${session.loggedInUser == null and currentUser != null}"
+              th:text="'Karibu, ' + ${currentUser.email} + (${userRole != null} ? ' (' + ${userRole} + ')' : '')">User</span>
 
         <!-- KITUFE CHA MSAADA -->
         <button onclick="openHelpModal()" class="nav-btn" style="background-color: #f39c12; border: none; cursor: pointer;">
             ❓ Help / Msaada
         </button>
 
-        <a th:if="${userRole == 'ADMIN' or (currentUser != null and currentUser.role == 'ADMIN') or (currentUser != null and currentUser.email != null and currentUser.email.contains('admin'))}"
+        <!-- Kitufe cha Admin ikiwa mtumiaji ni Admin -->
+        <a th:if="${userRole == 'ADMIN' or (session.loggedInUser != null and session.loggedInUser.role == 'ADMIN') or (currentUser != null and currentUser.role == 'ADMIN')}"
            href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
 
         <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
-        <a href="/login" class="nav-btn nav-btn-logout">Logout</a>
+        <a href="/logout" class="nav-btn nav-btn-logout">Logout</a>
     </div>
 </div>
 
 <div class="main-container">
 
     <!-- DASHBOARD YA LANDLORD -->
-    <div th:if="${userRole == 'LANDLORD'}" class="card form-section">
+    <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}" class="card form-section">
         <h3>Sajili Chumba Kipya</h3>
 
         <!-- TAARIFA ZA MAFANIKIO KWA LANDLORD -->
@@ -180,7 +185,7 @@
                     <a th:href="${room.imageUrl}" download="Chumba_PangaSmart.jpg" class="download-btn">📥 Pakua Picha</a>
 
                     <!-- KITUFE CHA KUFUTA PICHA (LANDLORD PEKEE) -->
-                    <a th:if="${userRole == 'LANDLORD'}"
+                    <a th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}"
                        th:href="@{/landlord/rooms/delete-image/{id}(id=${room.id})}"
                        class="delete-btn"
                        onclick="return confirm('Je, una uhakika unataka kufuta picha hii?')">
@@ -197,7 +202,7 @@
                 </video>
 
                 <!-- KITUFE CHA KUFUTA VIDEO (LANDLORD PEKEE) -->
-                <div th:if="${userRole == 'LANDLORD'}">
+                <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}">
                     <a th:href="@{/landlord/rooms/delete-video/{id}(id=${room.id})}"
                        class="delete-btn"
                        onclick="return confirm('Je, una uhakika unataka kufuta video hii?')">
@@ -209,7 +214,7 @@
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
             <!-- KITUFE CHA KUFUTA CHUMBA KIZIMA (LANDLORD PEKEE) -->
-            <div th:if="${userRole == 'LANDLORD'}" style="margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 8px;">
+            <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}" style="margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 8px;">
                 <a th:href="@{/landlord/rooms/delete/{id}(id=${room.id})}"
                    class="delete-btn" style="background: #c0392b;"
                    onclick="return confirm('Je, una uhakika unataka kufuta chumba hiki kizima?')">
@@ -217,8 +222,8 @@
                 </a>
             </div>
 
-            <!-- SEHEMU YA TENANT (REKEBISHO LILILOFANYIKA HAPA) -->
-            <div th:if="${userRole == 'TENANT'}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
+            <!-- SEHEMU YA TENANT -->
+            <div th:if="${userRole == 'TENANT' or (session.loggedInUser != null and session.loggedInUser.role == 'TENANT')}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
 
                 <!-- IKIKUBALIWA NA PARAMETER AU IKIPO KWENYE ORODHA YA PAIDROOMIDS -->
                 <div th:if="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
@@ -240,11 +245,11 @@
         </div>
 
         <div th:if="${rooms == null or #lists.isEmpty(rooms)}" style="text-align: center; padding: 30px 10px;">
-            <div th:if="${userRole == 'LANDLORD'}" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; border: 1px solid #ffeeba;">
+            <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 6px; border: 1px solid #ffeeba;">
                 <h4>⚠️ Hujaweka chumba sokoni!</h4>
                 <p style="margin: 5px 0 0; font-size: 13px;">Tumia fomu kusajili chumba chako cha kwanza.</p>
             </div>
-            <div th:if="${userRole == 'TENANT'}" style="background: #e2e3e5; color: #383d41; padding: 15px; border-radius: 6px;">
+            <div th:if="${userRole == 'TENANT' or (session.loggedInUser != null and session.loggedInUser.role == 'TENANT')}" style="background: #e2e3e5; color: #383d41; padding: 15px; border-radius: 6px;">
                 <h4>ℹ️ Hakuna vyumba vilivyopatikana.</h4>
                 <p style="margin: 5px 0 0; font-size: 13px;">Jaribu kutafuta tena au rudi baadae kuona vyumba vipya.</p>
             </div>
