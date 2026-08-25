@@ -9,7 +9,6 @@ import com.pangasmart.pangasmart.repository.PaymentRepository;
 import com.pangasmart.pangasmart.repositories.RoomRepository;
 import com.pangasmart.pangasmart.repositories.UserRepository;
 import com.pangasmart.pangasmart.services.PesapalService;
-import com.pangasmart.pangasmart.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
