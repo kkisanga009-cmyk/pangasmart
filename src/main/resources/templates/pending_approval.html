@@ -5,100 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kusubiri Idhini - PangaSmart</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #eef2f3;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 35px 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 440px;
-            text-align: center;
-        }
-
-        .icon {
-            font-size: 55px;
-            margin-bottom: 15px;
-        }
-
-        h2 {
-            color: #1e293b;
-            font-size: 22px;
-            margin-bottom: 10px;
-        }
-
-        p {
-            color: #64748b;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .contact-box {
-            background: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .phone-num {
-            font-size: 18px;
-            font-weight: bold;
-            color: #0369a1;
-            margin-top: 5px;
-        }
-
-        .btn-whatsapp {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: #25D366;
-            color: white;
-            text-decoration: none;
-            padding: 13px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        .btn-whatsapp:hover {
-            background: #1eb854;
-        }
-
-        .btn-login {
-            display: inline-block;
-            margin-top: 20px;
-            color: #3b82f6;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 25px;
-            width: 100%;
-            max-width: 440px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: white; padding: 35px 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); width: 100%; max-width: 440px; text-align: center; }
+        .icon { font-size: 55px; margin-bottom: 15px; }
+        h2 { color: #1e293b; font-size: 22px; margin-bottom: 10px; }
+        p { color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        .contact-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .phone-num { font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 5px; }
+        .btn-whatsapp { display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: white; text-decoration: none; padding: 13px 20px; border-radius: 6px; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .btn-whatsapp:hover { background: #1eb854; }
+        .btn-login { display: inline-block; margin-top: 20px; color: #3b82f6; text-decoration: none; font-size: 13px; font-weight: bold; }
+        footer { text-align: center; margin-top: 25px; width: 100%; max-width: 440px; }
     </style>
 </head>
 <body>
@@ -120,8 +38,8 @@
         </div>
     </div>
 
-    <!-- Link ya WhatsApp Iliyorekebishwa -->
-    <a href="https://wa.me/255747466962?text=Habari%20Admin,%20nimejisajili%20hivi%20punde%20kama%20Landlord%20kwenye%20PangaSmart,%20naomba%20idhini%20(Approval)%20ya%20akaunti%20yangu."
+    <!-- LINK YA WHATSAPP INAYOSOMA VARIABLE YA DYNAMIC -->
+    <a th:href="${whatsappUrl}"
        target="_blank"
        class="btn-whatsapp">
         💬 Wasiliana na Admin WhatsApp
@@ -131,7 +49,6 @@
     <a th:href="@{/login}" class="btn-login">Rudi Kwenye Login</a>
 </div>
 
-<!-- FOOTER BRANDING -->
 <footer>
     <p style="margin: 0; text-transform: lowercase; color: #94a3b8; font-size: 11px;">from</p>
     <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 2px;">

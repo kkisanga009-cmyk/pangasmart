@@ -40,13 +40,18 @@ public class AuthController {
             user.setStatus("PENDING");
             userRepository.save(user);
 
-            // Kutengeneza Link ya WhatsApp kuwasiliana na Admin
-            String message = "Habari Admin, nimejisajili kama Landlord kwenye PangaSmart. Naomba kibali cha akaunti yangu. Jina: "
-                    + (user.getFullName() != null ? user.getFullName() : "") + ", Email: " + user.getEmail();
-            String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
-            String whatsappUrl = "https://wa.me/255747466962?text=" + encodedMessage;
+            String whatsappUrl = "https://wa.me/255747466962";
+            try {
+                String fullName = (user.getFullName() != null) ? user.getFullName() : "";
+                String email = (user.getEmail() != null) ? user.getEmail() : "";
+                String message = "Habari Admin, nimejisajili kama Landlord kwenye PangaSmart. Naomba kibali cha akaunti yangu. Jina: "
+                        + fullName + ", Email: " + email;
+                String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.name());
+                whatsappUrl = "https://wa.me/255747466962?text=" + encodedMessage;
+            } catch (Exception e) {
+                System.err.println("Encoding error: " + e.getMessage());
+            }
 
-            // Tuma variables kwenda kwenye ukurasa wa pending-approval
             redirectAttributes.addFlashAttribute("landlordName", user.getFullName());
             redirectAttributes.addFlashAttribute("whatsappUrl", whatsappUrl);
 
@@ -58,14 +63,16 @@ public class AuthController {
         }
     }
 
-    // Ukurasa wa taarifa na WhatsApp kwa Landlord Mpya (IMEBORESHWA KUZUIA ERROR 500)
     @GetMapping("/pending-approval")
     public String showPendingApprovalPage(Model model) {
-        // Mfumo ukiingia hapa bila flash attributes, tunaweka default link kuzuia NullPointerException
         if (!model.containsAttribute("whatsappUrl")) {
-            String defaultMessage = "Habari Admin, naomba kibali cha akaunti yangu ya Landlord kwenye PangaSmart.";
-            String encodedMessage = URLEncoder.encode(defaultMessage, StandardCharsets.UTF_8);
-            model.addAttribute("whatsappUrl", "https://wa.me/255747466962?text=" + encodedMessage);
+            try {
+                String defaultMessage = "Habari Admin, naomba kibali cha akaunti yangu ya Landlord kwenye PangaSmart.";
+                String encodedMessage = URLEncoder.encode(defaultMessage, StandardCharsets.UTF_8.name());
+                model.addAttribute("whatsappUrl", "https://wa.me/255747466962?text=" + encodedMessage);
+            } catch (Exception e) {
+                model.addAttribute("whatsappUrl", "https://wa.me/255747466962");
+            }
         }
         if (!model.containsAttribute("landlordName")) {
             model.addAttribute("landlordName", "Mwenye Nyumba");
@@ -83,14 +90,19 @@ public class AuthController {
 
         if (user != null && user.getPassword().equals(password)) {
 
-            // Angalia status ikiwa ni Landlord
             if ("LANDLORD".equalsIgnoreCase(user.getRole())) {
                 if ("PENDING".equalsIgnoreCase(user.getStatus())) {
-                    String message = "Habari Admin, naomba kibali cha akaunti yangu ya Landlord kwenye PangaSmart. Email: " + user.getEmail();
-                    String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
+                    String whatsappUrl = "https://wa.me/255747466962";
+                    try {
+                        String message = "Habari Admin, naomba kibali cha akaunti yangu ya Landlord kwenye PangaSmart. Email: " + user.getEmail();
+                        String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.name());
+                        whatsappUrl = "https://wa.me/255747466962?text=" + encodedMessage;
+                    } catch (Exception e) {
+                        System.err.println("Encoding error: " + e.getMessage());
+                    }
 
                     model.addAttribute("errorPending", true);
-                    model.addAttribute("whatsappUrl", "https://wa.me/255747466962?text=" + encodedMessage);
+                    model.addAttribute("whatsappUrl", whatsappUrl);
                     return "login";
                 } else if ("REJECTED".equalsIgnoreCase(user.getStatus())) {
                     model.addAttribute("errorRejected", "Hujakidhi vigezo, hivyo huwezi kujisajili wala kuingia kama Landlord.");
@@ -98,7 +110,6 @@ public class AuthController {
                 }
             }
 
-            // Mruhusu kuingia ikiwa ni TENANT, ADMIN, au APPROVED LANDLORD
             session.setAttribute("loggedInUser", user);
             session.setAttribute("userId", user.getId());
             session.setAttribute("userEmail", user.getEmail());
@@ -115,8 +126,6 @@ public class AuthController {
         session.invalidate();
         return "redirect:/login?logout";
     }
-
-    // --- PASSWORD RESET ENDPOINTS ---
 
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
@@ -154,8 +163,6 @@ public class AuthController {
             return "forgot-password";
         }
     }
-
-    // --- USER PROFILE ENDPOINTS ---
 
     @GetMapping("/profile")
     public String showProfile(HttpSession session, Model model) {
