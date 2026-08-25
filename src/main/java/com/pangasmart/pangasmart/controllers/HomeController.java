@@ -38,10 +38,10 @@ public class HomeController {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private SmsService smsService;
 
-    @Autowired
+    @Autowired(required = false)
     private PesapalService pesapalService;
 
     @GetMapping("/home")
@@ -49,78 +49,90 @@ public class HomeController {
                                HttpSession session,
                                @RequestParam(value = "search", required = false) String search,
                                @RequestParam(value = "paidRoomId", required = false) Long paidRoomId) {
+        try {
+            User user = (User) session.getAttribute("loggedInUser");
 
-        User user = (User) session.getAttribute("loggedInUser");
-
-        if (user == null) {
-            return "redirect:/login";
-        }
-
-        String userRole = (String) session.getAttribute("userRole");
-        if (userRole == null && user.getRole() != null) {
-            userRole = user.getRole();
-            session.setAttribute("userRole", userRole);
-        }
-
-        List<Room> roomList;
-        List<Booking> bookingList;
-
-        if ("LANDLORD".equalsIgnoreCase(userRole)) {
-            if (search != null && !search.trim().isEmpty()) {
-                roomList = roomRepository.searchLandlordRooms(user.getEmail(), search);
-            } else {
-                roomList = roomRepository.findByLandlordEmail(user.getEmail());
+            if (user == null) {
+                return "redirect:/login";
             }
-            bookingList = bookingRepository.findByLandlordEmail(user.getEmail());
-        } else {
-            if (search != null && !search.trim().isEmpty()) {
-                roomList = roomRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(search, search);
-            } else {
-                roomList = roomRepository.findAll();
-            }
-            bookingList = new ArrayList<>();
-        }
 
-        List<Payment> userCompletedPayments = paymentRepository.findByUserIdAndStatus(user.getId(), "COMPLETED");
-        List<Long> paidRoomIds = new ArrayList<>();
-        if (userCompletedPayments != null) {
-            for (Payment p : userCompletedPayments) {
-                if (p.getRoomId() != null) {
-                    paidRoomIds.add(p.getRoomId());
+            String userRole = (String) session.getAttribute("userRole");
+            if (userRole == null && user.getRole() != null) {
+                userRole = user.getRole();
+                session.setAttribute("userRole", userRole);
+            }
+
+            List<Room> roomList = new ArrayList<>();
+            List<Booking> bookingList = new ArrayList<>();
+
+            if ("LANDLORD".equalsIgnoreCase(userRole)) {
+                if (search != null && !search.trim().isEmpty()) {
+                    roomList = roomRepository.searchLandlordRooms(user.getEmail(), search);
+                } else {
+                    roomList = roomRepository.findByLandlordEmail(user.getEmail());
+                }
+                bookingList = bookingRepository.findByLandlordEmail(user.getEmail());
+            } else {
+                if (search != null && !search.trim().isEmpty()) {
+                    roomList = roomRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(search, search);
+                } else {
+                    roomList = roomRepository.findAll();
                 }
             }
-        }
 
-        if (paidRoomId != null) {
-            boolean isPaid = paymentRepository.existsByUserIdAndRoomIdAndStatus(user.getId(), paidRoomId, "COMPLETED");
-            if (isPaid) {
-                Optional<Room> roomOpt = roomRepository.findById(paidRoomId);
-                if (roomOpt.isPresent()) {
-                    Room paidRoom = roomOpt.get();
-                    String phone = paidRoom.getLandlordPhone();
-
-                    if (phone == null || phone.trim().isEmpty()) {
-                        Optional<User> landlordOpt = userRepository.findByEmail(paidRoom.getLandlordEmail());
-                        if (landlordOpt.isPresent() && landlordOpt.get().getPhone() != null) {
-                            phone = landlordOpt.get().getPhone();
-                        } else {
-                            phone = paidRoom.getLandlordEmail();
+            List<Long> paidRoomIds = new ArrayList<>();
+            try {
+                List<Payment> userCompletedPayments = paymentRepository.findByUserIdAndStatus(user.getId(), "COMPLETED");
+                if (userCompletedPayments != null) {
+                    for (Payment p : userCompletedPayments) {
+                        if (p.getRoomId() != null) {
+                            paidRoomIds.add(p.getRoomId());
                         }
                     }
-                    model.addAttribute("paidRoomId", paidRoomId);
-                    model.addAttribute("landlordPhone", phone);
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching completed payments: " + e.getMessage());
+            }
+
+            if (paidRoomId != null) {
+                try {
+                    boolean isPaid = paymentRepository.existsByUserIdAndRoomIdAndStatus(user.getId(), paidRoomId, "COMPLETED");
+                    if (isPaid) {
+                        Optional<Room> roomOpt = roomRepository.findById(paidRoomId);
+                        if (roomOpt.isPresent()) {
+                            Room paidRoom = roomOpt.get();
+                            String phone = paidRoom.getLandlordPhone();
+
+                            if (phone == null || phone.trim().isEmpty()) {
+                                Optional<User> landlordOpt = userRepository.findByEmail(paidRoom.getLandlordEmail());
+                                if (landlordOpt.isPresent() && landlordOpt.get().getPhone() != null) {
+                                    phone = landlordOpt.get().getPhone();
+                                } else {
+                                    phone = paidRoom.getLandlordEmail();
+                                }
+                            }
+                            model.addAttribute("paidRoomId", paidRoomId);
+                            model.addAttribute("landlordPhone", phone);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error processing paidRoomId: " + e.getMessage());
                 }
             }
+
+            model.addAttribute("currentUser", user);
+            model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
+            model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
+            model.addAttribute("bookings", bookingList != null ? bookingList : new ArrayList<>());
+            model.addAttribute("searchKeyword", search);
+            model.addAttribute("paidRoomIds", paidRoomIds);
+
+            return "home";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/login?error=session_expired";
         }
-
-        model.addAttribute("currentUser", user);
-        model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
-        model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
-        model.addAttribute("bookings", bookingList != null ? bookingList : new ArrayList<>());
-        model.addAttribute("searchKeyword", search);
-        model.addAttribute("paidRoomIds", paidRoomIds);
-
-        return "home";
     }
 
     @PostMapping("/add-room")
@@ -134,13 +146,13 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        room.setLandlordEmail(user.getEmail());
-
-        if (user.getPhone() != null && !user.getPhone().isEmpty()) {
-            room.setLandlordPhone(user.getPhone());
-        }
-
         try {
+            room.setLandlordEmail(user.getEmail());
+
+            if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+                room.setLandlordPhone(user.getPhone());
+            }
+
             if (imageFile != null && !imageFile.isEmpty()) {
                 String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
                 String imageUrl = "data:" + imageFile.getContentType() + ";base64," + base64Image;
@@ -152,13 +164,14 @@ public class HomeController {
                 String videoUrl = "data:" + videoFile.getContentType() + ";base64," + base64Video;
                 room.setVideoUrl(videoUrl);
             }
-        } catch (Exception e) {
-            System.err.println("Base64 Encoding Error: " + e.getMessage());
-            e.printStackTrace();
-        }
 
-        roomRepository.save(room);
-        return "redirect:/home?roomAdded=true";
+            roomRepository.save(room);
+            return "redirect:/home?roomAdded=true";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/home?error=room_add_failed";
+        }
     }
 
     @GetMapping("/landlord/rooms/delete-image/{id}")
@@ -168,13 +181,17 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        Optional<Room> roomOptional = roomRepository.findById(id);
-        if (roomOptional.isPresent()) {
-            Room room = roomOptional.get();
-            if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
-                room.setImageUrl(null);
-                roomRepository.save(room);
+        try {
+            Optional<Room> roomOptional = roomRepository.findById(id);
+            if (roomOptional.isPresent()) {
+                Room room = roomOptional.get();
+                if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
+                    room.setImageUrl(null);
+                    roomRepository.save(room);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return "redirect:/home?imageDeleted=true";
     }
@@ -186,13 +203,17 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        Optional<Room> roomOptional = roomRepository.findById(id);
-        if (roomOptional.isPresent()) {
-            Room room = roomOptional.get();
-            if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
-                room.setVideoUrl(null);
-                roomRepository.save(room);
+        try {
+            Optional<Room> roomOptional = roomRepository.findById(id);
+            if (roomOptional.isPresent()) {
+                Room room = roomOptional.get();
+                if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
+                    room.setVideoUrl(null);
+                    roomRepository.save(room);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return "redirect:/home?videoDeleted=true";
     }
@@ -204,12 +225,16 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        Optional<Room> roomOptional = roomRepository.findById(id);
-        if (roomOptional.isPresent()) {
-            Room room = roomOptional.get();
-            if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
-                roomRepository.deleteById(id);
+        try {
+            Optional<Room> roomOptional = roomRepository.findById(id);
+            if (roomOptional.isPresent()) {
+                Room room = roomOptional.get();
+                if (room.getLandlordEmail() != null && room.getLandlordEmail().equalsIgnoreCase(loggedInUser.getEmail())) {
+                    roomRepository.deleteById(id);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return "redirect:/home?roomDeleted=true";
     }
@@ -222,6 +247,10 @@ public class HomeController {
         }
 
         try {
+            if (pesapalService == null) {
+                return "redirect:/home?error=payment_service_unavailable";
+            }
+
             String token = pesapalService.getAuthToken();
             if (token == null) {
                 return "redirect:/home?error=pesapal_auth_failed";
@@ -254,58 +283,76 @@ public class HomeController {
     public String bookRoom(@RequestParam Long roomId,
                            @RequestParam String roomTitle,
                            @RequestParam String tenantPhone) {
-
-        Booking booking = new Booking();
-        booking.setRoomId(roomId);
-        booking.setRoomTitle(roomTitle);
-        booking.setTenantPhone(tenantPhone);
-        booking.setStatus("PENDING");
-
-        roomRepository.findById(roomId).ifPresent(room -> {
-            booking.setLandlordEmail(room.getLandlordEmail());
-        });
-
-        bookingRepository.save(booking);
-
         try {
-            String msg = "PangaSmart: Ombi lako la chumba '" + roomTitle + "' limepokelewa. Mwenye nyumba atakujibu hivi karibuni.";
-            smsService.sendSms(tenantPhone, msg);
-        } catch (Exception e) {
-            System.out.println("SMS error: " + e.getMessage());
-        }
+            Booking booking = new Booking();
+            booking.setRoomId(roomId);
+            booking.setRoomTitle(roomTitle);
+            booking.setTenantPhone(tenantPhone);
+            booking.setStatus("PENDING");
 
-        return "redirect:/home?booked=true";
+            roomRepository.findById(roomId).ifPresent(room -> {
+                booking.setLandlordEmail(room.getLandlordEmail());
+            });
+
+            bookingRepository.save(booking);
+
+            if (smsService != null) {
+                try {
+                    String msg = "PangaSmart: Ombi lako la chumba '" + roomTitle + "' limepokelewa. Mwenye nyumba atakujibu hivi karibuni.";
+                    smsService.sendSms(tenantPhone, msg);
+                } catch (Exception e) {
+                    System.out.println("SMS error: " + e.getMessage());
+                }
+            }
+            return "redirect:/home?booked=true";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/home?error=booking_failed";
+        }
     }
 
     @PostMapping("/approve-booking")
     public String approveBooking(@RequestParam Long bookingId) {
-        bookingRepository.findById(bookingId).ifPresent(b -> {
-            b.setStatus("APPROVED");
-            bookingRepository.save(b);
+        try {
+            bookingRepository.findById(bookingId).ifPresent(b -> {
+                b.setStatus("APPROVED");
+                bookingRepository.save(b);
 
-            try {
-                String msg = "PangaSmart: Hongera! Ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKUBALIWA na mwenye nyumba.";
-                smsService.sendSms(b.getTenantPhone(), msg);
-            } catch (Exception e) {
-                System.out.println("SMS error: " + e.getMessage());
-            }
-        });
+                if (smsService != null) {
+                    try {
+                        String msg = "PangaSmart: Hongera! Ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKUBALIWA na mwenye nyumba.";
+                        smsService.sendSms(b.getTenantPhone(), msg);
+                    } catch (Exception e) {
+                        System.out.println("SMS error: " + e.getMessage());
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "redirect:/home";
     }
 
     @PostMapping("/reject-booking")
     public String rejectBooking(@RequestParam Long bookingId) {
-        bookingRepository.findById(bookingId).ifPresent(b -> {
-            b.setStatus("REJECTED");
-            bookingRepository.save(b);
+        try {
+            bookingRepository.findById(bookingId).ifPresent(b -> {
+                b.setStatus("REJECTED");
+                bookingRepository.save(b);
 
-            try {
-                String msg = "PangaSmart: Samahani, ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKATALIWA.";
-                smsService.sendSms(b.getTenantPhone(), msg);
-            } catch (Exception e) {
-                System.out.println("SMS error: " + e.getMessage());
-            }
-        });
+                if (smsService != null) {
+                    try {
+                        String msg = "PangaSmart: Samahani, ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKATALIWA.";
+                        smsService.sendSms(b.getTenantPhone(), msg);
+                    } catch (Exception e) {
+                        System.out.println("SMS error: " + e.getMessage());
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "redirect:/home";
     }
 }
