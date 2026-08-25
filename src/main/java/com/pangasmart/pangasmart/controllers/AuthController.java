@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -34,25 +35,33 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user, Model model) {
+    public String registerUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         if ("LANDLORD".equalsIgnoreCase(user.getRole())) {
             user.setStatus("PENDING");
             userRepository.save(user);
 
             // Kutengeneza Link ya WhatsApp kuwasiliana na Admin
-            String message = "Habari Admin, naomba kibali cha kujisajili kama Landlord kwenye PangaSmart. Jina langu ni "
-                    + user.getFullName() + " na Email yangu ni " + user.getEmail();
+            String message = "Habari Admin, nimejisajili kama Landlord kwenye PangaSmart. Naomba kibali cha akaunti yangu. Jina: "
+                    + user.getFullName() + ", Email: " + user.getEmail();
             String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
             String whatsappUrl = "https://wa.me/255747466962?text=" + encodedMessage;
 
-            model.addAttribute("pendingApproval", true);
-            model.addAttribute("whatsappUrl", whatsappUrl);
-            return "register";
+            // Tuma variables kwenda kwenye ukurasa wa pending-approval
+            redirectAttributes.addFlashAttribute("landlordName", user.getFullName());
+            redirectAttributes.addFlashAttribute("whatsappUrl", whatsappUrl);
+
+            return "redirect:/pending-approval";
         } else {
             user.setStatus("APPROVED");
             userRepository.save(user);
             return "redirect:/login?success";
         }
+    }
+
+    // Ukurasa wa taarifa na WhatsApp kwa Landlord Mpya
+    @GetMapping("/pending-approval")
+    public String showPendingApprovalPage() {
+        return "pending-approval";
     }
 
     @PostMapping("/login")

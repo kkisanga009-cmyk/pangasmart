@@ -64,13 +64,13 @@
 <div class="navbar">
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
-        <span th:text="'Karibu, ' + ${currentUser.email} + ' (' + ${userRole} + ')'">User</span>
+        <span th:text="'Karibu, ' + (${currentUser != null ? currentUser.email : 'User'}) + ' (' + (${userRole != null ? userRole : 'GUEST'}) + ')'">User</span>
 
         <button onclick="openHelpModal()" class="nav-btn" style="background-color: #f39c12; border: none; cursor: pointer;">
             ❓ Help / Msaada
         </button>
 
-        <a th:if="${userRole == 'ADMIN' or currentUser.role == 'ADMIN' or currentUser.email.contains('admin')}"
+        <a th:if="${userRole == 'ADMIN' or (currentUser != null and (currentUser.role == 'ADMIN' or currentUser.email.contains('admin')))}"
            href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
 
         <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
@@ -86,15 +86,15 @@
 <div class="stats-grid">
     <div class="stat-card">
         <h4>Watumiaji Wote</h4>
-        <p th:text="${totalUsers}">0</p>
+        <p th:text="${totalUsers != null ? totalUsers : 0}">0</p>
     </div>
     <div class="stat-card">
         <h4>Vyumba Vilivyopo</h4>
-        <p th:text="${totalRooms}">0</p>
+        <p th:text="${totalRooms != null ? totalRooms : 0}">0</p>
     </div>
     <div class="stat-card">
         <h4>Jumla ya Mapato</h4>
-        <p>TZS <span th:text="${totalRevenue}">0</span></p>
+        <p>TZS <span th:text="${totalRevenue != null ? #numbers.formatDecimal(totalRevenue, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span></p>
     </div>
 </div>
 
@@ -137,7 +137,7 @@
                 <b th:text="${r.title}">Master Room</b><br>
                 <small style="color: #64748b;" th:text="${r.location}">Location</small>
             </td>
-            <td th:text="${r.price}">0.0</td>
+            <td th:text="${r.price != null ? #numbers.formatDecimal(r.price, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
             <td th:text="${r.landlordEmail}">landlord@gmail.com</td>
 
             <td>
@@ -191,17 +191,17 @@
                 <span style="font-weight: bold; color: #475569;" th:text="${p.formattedDate != null ? p.formattedDate : (p.date != null ? p.date : 'N/A')}">24/08/2026 14:30</span>
             </td>
             <td>
-                <b th:text="${p.tenantName}">Jina</b><br>
-                <small style="color: #64748b;" th:text="${p.tenantPhone}">0700000000</small>
+                <b th:text="${p.tenantName != null ? p.tenantName : 'N/A'}">Jina</b><br>
+                <small style="color: #64748b;" th:text="${p.tenantPhone != null ? p.tenantPhone : 'N/A'}">0700000000</small>
             </td>
             <td th:text="${p.roomTitle}">Chumba</td>
             <td th:text="${p.landlordName}">Landlord Name</td>
             <td>
                 <span class="phone-highlight" th:text="${p.landlordPhone}">0789654321</span>
             </td>
-            <td th:text="${p.amount}">0.0</td>
+            <td th:text="${p.amount != null ? #numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
             <td>
-                <span th:class="'status ' + ${p.status != null ? p.status.toUpperCase() : 'PENDING'}" th:text="${p.status}">PENDING</span>
+                <span th:class="'status ' + ${p.status != null ? p.status.toUpperCase() : 'PENDING'}" th:text="${p.status != null ? p.status : 'PENDING'}">PENDING</span>
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(paymentDetails)}">

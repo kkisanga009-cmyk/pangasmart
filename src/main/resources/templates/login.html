@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="sw" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -63,13 +63,13 @@
     <p class="subtitle">Housing & Room Rental System <br> <i>(Mfumo wa Kupanga Nyumba & Vyumba)</i></p>
 
     <!-- KITUFE CHA MSAADA -->
-    <button onclick="openHelpModal()" class="help-btn-login">
+    <button type="button" onclick="openHelpModal()" class="help-btn-login">
         ❓ Help / Msaada wa Haraka
     </button>
 
     <!-- SAFE CHECK YA CURRENT USER -->
     <div th:if="${currentUser != null}" class="user-welcome-info">
-        Karibu tena, <b th:text="${currentUser?.email}"></b>! Ingiza password yako kuendelea.
+        Karibu tena, <b th:text="${currentUser.email}"></b>! Ingiza password yako kuendelea.
     </div>
 
     <!-- ERROR MESSAGES -->
@@ -78,15 +78,17 @@
     </div>
 
     <!-- LANDLORD PENDING APPROVAL ALERT -->
-    <div th:if="${errorPending}" class="warning-msg">
+    <div th:if="${errorPending != null}" class="warning-msg">
         ⏳ Akaunti yako ya Landlord inasubiri kuidhinishwa na Admin.<br>
-        <a th:href="${whatsappUrl}" target="_blank" class="btn-whatsapp-link">
+        <a th:href="${whatsappUrl != null ? whatsappUrl : 'https://wa.me/255747466962'}" target="_blank" class="btn-whatsapp-link">
             💬 Omba Ruhusa Kupitia WhatsApp
         </a>
     </div>
 
     <!-- LANDLORD REJECTED ALERT -->
-    <div th:if="${errorRejected}" class="error-msg" th:text="${errorRejected}"></div>
+    <div th:if="${errorRejected != null}" class="error-msg" th:text="${errorRejected}">
+        Akaunti yako haijaidhinishwa. Wasiliana na Admin.
+    </div>
 
     <!-- SUCCESS MESSAGES -->
     <div th:if="${param.logout}" class="success-msg">
@@ -95,17 +97,17 @@
     <div th:if="${param.success}" class="success-msg">
         Usajili umefanikiwa! Ingiza taarifa zako hapa kuingia.
     </div>
-    <div th:if="${message}" class="success-msg" th:text="${message}"></div>
+    <div th:if="${message != null}" class="success-msg" th:text="${message}"></div>
 
     <form th:action="@{/login}" method="post">
         <div class="form-group">
-            <label>Email Address / <span>Barua Pepe:</span></label>
+            <label for="emailInput">Email Address / <span>Barua Pepe:</span></label>
             <input type="email" name="email" id="emailInput" th:value="${currentUser?.email}" required placeholder="example@gmail.com" oninput="document.getElementById('usernameInput').value = this.value">
             <input type="hidden" name="username" id="usernameInput" th:value="${currentUser?.email}">
         </div>
 
         <div class="form-group">
-            <label>Password / <span>Neno la Siri:</span></label>
+            <label for="passwordInput">Password / <span>Neno la Siri:</span></label>
             <div class="password-container">
                 <input type="password" id="passwordInput" name="password" required placeholder="••••••••">
                 <span class="toggle-password-btn" id="toggleIcon" onclick="togglePasswordVisibility()">👁️</span>
@@ -157,7 +159,7 @@
             <a href="https://wa.me/255747466962?text=Habari%20Admin,%20ninahitaji%20msaada%20kwenye%20PangaSmart" target="_blank" style="background: #25D366; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">
                 💬 WhatsApp
             </a>
-            <button onclick="closeHelpModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
+            <button type="button" onclick="closeHelpModal()" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
                 Funga
             </button>
         </div>
@@ -204,7 +206,7 @@
         if (event.target == modal) {
             modal.style.display = "none";
         }
-    }
+    };
 </script>
 
 </body>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kusubiri Idhini - PangaSmart</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 35px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: #1e293b;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .contact-box {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .phone-num {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0369a1;
+            margin-top: 5px;
+        }
+
+        .btn-whatsapp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            padding: 13px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .btn-whatsapp:hover {
+            background: #1eb854;
+        }
+
+        .btn-login {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            width: 100%;
+            max-width: 440px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="icon">⏳</div>
+    <h2>Usajili Umepokelewa!</h2>
+
+    <p>
+        Habari <b th:text="${landlordName != null ? landlordName : 'Landlord'}">Landlord</b>, akaunti yako imesajiliwa kwa mafanikio.
+        <br><br>
+        Akaunti za <b>Wenye Nyumba (Landlords)</b> zinahitaji kuidhinishwa (Approved) na Admin kabla ya kuweza kuingia kwenye mfumo.
+    </p>
+
+    <div class="contact-box">
+        <p style="margin-bottom: 3px; font-size: 12px; font-weight: bold; color: #475569;">Wasiliana na Admin:</p>
+        <div class="phone-num">
+            📱 <a href="tel:0747466962" style="color: #0369a1; text-decoration: none;">0747466962</a>
+        </div>
+    </div>
+
+    <!-- Batani inayompeleka Moja kwa Moja WhatsApp -->
+    <a th:href="@{https://wa.me/255747466962(text='Habari Admin, nimejisajili hivi punde kama Landlord kwenye PangaSmart, naomba idhini (Approval) ya akaunti yangu.')}"
+       target="_blank"
+       class="btn-whatsapp">
+        💬 Wasiliana na Admin WhatsApp
+    </a>
+
+    <br>
+    <a th:href="@{/login}" class="btn-login">Rudi Kwenye Login</a>
+</div>
+
+<!-- FOOTER BRANDING -->
+<footer>
+    <p style="margin: 0; text-transform: lowercase; color: #94a3b8; font-size: 11px;">from</p>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 2px;">
+        <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="#1e293b" stroke="#3b82f6" stroke-width="6"/>
+            <path d="M55 15 L35 55 H50 L45 85 L70 45 H55 L65 15 Z" fill="#f59e0b"/>
+        </svg>
+        <span style="font-weight: 900; font-size: 13px; color: #0f172a; letter-spacing: 1px;">
+            KISANGA <span style="color: #3b82f6;">TECHNOLOGY</span>
+        </span>
+    </div>
+</footer>
+
+</body>
+</html>

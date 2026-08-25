@@ -33,7 +33,7 @@ public class AdminController {
     private boolean checkIsAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) {
-            loggedInUser = (User) session.getAttribute("currentUser"); // Fallback kama session inatumia currentUser
+            loggedInUser = (User) session.getAttribute("currentUser");
         }
 
         String role = (String) session.getAttribute("userRole");
@@ -97,7 +97,6 @@ public class AdminController {
             loggedUser = (User) session.getAttribute("currentUser");
         }
 
-        // Pass users kwa ajili ya Thymeleaf Navigation checks
         model.addAttribute("currentUser", loggedUser);
         model.addAttribute("loggedInUser", loggedUser);
 
@@ -126,10 +125,8 @@ public class AdminController {
                 User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
                 Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
-                User landlord = null;
-                if (landlords != null && !landlords.isEmpty()) {
-                    landlord = landlords.get(0);
-                }
+                // Tafuta Landlord bila kusababisha kosa la compilation
+                User landlord = findLandlordForRoom(room, landlords);
 
                 String tenantName = tenant != null ? tenant.getFullName() : "N/A";
                 String tenantPhone = tenant != null ? tenant.getPhone() : "N/A";
@@ -152,10 +149,36 @@ public class AdminController {
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
 
-        return "admin"; // Inafungua admin.html
+        return "admin";
     }
 
-    // --- LANDLORD APPROVAL & REJECTION ENDPOINTS ---
+    // Method hii inahakikisha hupati error ikiwa Room haina getLandlord/getLandlordId
+    private User findLandlordForRoom(Room room, List<User> landlords) {
+        if (room == null) {
+            return (landlords != null && !landlords.isEmpty()) ? landlords.get(0) : null;
+        }
+
+        try {
+            // Jaribu kuangalia getLandlordId
+            java.lang.reflect.Method methodId = room.getClass().getMethod("getLandlordId");
+            Object idObj = methodId.invoke(room);
+            if (idObj instanceof Long) {
+                Optional<User> u = userRepository.findById((Long) idObj);
+                if (u.isPresent()) return u.get();
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            // Jaribu kuangalia getLandlord
+            java.lang.reflect.Method methodUser = room.getClass().getMethod("getLandlord");
+            Object userObj = methodUser.invoke(room);
+            if (userObj instanceof User) {
+                return (User) userObj;
+            }
+        } catch (Exception ignored) {}
+
+        return (landlords != null && !landlords.isEmpty()) ? landlords.get(0) : null;
+    }
 
     @GetMapping("/admin/users/approve/{id}")
     public String approveLandlord(@PathVariable("id") Long id, HttpSession session) {
@@ -185,8 +208,6 @@ public class AdminController {
         return "redirect:/admin/dashboard?rejected=true";
     }
 
-    // --- USER MANAGEMENT ENDPOINTS ---
-
     @GetMapping("/admin/rooms/delete/{id}")
     public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAdmin(session)) {
@@ -202,7 +223,7 @@ public class AdminController {
             return "redirect:/login";
         }
         userRepository.deleteById(id);
-        return "redirect:/admin/dashboard";
+        return "redirect:/admin/dashboard?userDeleted=true";
     }
 
     @GetMapping("/admin/users/edit/{id}")
@@ -235,14 +256,13 @@ public class AdminController {
             existingUser.setPassword(updatedUser.getPassword());
             existingUser.setRole(updatedUser.getRole());
 
-            // Unahakikisha status haipotei wakati wa ku-update
-            if (updatedUser.getStatus() != null && !updatedUser.getStatus().isEmpty()) {
+            if (updatedUser.getStatus() != null && !updatedUser.getStatus().trim().isEmpty()) {
                 existingUser.setStatus(updatedUser.getStatus());
             }
 
             userRepository.save(existingUser);
         }
 
-        return "redirect:/admin/dashboard";
+        return "redirect:/admin/dashboard?userUpdated=true";
     }
 }
