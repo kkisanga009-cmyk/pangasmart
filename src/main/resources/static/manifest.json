@@ -1,0 +1,38 @@
+{
+  "name": "PangaSmart - Kisanga Technology",
+  "short_name": "PangaSmart",
+  "description": "Mfumo Rahisi wa Kupata na Kupangisha Vyumba Tanzania",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#075985",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tafuta Chumba",
+      "short_name": "Tafuta",
+      "description": "Tafuta vyumba vinavyopatikana",
+      "url": "/search",
+      "icons": [{ "src": "/images/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Weka Tangazo",
+      "short_name": "Tangaza",
+      "description": "Weka tangazo lako la chumba",
+      "url": "/advertise",
+      "icons": [{ "src": "/images/logo.png", "sizes": "96x96" }]
+    }
+  ]
+}
