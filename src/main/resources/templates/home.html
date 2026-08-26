@@ -73,7 +73,10 @@
         <a href="/logout" class="nav-btn nav-btn-logout">Logout</a>
     </div>
 </div>
-
+<!-- Kitufe cha kuinstall app kitakachofichika kwanza mpaka simu iruhusu -->
+<button id="installBtn" style="display: none; background-color: #075985; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+    📲 Weka PangaSmart Kwenye Simu
+</button>
 <div class="main-container">
 
     <!-- DASHBOARD YA LANDLORD -->
@@ -310,6 +313,35 @@
             modal.style.display = "none";
         }
     }
+</script>
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Zuia kivinjari kisionyeshe prompt yake ya kawaida kwanza
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Onyesha kitufe chetu cha PangaSmart
+      installBtn.style.display = 'block';
+
+      installBtn.addEventListener('click', () => {
+        // Ficha kitufe baada ya kubonyezwa
+        installBtn.style.display = 'none';
+        // Onyesha prompt ya installation
+        deferredPrompt.prompt();
+
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Mtumiaji amekubali kuweka app');
+          } else {
+            console.log('Mtumiaji amekataa');
+          }
+          deferredPrompt = null;
+        });
+      });
+    });
 </script>
 
 </body>
