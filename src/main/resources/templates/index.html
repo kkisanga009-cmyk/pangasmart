@@ -47,9 +47,6 @@
         <a class="navbar-brand fw-bold fs-3 text-warning" href="/">🏠 PangaSmart</a>
         <div class="d-flex gap-2 align-items-center">
             <!-- KITUFE CHA MSAADA -->
-            <button id="installBtn" style="display: none; background-color: #075985; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                📥 Pakua PangaSmart App
-            </button>
             <button onclick="openHelpModal()" class="btn btn-warning btn-sm fw-bold">
                 ❓ Help / Msaada
             </button>
@@ -182,31 +179,28 @@
     const installBtn = document.getElementById('installBtn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Zuia kivinjari kisionyeshe onyo lake la kawaida lenyewe
+      // Zuia popup ya kawaida ya browser
       e.preventDefault();
-      // Hifadhi tukio ili liweze kutumika baadaye
       deferredPrompt = e;
-      // Onyesha kitufe chetu chema cha kusakinisha
-      installBtn.style.display = 'block';
+      // Onyesha kitufe
+      installBtn.style.display = 'flex';
+    });
 
-      installBtn.addEventListener('click', () => {
-        // Ficha kitufe baada ya kubonyezwa
-        installBtn.style.display = 'none';
-        // Onyesha lile boksi la kusakinisha la mfumo
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        // Onyesha prompt ya kuinstall
         deferredPrompt.prompt();
-
-        // Angalia kama mtumiaji amekubali au amekataa
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Mtumiaji amekubali kusakinisha PangaSmart');
-          } else {
-            console.log('Mtumiaji amekataa kusakinisha');
-          }
-          deferredPrompt = null;
-        });
-      });
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('Mtumiaji amekubali');
+        }
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      } else {
+        // Kama prompt haipo bado, mpe maelezo badala ya kukaa kimya
+        alert("Samahani, App tayari imewekwa kwenye simu yako au kivinjari kinajiandaa. Unaweza pia kuinstall kupitia menyu ya juu ya Chrome (nukta tatu) ukibonyeza 'Install app' au 'Add to Home screen'.");
+      }
     });
 </script>
-
 </body>
 </html>
