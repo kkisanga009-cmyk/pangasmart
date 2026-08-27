@@ -2,6 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/logo.png">
+    <meta name="theme-color" content="#075985">
+    <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PangaSmart - Nyumba na Vyumba vya Kupanga</title>
@@ -44,6 +47,9 @@
         <a class="navbar-brand fw-bold fs-3 text-warning" href="/">🏠 PangaSmart</a>
         <div class="d-flex gap-2 align-items-center">
             <!-- KITUFE CHA MSAADA -->
+            <button id="installBtn" style="display: none; background-color: #075985; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                📥 Pakua PangaSmart App
+            </button>
             <button onclick="openHelpModal()" class="btn btn-warning btn-sm fw-bold">
                 ❓ Help / Msaada
             </button>
@@ -170,6 +176,36 @@
           .catch((err) => { console.log('Imeshindikana kusajili Service Worker:', err); });
       });
     }
+</script>
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Zuia kivinjari kisionyeshe onyo lake la kawaida lenyewe
+      e.preventDefault();
+      // Hifadhi tukio ili liweze kutumika baadaye
+      deferredPrompt = e;
+      // Onyesha kitufe chetu chema cha kusakinisha
+      installBtn.style.display = 'block';
+
+      installBtn.addEventListener('click', () => {
+        // Ficha kitufe baada ya kubonyezwa
+        installBtn.style.display = 'none';
+        // Onyesha lile boksi la kusakinisha la mfumo
+        deferredPrompt.prompt();
+
+        // Angalia kama mtumiaji amekubali au amekataa
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Mtumiaji amekubali kusakinisha PangaSmart');
+          } else {
+            console.log('Mtumiaji amekataa kusakinisha');
+          }
+          deferredPrompt = null;
+        });
+      });
+    });
 </script>
 
 </body>

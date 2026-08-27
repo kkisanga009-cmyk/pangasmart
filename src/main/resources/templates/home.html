@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PangaSmart - Dashboard</title>
@@ -314,43 +313,6 @@
         }
     }
 </script>
-<script>
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Zuia kivinjari kisionyeshe prompt yake ya kawaida kwanza
-      e.preventDefault();
-      deferredPrompt = e;
-
-      // Onyesha kitufe chetu cha PangaSmart
-      installBtn.style.display = 'block';
-
-      installBtn.addEventListener('click', () => {
-        // Ficha kitufe baada ya kubonyezwa
-        installBtn.style.display = 'none';
-        // Onyesha prompt ya installation
-        deferredPrompt.prompt();
-
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Mtumiaji amekubali kuweka app');
-          } else {
-            console.log('Mtumiaji amekataa');
-          }
-          deferredPrompt = null;
-        });
-      });
-    });
-</script>
-<script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((reg) => { console.log('Service Worker Imesajiliwa mafanikio!', reg.scope); })
-          .catch((err) => { console.log('Imeshindikana kusajili Service Worker:', err); });
-      });
-    }
-</script>
 </body>
 </html>
