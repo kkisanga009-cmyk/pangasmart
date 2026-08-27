@@ -32,7 +32,23 @@ public class AdminController {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    private boolean checkIsAdmin(HttpSession session) {
+    // Inaruhusu Admin Mkuu na Sub-Admin kuingia kwenye Dashboard
+    private boolean checkIsAnyAdmin(HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            loggedInUser = (User) session.getAttribute("currentUser");
+        }
+
+        String role = (String) session.getAttribute("userRole");
+
+        return (role != null && (role.equalsIgnoreCase("ADMIN") || role.equalsIgnoreCase("SUB_ADMIN"))) ||
+                (loggedInUser != null && loggedInUser.getRole() != null &&
+                        (loggedInUser.getRole().equalsIgnoreCase("ADMIN") || loggedInUser.getRole().equalsIgnoreCase("SUB_ADMIN"))) ||
+                (loggedInUser != null && loggedInUser.getEmail() != null && loggedInUser.getEmail().equalsIgnoreCase("kkisanga009@gmail.com"));
+    }
+
+    // Inaruhusu Admin Mkuu PEKEE kufanya mambo nyeti (kama kufuta, n.k.)
+    private boolean checkIsSuperAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) {
             loggedInUser = (User) session.getAttribute("currentUser");
@@ -106,7 +122,7 @@ public class AdminController {
 
     @GetMapping({"/admin", "/admin/dashboard"})
     public String adminDashboard(HttpSession session, Model model) {
-        if (!checkIsAdmin(session)) {
+        if (!checkIsAnyAdmin(session)) {
             return "redirect:/login";
         }
 
@@ -115,11 +131,15 @@ public class AdminController {
             loggedUser = (User) session.getAttribute("currentUser");
         }
 
+        boolean isSuperAdmin = checkIsSuperAdmin(session);
+
         model.addAttribute("currentUser", loggedUser);
         model.addAttribute("loggedInUser", loggedUser);
+        model.addAttribute("isSuperAdmin", isSuperAdmin);
 
         List<User> tenants = userRepository.findByRole("TENANT");
         List<User> landlords = userRepository.findByRole("LANDLORD");
+        List<User> subAdmins = userRepository.findByRole("SUB_ADMIN"); // Orodha ya Ma-admin Wadogo
         List<Room> rooms = roomRepository.findAll();
         List<Payment> allPayments = paymentRepository.findAll();
 
@@ -223,6 +243,7 @@ public class AdminController {
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
+        model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>()); // Tuma orodha kwenye HTML
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
 
         return "admin";
@@ -230,8 +251,8 @@ public class AdminController {
 
     @GetMapping("/admin/users/approve/{id}")
     public String approveLandlord(@PathVariable("id") Long id, HttpSession session) {
-        if (!checkIsAdmin(session)) {
-            return "redirect:/login";
+        if (!checkIsSuperAdmin(session)) {
+            return "redirect:/admin/dashboard";
         }
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
@@ -244,8 +265,8 @@ public class AdminController {
 
     @GetMapping("/admin/users/reject/{id}")
     public String rejectLandlord(@PathVariable("id") Long id, HttpSession session) {
-        if (!checkIsAdmin(session)) {
-            return "redirect:/login";
+        if (!checkIsSuperAdmin(session)) {
+            return "redirect:/admin/dashboard";
         }
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
@@ -258,8 +279,8 @@ public class AdminController {
 
     @GetMapping("/admin/rooms/delete/{id}")
     public String deleteRoom(@PathVariable("id") Long id, HttpSession session) {
-        if (!checkIsAdmin(session)) {
-            return "redirect:/login";
+        if (!checkIsSuperAdmin(session)) {
+            return "redirect:/admin/dashboard";
         }
         roomRepository.deleteById(id);
         return "redirect:/admin/dashboard?roomDeleted=true";
@@ -267,8 +288,8 @@ public class AdminController {
 
     @GetMapping("/admin/users/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id, HttpSession session) {
-        if (!checkIsAdmin(session)) {
-            return "redirect:/login";
+        if (!checkIsSuperAdmin(session)) {
+            return "redirect:/admin/dashboard";
         }
         userRepository.deleteById(id);
         return "redirect:/admin/dashboard?userDeleted=true";
@@ -276,8 +297,8 @@ public class AdminController {
 
     @GetMapping("/admin/users/edit/{id}")
     public String showEditForm(@PathVariable("id") Long id, HttpSession session, Model model) {
-        if (!checkIsAdmin(session)) {
-            return "redirect:/login";
+        if (!checkIsSuperAdmin(session)) {
+            return "redirect:/admin/dashboard";
         }
 
         Optional<User> userOptional = userRepository.findById(id);
@@ -291,8 +312,8 @@ public class AdminController {
 
     @PostMapping("/admin/users/update")
     public String updateUser(@ModelAttribute("user") User updatedUser, HttpSession session) {
-        if (!checkIsAdmin(session)) {
-            return "redirect:/login";
+        if (!checkIsSuperAdmin(session)) {
+            return "redirect:/admin/dashboard";
         }
 
         Optional<User> existingUserOpt = userRepository.findById(updatedUser.getId());
