@@ -243,7 +243,7 @@ public class AdminController {
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
-        model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>()); // Tuma orodha kwenye HTML
+        model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>());
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
 
         return "admin";
