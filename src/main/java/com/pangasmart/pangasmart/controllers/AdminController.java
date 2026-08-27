@@ -125,10 +125,17 @@ public class AdminController {
                 User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
                 Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
-                // Tafuta Landlord kupitia email iliyopo kwenye Room bila Reflection
+                // Ulinzi dhidi ya NonUniqueResultException endapo email imejirudia
                 User landlord = null;
                 if (room != null && room.getLandlordEmail() != null) {
-                    landlord = userRepository.findByEmail(room.getLandlordEmail()).orElse(null);
+                    try {
+                        List<User> foundLandlords = userRepository.findAllByEmail(room.getLandlordEmail());
+                        if (foundLandlords != null && !foundLandlords.isEmpty()) {
+                            landlord = foundLandlords.get(0);
+                        }
+                    } catch (Exception e) {
+                        landlord = userRepository.findByEmail(room.getLandlordEmail()).orElse(null);
+                    }
                 }
 
                 String tenantName = tenant != null ? tenant.getFullName() : "N/A";
