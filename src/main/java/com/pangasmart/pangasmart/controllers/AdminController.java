@@ -188,7 +188,6 @@ public class AdminController {
                     }
                 }
 
-                // Jaza malipo YOTE kwenye jedwali bila kuchuja mwezi pekee ili yaonekane
                 User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
                 Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
@@ -266,7 +265,7 @@ public class AdminController {
     public String deleteUser(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsSuperAdmin(session)) { return "redirect:/admin/dashboard"; }
         userRepository.deleteById(id);
-        return "redirect:/admin/dashboard?userDeleted=type";
+        return "redirect:/admin/dashboard?userDeleted=true";
     }
 
     @GetMapping("/admin/users/edit/{id}")
