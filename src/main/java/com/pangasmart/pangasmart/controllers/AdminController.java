@@ -113,49 +113,76 @@ public class AdminController {
             });
         }
 
-        Double totalRevenue = (allPayments != null) ? allPayments.stream()
-                .filter(p -> p != null && ("SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus())))
-                .mapToDouble(p -> p.getAmount() != null ? p.getAmount() : 0.0)
-                .sum() : 0.0;
+        // Pata mwezi wa sasa na mwaka wa sasa kwa ajili ya kuchuja malipo ya mwezi huu pekee
+        LocalDateTime now = LocalDateTime.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+
+        Double totalRevenue = 0.0;
+        double monthlyRevenue = 0.0;
 
         List<PaymentDetailDTO> paymentDetails = new ArrayList<>();
         if (allPayments != null) {
             for (Payment p : allPayments) {
                 if (p == null) continue;
-                User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
-                Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
-                // Ulinzi dhidi ya NonUniqueResultException endapo email imejirudia
-                User landlord = null;
-                if (room != null && room.getLandlordEmail() != null) {
-                    try {
-                        List<User> foundLandlords = userRepository.findAllByEmail(room.getLandlordEmail());
-                        if (foundLandlords != null && !foundLandlords.isEmpty()) {
-                            landlord = foundLandlords.get(0);
-                        }
-                    } catch (Exception e) {
-                        landlord = userRepository.findByEmail(room.getLandlordEmail()).orElse(null);
+                // Hesabu jumla ya mapato yote ya siku zote kwa ajili ya takwimu kuu
+                if ("SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus())) {
+                    if (p.getAmount() != null) {
+                        totalRevenue += p.getAmount();
                     }
                 }
 
-                String tenantName = tenant != null ? tenant.getFullName() : "N/A";
-                String tenantPhone = tenant != null ? tenant.getPhone() : "N/A";
-                String roomTitle = room != null ? room.getTitle() : "Chumba ID: " + p.getRoomId();
-                String landlordName = landlord != null ? landlord.getFullName() : "N/A";
-                String landlordPhone = (room != null && room.getLandlordPhone() != null && !room.getLandlordPhone().isEmpty())
-                        ? room.getLandlordPhone()
-                        : (landlord != null ? landlord.getPhone() : "N/A");
+                // Angalia kama malipo haya yamefanyika mwezi huu wa sasa
+                boolean isCurrentMonthPayment = false;
+                if (p.getPaymentDate() != null) {
+                    if (p.getPaymentDate().getMonthValue() == currentMonth && p.getPaymentDate().getYear() == currentYear) {
+                        isCurrentMonthPayment = true;
+                        if ("SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus())) {
+                            if (p.getAmount() != null) {
+                                monthlyRevenue += p.getAmount();
+                            }
+                        }
+                    }
+                }
 
-                paymentDetails.add(new PaymentDetailDTO(
-                        p.getId(), tenantName, tenantPhone, roomTitle, landlordName, landlordPhone,
-                        p.getAmount(), p.getStatus(), p.getPaymentDate()
-                ));
+                // Onyesha kwenye jedwali la malipo yale tu ya mwezi huu (kama ambavyo ukitaka kuona ya mwezi husika)
+                if (isCurrentMonthPayment) {
+                    User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
+                    Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
+
+                    User landlord = null;
+                    if (room != null && room.getLandlordEmail() != null) {
+                        try {
+                            List<User> foundLandlords = userRepository.findAllByEmail(room.getLandlordEmail());
+                            if (foundLandlords != null && !foundLandlords.isEmpty()) {
+                                landlord = foundLandlords.get(0);
+                            }
+                        } catch (Exception e) {
+                            landlord = userRepository.findByEmail(room.getLandlordEmail()).orElse(null);
+                        }
+                    }
+
+                    String tenantName = tenant != null ? tenant.getFullName() : "N/A";
+                    String tenantPhone = tenant != null ? tenant.getPhone() : "N/A";
+                    String roomTitle = room != null ? room.getTitle() : "Chumba ID: " + p.getRoomId();
+                    String landlordName = landlord != null ? landlord.getFullName() : "N/A";
+                    String landlordPhone = (room != null && room.getLandlordPhone() != null && !room.getLandlordPhone().isEmpty())
+                            ? room.getLandlordPhone()
+                            : (landlord != null ? landlord.getPhone() : "N/A");
+
+                    paymentDetails.add(new PaymentDetailDTO(
+                            p.getId(), tenantName, tenantPhone, roomTitle, landlordName, landlordPhone,
+                            p.getAmount(), p.getStatus(), p.getPaymentDate()
+                    ));
+                }
             }
         }
 
         model.addAttribute("totalUsers", userRepository.count());
         model.addAttribute("totalRooms", roomRepository.count());
         model.addAttribute("totalRevenue", totalRevenue);
+        model.addAttribute("monthlyRevenue", monthlyRevenue); // Hii inaleta summary ya mwezi
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
