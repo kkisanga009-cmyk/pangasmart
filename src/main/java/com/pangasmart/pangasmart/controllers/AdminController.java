@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -86,6 +88,22 @@ public class AdminController {
         public String getFormattedDate() { return formattedDate; }
     }
 
+    public static class MonthlyRevenueDTO {
+        private String monthName;
+        private int year;
+        private Double amount;
+
+        public MonthlyRevenueDTO(String monthName, int year, Double amount) {
+            this.monthName = monthName;
+            this.year = year;
+            this.amount = amount;
+        }
+
+        public String getMonthName() { return monthName; }
+        public int getYear() { return year; }
+        public Double getAmount() { return amount; }
+    }
+
     @GetMapping({"/admin", "/admin/dashboard"})
     public String adminDashboard(HttpSession session, Model model) {
         if (!checkIsAdmin(session)) {
@@ -113,41 +131,51 @@ public class AdminController {
             });
         }
 
-        // Pata mwezi wa sasa na mwaka wa sasa kwa ajili ya kuchuja malipo ya mwezi huu pekee
         LocalDateTime now = LocalDateTime.now();
         int currentMonth = now.getMonthValue();
         int currentYear = now.getYear();
 
         Double totalRevenue = 0.0;
         double monthlyRevenue = 0.0;
+        double yearlyRevenue = 0.0;
+
+        Map<String, Double> monthlyRevenueMap = new LinkedHashMap<>();
+        String[] monthNames = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
+        for (String mName : monthNames) {
+            monthlyRevenueMap.put(mName + "-" + currentYear, 0.0);
+        }
 
         List<PaymentDetailDTO> paymentDetails = new ArrayList<>();
         if (allPayments != null) {
             for (Payment p : allPayments) {
                 if (p == null) continue;
 
-                // Hesabu jumla ya mapato yote ya siku zote kwa ajili ya takwimu kuu
-                if ("SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus())) {
-                    if (p.getAmount() != null) {
-                        totalRevenue += p.getAmount();
-                    }
+                boolean isSuccess = "SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus());
+
+                if (isSuccess && p.getAmount() != null) {
+                    totalRevenue += p.getAmount();
                 }
 
-                // Angalia kama malipo haya yamefanyika mwezi huu wa sasa
-                boolean isCurrentMonthPayment = false;
                 if (p.getPaymentDate() != null) {
-                    if (p.getPaymentDate().getMonthValue() == currentMonth && p.getPaymentDate().getYear() == currentYear) {
-                        isCurrentMonthPayment = true;
-                        if ("SUCCESS".equalsIgnoreCase(p.getStatus()) || "COMPLETED".equalsIgnoreCase(p.getStatus())) {
-                            if (p.getAmount() != null) {
-                                monthlyRevenue += p.getAmount();
-                            }
+                    int pYear = p.getPaymentDate().getYear();
+                    int pMonth = p.getPaymentDate().getMonthValue();
+
+                    if (pYear == currentYear && isSuccess && p.getAmount() != null) {
+                        yearlyRevenue += p.getAmount();
+
+                        String mKey = monthNames[pMonth - 1] + "-" + pYear;
+                        monthlyRevenueMap.put(mKey, monthlyRevenueMap.getOrDefault(mKey, 0.0) + p.getAmount());
+                    }
+
+                    if (pMonth == currentMonth && pYear == currentYear) {
+                        if (isSuccess && p.getAmount() != null) {
+                            monthlyRevenue += p.getAmount();
                         }
                     }
                 }
 
-                // Onyesha kwenye jedwali la malipo yale tu ya mwezi huu (kama ambavyo ukitaka kuona ya mwezi husika)
-                if (isCurrentMonthPayment) {
+                if (p.getPaymentDate() != null && p.getPaymentDate().getMonthValue() == currentMonth && p.getPaymentDate().getYear() == currentYear) {
                     User tenant = (p.getUserId() != null) ? userRepository.findById(p.getUserId()).orElse(null) : null;
                     Room room = (p.getRoomId() != null) ? roomRepository.findById(p.getRoomId()).orElse(null) : null;
 
@@ -179,10 +207,19 @@ public class AdminController {
             }
         }
 
+        List<MonthlyRevenueDTO> monthlyRevenueList = new ArrayList<>();
+        for (int i = 0; i < monthNames.length; i++) {
+            String key = monthNames[i] + "-" + currentYear;
+            Double rev = monthlyRevenueMap.getOrDefault(key, 0.0);
+            monthlyRevenueList.add(new MonthlyRevenueDTO(monthNames[i], currentYear, rev));
+        }
+
         model.addAttribute("totalUsers", userRepository.count());
         model.addAttribute("totalRooms", roomRepository.count());
         model.addAttribute("totalRevenue", totalRevenue);
-        model.addAttribute("monthlyRevenue", monthlyRevenue); // Hii inaleta summary ya mwezi
+        model.addAttribute("monthlyRevenue", monthlyRevenue);
+        model.addAttribute("yearlyRevenue", yearlyRevenue);
+        model.addAttribute("monthlyRevenueList", monthlyRevenueList);
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
