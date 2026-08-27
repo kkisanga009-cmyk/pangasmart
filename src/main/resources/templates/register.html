@@ -179,7 +179,9 @@
         ❓ Help / Msaada wa Haraka
     </button>
 
-    <!-- ONYESHA ERROR KAMA zipo -->
+    <!-- ONYESHA ERROR KAMA ZIPO (Kutoka Controller) -->
+    <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+
     <div th:if="${param.error}" class="error-msg">
         Usajili umefeli! Email au Namba ya simu tayari inatumika.
     </div>

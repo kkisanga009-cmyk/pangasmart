@@ -35,7 +35,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+    public String registerUser(@ModelAttribute User user, Model model, RedirectAttributes redirectAttributes) {
+        // Angalia kama email ipo tayari kwenye database ili kuzuia duplication na Error 500 ya baadaye
+        if (user.getEmail() != null && userRepository.findByEmail(user.getEmail()).isPresent()) {
+            model.addAttribute("error", "⚠️ Email hii imeshatumika tayari! Tafadhali tumia email nyingine.");
+            return "register";
+        }
+
         if ("LANDLORD".equalsIgnoreCase(user.getRole())) {
             user.setStatus("PENDING");
             userRepository.save(user);
