@@ -7,14 +7,49 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { min-height: 100vh; background-color: #1e293b; color: #fff; }
-        .sidebar .nav-link { color: #94a3b8; margin-bottom: 5px; border-radius: 5px; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #334155; color: #fff; }
-        .card-stat { border: none; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .table-container { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        /* Scroll bar maalum kwenye matoleo ya jedwali lenye urefu */
-        .table-scrollable { max-height: 380px; overflow-y: auto; overflow-x: auto; }
+        body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { min-height: 100vh; background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; box-shadow: 4px 0 10px rgba(0,0,0,0.05); }
+        .sidebar .nav-link { color: #94a3b8; margin-bottom: 8px; border-radius: 8px; transition: all 0.3s ease; font-weight: 500; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #334155; color: #ffffff; transform: translateX(4px); }
+        .card-stat { border: none; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card-stat:hover { transform: translateY(-3px); }
+        .table-container { background: #ffffff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; }
+
+        /* Scrollbar maalum: Urefu wa watu 5 tu kwa kila table (~280px to 320px) */
+        .table-scrollable {
+            max-height: 310px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+
+        /* Ubunifu wa Scrollbar */
+        .table-scrollable::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .table-scrollable::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .table-scrollable::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .table-scrollable::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .search-box { border-radius: 50rem; padding-left: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border: 1px solid #cbd5e1; }
+        .table th { background-color: #f8fafc !important; color: #334155; font-weight: 600; position: sticky; top: 0; z-index: 1; }
+        .btn-action-edit { background-color: #e0f2fe; color: #0284c7; border: none; }
+        .btn-action-edit:hover { background-color: #bae6fd; color: #0369a1; }
+        .btn-action-approve { background-color: #dcfce7; color: #16a34a; border: none; }
+        .btn-action-approve:hover { background-color: #bbf7d0; color: #15803d; }
+        .btn-action-reject { background-color: #fef3c7; color: #d97706; border: none; }
+        .btn-action-reject:hover { background-color: #fde68a; color: #b45309; }
+        .btn-action-delete { background-color: #fee2e2; color: #dc2626; border: none; }
+        .btn-action-delete:hover { background-color: #fecaca; color: #b91c1c; }
     </style>
 </head>
 <body>
@@ -24,7 +59,7 @@
         <!-- SIDEBAR -->
         <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
             <h4 class="text-white text-center py-3 mb-4 border-bottom border-secondary">
-                <i class="fa-solid fa-house-chimney-user text-warning"></i> PangaSmart
+                <i class="fa-solid fa-house-chimney-user text-warning me-2"></i> PangaSmart
             </h4>
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link active" href="/admin/dashboard"><i class="fa-solid fa-chart-line me-2"></i> Dashboard</a></li>
@@ -33,64 +68,84 @@
                 <li class="nav-item"><a class="nav-link" href="#landlordsSection"><i class="fa-solid fa-user-tie me-2"></i> Wenye Nyumba</a></li>
                 <li class="nav-item"><a class="nav-link" href="#roomsSection"><i class="fa-solid fa-door-open me-2"></i> Vyumba & Media</a></li>
                 <li class="nav-item" th:if="${isSuperAdmin}"><a class="nav-link" href="#subAdminsSection"><i class="fa-solid fa-user-shield me-2"></i> Ma-admin Wadogo</a></li>
-                <li class="nav-item mt-4"><a class="nav-link text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Ondoka</a></li>
+                <li class="nav-item mt-5"><a class="nav-link text-danger bg-danger bg-opacity-10" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Ondoka</a></li>
             </ul>
         </nav>
 
         <!-- MAIN CONTENT -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard ya Utawala</h1>
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+                <h1 class="h3 fw-bold text-dark">Dashboard ya Utawala</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <span class="text-muted me-3">Karibu, <strong th:text="${currentUser != null ? currentUser.fullName : 'Admin'}">Admin</strong></span>
-                    <span class="badge bg-primary fs-6" th:text="${isSuperAdmin ? 'SUPER ADMIN' : 'SUB ADMIN'}">ADMIN</span>
+                    <span class="text-muted me-3 mt-1">Karibu, <strong class="text-dark" th:text="${currentUser != null ? currentUser.fullName : 'Admin'}">Admin</strong></span>
+                    <span class="badge bg-dark fs-6 px-3 py-2 shadow-sm" th:text="${isSuperAdmin ? 'SUPER ADMIN' : 'SUB ADMIN'}">ADMIN</span>
                 </div>
             </div>
 
-            <!-- STATISTICS CARDS (Pamoja na Jumla ya Watumiaji) -->
+            <!-- STATISTICS CARDS -->
             <div class="row g-4 mb-4" th:if="${isSuperAdmin}">
                 <div class="col-xl-3 col-md-6">
-                    <div class="card card-stat bg-primary text-white p-3">
-                        <h6>Jumla ya Mapato</h6>
-                        <h3 th:text="${'Tsh ' + totalRevenue}">0</h3>
+                    <div class="card card-stat bg-gradient bg-primary text-white p-3 shadow-sm">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 small text-uppercase fw-bold">Jumla ya Mapato</h6>
+                                <h3 class="fw-bold mb-0" th:text="${'Tsh ' + totalRevenue}">0</h3>
+                            </div>
+                            <div class="fs-1 text-white-50"><i class="fa-solid fa-wallet"></i></div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="card card-stat bg-success text-white p-3">
-                        <h6>Mapato ya Mwezi</h6>
-                        <h3 th:text="${'Tsh ' + monthlyRevenue}">0</h3>
+                    <div class="card card-stat bg-gradient bg-success text-white p-3 shadow-sm">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 small text-uppercase fw-bold">Mapato ya Mwezi</h6>
+                                <h3 class="fw-bold mb-0" th:text="${'Tsh ' + monthlyRevenue}">0</h3>
+                            </div>
+                            <div class="fs-1 text-white-50"><i class="fa-solid fa-chart-pie"></i></div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="card card-stat bg-info text-white p-3">
-                        <h6>Jumla ya Vyumba</h6>
-                        <h3 th:text="${totalRooms}">0</h3>
+                    <div class="card card-stat bg-gradient bg-info text-white p-3 shadow-sm">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 small text-uppercase fw-bold">Jumla ya Vyumba</h6>
+                                <h3 class="fw-bold mb-0" th:text="${totalRooms}">0</h3>
+                            </div>
+                            <div class="fs-1 text-white-50"><i class="fa-solid fa-door-closed"></i></div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="card card-stat bg-secondary text-white p-3">
-                        <h6>Jumla ya Watumiaji</h6>
-                        <h3 th:text="${totalUsers}">0</h3>
+                    <div class="card card-stat bg-gradient bg-secondary text-white p-3 shadow-sm">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 small text-uppercase fw-bold">Jumla ya Watumiaji</h6>
+                                <h3 class="fw-bold mb-0" th:text="${totalUsers}">0</h3>
+                            </div>
+                            <div class="fs-1 text-white-50"><i class="fa-solid fa-users-gear"></i></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- SEARCH BAR YA KUCHUJA KILA KITU -->
-            <div class="input-group mb-4">
-                <span class="input-group-text bg-white"><i class="fa-solid fa-search"></i></span>
-                <input type="text" id="globalSearch" class="form-control" placeholder="Tafuta chochote kwenye meza (Jina, Namba, Eneo, n.k.)..." onkeyup="filterTables()">
+            <div class="input-group mb-4 shadow-sm">
+                <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3 text-muted"><i class="fa-solid fa-search"></i></span>
+                <input type="text" id="globalSearch" class="form-control border-start-0 rounded-end-pill py-2" placeholder="Tafuta chochote kwenye meza (Jina, Simu, Eneo, n.k.)..." onkeyup="filterTables()">
             </div>
 
             <!-- 1. JEDWALI LA WALIOWEZA KULIPIA (Payments) -->
             <div class="table-container" id="paymentsSection">
-                <h4 class="text-success mb-3"><i class="fa-solid fa-money-bill-wave me-2"></i> Orodha ya Waliolipia (Payments History)</h4>
+                <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-money-bill-wave me-2"></i> Orodha ya Waliolipia (Payments History)</h5>
                 <div class="table-responsive table-scrollable">
-                    <table class="table table-striped table-hover align-middle search-table">
-                        <thead class="table-success">
+                    <table class="table table-hover align-middle search-table mb-0">
+                        <thead>
                         <tr>
                             <th>ID</th>
                             <th>Mpangaji</th>
-                            <th>Simu ya Mpangaji</th>
+                            <th>Simu</th>
                             <th>Chumba</th>
                             <th>Mwenye Nyumba</th>
                             <th>Kiasi (Tsh)</th>
@@ -101,16 +156,16 @@
                         <tbody>
                         <tr th:each="p : ${paymentDetails}">
                             <td th:text="${p.paymentId}">1</td>
-                            <td th:text="${p.tenantName}">Mpangaji</td>
+                            <td class="fw-semibold" th:text="${p.tenantName}">Mpangaji</td>
                             <td th:text="${p.tenantPhone}">0700000000</td>
                             <td th:text="${p.roomTitle}">Chumba</td>
                             <td th:text="${p.landlordName}">Mwenye Nyumba</td>
-                            <td th:text="${p.amount}">0.0</td>
-                            <td><span class="badge bg-success" th:text="${p.status}">SUCCESS</span></td>
-                            <td th:text="${p.formattedDate}">01/01/2026</td>
+                            <td class="fw-bold text-success" th:text="${p.amount}">0.0</td>
+                            <td><span class="badge bg-success bg-opacity-15 text-success px-2 py-1" th:text="${p.status}">SUCCESS</span></td>
+                            <td class="text-muted small" th:text="${p.formattedDate}">01/01/2026</td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(paymentDetails)}">
-                            <td colspan="8" class="text-center text-muted">Hakuna malipo yaliyofanyika bado.</td>
+                            <td colspan="8" class="text-center text-muted py-4">Hakuna malipo yaliyofanyika bado.</td>
                         </tr>
                         </tbody>
                     </table>
@@ -119,25 +174,25 @@
 
             <!-- 2. JEDWALI LA MA-ADMIN WADOGO -->
             <div class="table-container" id="subAdminsSection" th:if="${isSuperAdmin}">
-                <h4 class="text-primary mb-3"><i class="fa-solid fa-user-shield me-2"></i> Orodha ya Ma-admin Wadogo (Sub-Admins)</h4>
+                <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-shield me-2"></i> Orodha ya Ma-admin Wadogo (Sub-Admins)</h5>
                 <div class="table-responsive table-scrollable">
-                    <table class="table table-striped table-hover align-middle search-table">
-                        <thead class="table-dark">
+                    <table class="table table-hover align-middle search-table mb-0">
+                        <thead>
                         <tr><th>ID</th><th>Jina</th><th>Email</th><th>Simu</th><th>Hali</th><th>Vitendo</th></tr>
                         </thead>
                         <tbody>
                         <tr th:each="sa : ${subAdmins}">
                             <td th:text="${sa.id}">1</td>
-                            <td th:text="${sa.fullName}">Jina</td>
+                            <td class="fw-semibold" th:text="${sa.fullName}">Jina</td>
                             <td th:text="${sa.email}">email</td>
                             <td th:text="${sa.phone}">simu</td>
-                            <td><span class="badge bg-success">ACTIVE</span></td>
+                            <td><span class="badge bg-success bg-opacity-15 text-success px-2 py-1">ACTIVE</span></td>
                             <td>
-                                <a th:href="@{/admin/users/edit/{id}(id=${sa.id})}" class="btn btn-sm btn-outline-warning">Hariri</a>
-                                <a th:href="@{/admin/users/delete/{id}(id=${sa.id})}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Futa admin?')">Futa</a>
+                                <a th:href="@{/admin/users/edit/{id}(id=${sa.id})}" class="btn btn-sm btn-action-edit px-2 py-1 me-1" title="Hariri"><i class="fa-solid fa-pen-to-square"></i> Hariri</a>
+                                <a th:href="@{/admin/users/delete/{id}(id=${sa.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa admin huyu?')" title="Futa"><i class="fa-solid fa-trash"></i> Futa</a>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(subAdmins)}"><td colspan="6" class="text-center text-muted">Hakuna ma-admin wadogo.</td></tr>
+                        <tr th:if="${#lists.isEmpty(subAdmins)}"><td colspan="6" class="text-center text-muted py-4">Hakuna ma-admin wadogo.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -145,23 +200,23 @@
 
             <!-- 3. JEDWALI LA WAPANGAJI -->
             <div class="table-container" id="tenantsSection">
-                <h4 class="text-success mb-3"><i class="fa-solid fa-users me-2"></i> Orodha ya Wapangaji (Tenants)</h4>
+                <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-users me-2"></i> Orodha ya Wapangaji (Tenants)</h5>
                 <div class="table-responsive table-scrollable">
-                    <table class="table table-striped table-hover align-middle search-table">
-                        <thead class="table-success">
+                    <table class="table table-hover align-middle search-table mb-0">
+                        <thead>
                         <tr><th>ID</th><th>Jina Kamili</th><th>Email</th><th>Simu</th><th th:if="${isSuperAdmin}">Vitendo</th></tr>
                         </thead>
                         <tbody>
                         <tr th:each="tenant : ${tenants}">
                             <td th:text="${tenant.id}">1</td>
-                            <td th:text="${tenant.fullName}">Jina</td>
+                            <td class="fw-semibold" th:text="${tenant.fullName}">Jina</td>
                             <td th:text="${tenant.email}">email</td>
                             <td th:text="${tenant.phone}">simu</td>
                             <td th:if="${isSuperAdmin}">
-                                <a th:href="@{/admin/users/delete/{id}(id=${tenant.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Futa mpangaji?')">Futa</a>
+                                <a th:href="@{/admin/users/delete/{id}(id=${tenant.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa mpangaji huyu?')" title="Futa"><i class="fa-solid fa-trash"></i> Futa</a>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(tenants)}"><td colspan="5" class="text-center text-muted">Hakuna wapangaji.</td></tr>
+                        <tr th:if="${#lists.isEmpty(tenants)}"><td colspan="5" class="text-center text-muted py-4">Hakuna wapangaji.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -169,26 +224,28 @@
 
             <!-- 4. JEDWALI LA WENYE NYUMBA -->
             <div class="table-container" id="landlordsSection">
-                <h4 class="text-warning mb-3"><i class="fa-solid fa-user-tie me-2"></i> Orodha ya Wenye Nyumba (Landlords)</h4>
+                <h5 class="text-warning text-dark mb-3 fw-bold"><i class="fa-solid fa-user-tie me-2"></i> Orodha ya Wenye Nyumba (Landlords)</h5>
                 <div class="table-responsive table-scrollable">
-                    <table class="table table-striped table-hover align-middle search-table">
-                        <thead class="table-warning">
+                    <table class="table table-hover align-middle search-table mb-0">
+                        <thead>
                         <tr><th>ID</th><th>Jina</th><th>Email</th><th>Simu</th><th>Hali</th><th>Vitendo</th></tr>
                         </thead>
                         <tbody>
                         <tr th:each="landlord : ${landlords}">
                             <td th:text="${landlord.id}">1</td>
-                            <td th:text="${landlord.fullName}">Jina</td>
+                            <td class="fw-semibold" th:text="${landlord.fullName}">Jina</td>
                             <td th:text="${landlord.email}">email</td>
                             <td th:text="${landlord.phone}">simu</td>
-                            <td><span class="badge" th:classappend="${landlord.status == 'APPROVED' ? 'bg-success' : 'bg-secondary'}" th:text="${landlord.status != null ? landlord.status : 'PENDING'}">PENDING</span></td>
                             <td>
-                                <a th:if="${isSuperAdmin && landlord.status != 'APPROVED'}" th:href="@{/admin/users/approve/{id}(id=${landlord.id})}" class="btn btn-sm btn-success">Idhinisha</a>
-                                <a th:if="${isSuperAdmin && landlord.status != 'REJECTED'}" th:href="@{/admin/users/reject/{id}(id=${landlord.id})}" class="btn btn-sm btn-secondary">Kataa</a>
-                                <a th:if="${isSuperAdmin}" th:href="@{/admin/users/delete/{id}(id=${landlord.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Futa mwenye nyumba?')">Futa</a>
+                                <span class="badge px-2 py-1" th:classappend="${landlord.status == 'APPROVED' ? 'bg-success bg-opacity-15 text-success' : 'bg-warning bg-opacity-15 text-dark'}" th:text="${landlord.status != null ? landlord.status : 'PENDING'}">PENDING</span>
+                            </td>
+                            <td>
+                                <a th:if="${isSuperAdmin && landlord.status != 'APPROVED'}" th:href="@{/admin/users/approve/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1"><i class="fa-solid fa-check"></i> Idhinisha</a>
+                                <a th:if="${isSuperAdmin && landlord.status != 'REJECTED'}" th:href="@{/admin/users/reject/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-reject px-2 py-1 me-1"><i class="fa-solid fa-xmark"></i> Kataa</a>
+                                <a th:if="${isSuperAdmin}" th:href="@{/admin/users/delete/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa mwenye nyumba huyu?')"><i class="fa-solid fa-trash"></i> Futa</a>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(landlords)}"><td colspan="6" class="text-center text-muted">Hakuna wenye nyumba.</td></tr>
+                        <tr th:if="${#lists.isEmpty(landlords)}"><td colspan="6" class="text-center text-muted py-4">Hakuna wenye nyumba.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -196,30 +253,30 @@
 
             <!-- 5. JEDWALI LA VYUMBA NA PICHA/VIDEO HALISI -->
             <div class="table-container" id="roomsSection">
-                <h4 class="text-info mb-3"><i class="fa-solid fa-door-open me-2"></i> Udhibiti wa Vyumba (Picha na Video)</h4>
+                <h5 class="text-info text-dark mb-3 fw-bold"><i class="fa-solid fa-door-open me-2"></i> Udhibiti wa Vyumba (Picha na Video)</h5>
                 <div class="table-responsive table-scrollable">
-                    <table class="table table-striped table-hover align-middle search-table">
-                        <thead class="table-info">
+                    <table class="table table-hover align-middle search-table mb-0">
+                        <thead>
                         <tr><th>ID</th><th>Kichwa</th><th>Bei</th><th>Eneo</th><th>Email ya Mwenye Nyumba</th><th>Media (Picha/Video)</th><th th:if="${isSuperAdmin}">Vitendo</th></tr>
                         </thead>
                         <tbody>
                         <tr th:each="room : ${rooms}">
                             <td th:text="${room.id}">1</td>
-                            <td th:text="${room.title}">Chumba</td>
-                            <td th:text="${room.price}">0</td>
+                            <td class="fw-semibold" th:text="${room.title}">Chumba</td>
+                            <td class="text-success fw-bold" th:text="${room.price}">0</td>
                             <td th:text="${room.location}">Eneo</td>
-                            <td th:text="${room.landlordEmail}">email</td>
+                            <td class="text-muted small" th:text="${room.landlordEmail}">email</td>
                             <td>
-                                <!-- Kuonyesha picha au video halisi kutoka kwa Room model -->
-                                <a th:if="${room.imageUrl != null && !room.imageUrl.isEmpty()}" th:href="${room.imageUrl}" target="_blank" class="btn btn-sm btn-outline-info me-1"><i class="fa-solid fa-image"></i> Tazama Picha</a>
-                                <a th:if="${room.videoUrl != null && !room.videoUrl.isEmpty()}" th:href="${room.videoUrl}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-video"></i> Tazama Video</a>
+                                <!-- Picha na Video mpya zilizohifadhiwa kama link salama (/uploads/...) -->
+                                <a th:if="${room.imageUrl != null && !room.imageUrl.isEmpty()}" th:href="${room.imageUrl}" target="_blank" class="btn btn-sm btn-outline-info px-2 py-1 me-1"><i class="fa-solid fa-image"></i> Picha</a>
+                                <a th:if="${room.videoUrl != null && !room.videoUrl.isEmpty()}" th:href="${room.videoUrl}" target="_blank" class="btn btn-sm btn-outline-primary px-2 py-1"><i class="fa-solid fa-video"></i> Video</a>
                                 <span th:if="${(room.imageUrl == null || room.imageUrl.isEmpty()) && (room.videoUrl == null || room.videoUrl.isEmpty())}" class="text-muted small">Hakuna Media</span>
                             </td>
                             <td th:if="${isSuperAdmin}">
-                                <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Futa chumba hiki?')">Futa Chumba</a>
+                                <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa chumba hiki?')"><i class="fa-solid fa-trash"></i> Futa Chumba</a>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(rooms)}"><td colspan="7" class="text-center text-muted">Hakuna vyumba vilivyosajiliwa.</td></tr>
+                        <tr th:if="${#lists.isEmpty(rooms)}"><td colspan="7" class="text-center text-muted py-4">Hakuna vyumba vilivyosajiliwa.</td></tr>
                         </tbody>
                     </table>
                 </div>

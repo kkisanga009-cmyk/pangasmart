@@ -17,8 +17,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -153,16 +156,24 @@ public class HomeController {
                 room.setLandlordPhone(user.getPhone());
             }
 
-            if (imageFile != null && !imageFile.isEmpty()) {
-                String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
-                String imageUrl = "data:" + imageFile.getContentType() + ";base64," + base64Image;
-                room.setImageUrl(imageUrl);
+            String uploadDir = "uploads/";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
             }
 
+            // Hifadhi picha kama faili halisi
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String imgFileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+                Files.copy(imageFile.getInputStream(), uploadPath.resolve(imgFileName), StandardCopyOption.REPLACE_EXISTING);
+                room.setImageUrl("/uploads/" + imgFileName);
+            }
+
+            // Hifadhi video kama faili halisi badala ya Base64
             if (videoFile != null && !videoFile.isEmpty()) {
-                String base64Video = Base64.getEncoder().encodeToString(videoFile.getBytes());
-                String videoUrl = "data:" + videoFile.getContentType() + ";base64," + base64Video;
-                room.setVideoUrl(videoUrl);
+                String videoFileName = System.currentTimeMillis() + "_" + videoFile.getOriginalFilename();
+                Files.copy(videoFile.getInputStream(), uploadPath.resolve(videoFileName), StandardCopyOption.REPLACE_EXISTING);
+                room.setVideoUrl("/uploads/" + videoFileName);
             }
 
             roomRepository.save(room);

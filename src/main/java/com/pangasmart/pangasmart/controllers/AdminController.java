@@ -237,7 +237,7 @@ public class AdminController {
         model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>());
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
 
-        return "admin";
+        return "admin"; // Hakikisha faili lako la HTML linajulikana kama admin.html kwenye templates
     }
 
     @GetMapping("/admin/users/approve/{id}")
