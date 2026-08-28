@@ -19,10 +19,10 @@
         .nav-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
         /* Stats Section */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 22px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .stat-card h4 { color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        .stat-card p { font-size: 26px; font-weight: 800; color: #0f172a; margin-top: 6px; }
+        .stat-card h4 { color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .stat-card p { font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 6px; }
 
         /* Search input */
         .search-container { margin-bottom: 25px; }
@@ -33,13 +33,31 @@
         }
         .search-container input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
 
-        /* Table Design */
-        .table-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 25px; }
+        /* Table Design & Modern Scroll */
+        .table-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .table-card h3 { margin-bottom: 18px; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+        .table-responsive {
+            max-height: 350px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
 
         table { width: 100%; border-collapse: collapse; min-width: 750px; }
         th, td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; text-align: left; font-size: 13px; vertical-align: middle; }
-        th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
         tr:hover { background-color: #f8fafc; }
 
         /* Badges & Text Styling */
@@ -99,7 +117,15 @@
         <p th:text="${totalRooms != null ? totalRooms : 0}">0</p>
     </div>
     <div class="stat-card">
-        <h4>Jumla ya Mapato</h4>
+        <h4>Mapato ya Mwezi Huu</h4>
+        <p style="color: #10b981;">TZS <span th:text="${monthlyRevenue != null ? #numbers.formatDecimal(monthlyRevenue, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span></p>
+    </div>
+    <div class="stat-card">
+        <h4>Mapato ya Mwaka Huu</h4>
+        <p style="color: #2563eb;">TZS <span th:text="${yearlyRevenue != null ? #numbers.formatDecimal(yearlyRevenue, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span></p>
+    </div>
+    <div class="stat-card">
+        <h4>Jumla ya Mapato Yote</h4>
         <p>TZS <span th:text="${totalRevenue != null ? #numbers.formatDecimal(totalRevenue, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span></p>
     </div>
 </div>
@@ -119,179 +145,213 @@
     ❌ Ombi la Landlord limekataliwa.
 </div>
 
-<!-- 1. TABLE: MALIPO -->
+<!-- TABLE: MAPATO KWA MWEZI KWA MWAKA HUU -->
 <div class="table-card">
-    <h3 style="color: #7c3aed;">💳 Orodha ya Waliolipia & Namba za Wenye Nyumba</h3>
-    <table class="searchable-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tarehe & Muda</th>
-            <th>Mpangaji (Jina & Simu)</th>
-            <th>Chumba</th>
-            <th>Mwenye Nyumba</th>
-            <th>Simu ya Mwenye Nyumba</th>
-            <th>Kiasi (TZS)</th>
-            <th>Status</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${paymentDetails}">
-            <td th:text="${p.paymentId}">1</td>
-            <td>
-                <span style="font-weight: 600; color: #475569;" th:text="${p.formattedDate != null ? p.formattedDate : (p.date != null ? p.date : 'N/A')}">24/08/2026 14:30</span>
-            </td>
-            <td>
-                <b th:text="${p.tenantName != null ? p.tenantName : 'N/A'}">Jina</b><br>
-                <small style="color: #64748b;" th:text="${p.tenantPhone != null ? p.tenantPhone : 'N/A'}">0700000000</small>
-            </td>
-            <td th:text="${p.roomTitle}">Chumba</td>
-            <td th:text="${p.landlordName}">Landlord Name</td>
-            <td>
-                <span class="phone-highlight" th:text="${p.landlordPhone}">0789654321</span>
-            </td>
-            <td th:text="${p.amount != null ? #numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
-            <td>
-                <span th:class="'status ' + ${p.status != null ? p.status.toUpperCase() : 'PENDING'}" th:text="${p.status != null ? p.status : 'PENDING'}">PENDING</span>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(paymentDetails)}">
-            <td colspan="8" style="text-align: center; color: #94a3b8;">Hakuna malipo yoyote yaliyofanyika bado.</td>
-        </tr>
-        </tbody>
-    </table>
+    <h3 style="color: #2563eb;">📊 Mgawanyo wa Mapato ya Mwaka Kulingana na Miezi</h3>
+    <div class="table-responsive">
+        <table class="searchable-table">
+            <thead>
+            <tr>
+                <th>Mwezi</th>
+                <th>Mwaka</th>
+                <th>Jumla ya Mapato (TZS)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="m : ${monthlyRevenueList}">
+                <td style="font-weight: 600;" th:text="${m.monthName}">January</td>
+                <td th:text="${m.year}">2026</td>
+                <td style="font-weight: 700; color: #10b981;" th:text="${m.amount != null ? #numbers.formatDecimal(m.amount, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(monthlyRevenueList)}">
+                <td colspan="3" style="text-align: center; color: #94a3b8;">Hakuna taarifa za mapato ya miezi iliyorekodiwa bado.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 1. TABLE: MALIPO YA MWEZI HUU -->
+<div class="table-card">
+    <h3 style="color: #7c3aed;">💳 Orodha ya Waliolipia Mwezi Huu & Namba za Wenye Nyumba</h3>
+    <div class="table-responsive">
+        <table class="searchable-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tarehe & Muda</th>
+                <th>Mpangaji (Jina & Simu)</th>
+                <th>Chumba</th>
+                <th>Mwenye Nyumba</th>
+                <th>Simu ya Mwenye Nyumba</th>
+                <th>Kiasi (TZS)</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${paymentDetails}">
+                <td th:text="${p.paymentId}">1</td>
+                <td>
+                    <span style="font-weight: 600; color: #475569;" th:text="${p.formattedDate != null ? p.formattedDate : (p.date != null ? p.date : 'N/A')}">24/08/2026 14:30</span>
+                </td>
+                <td>
+                    <b th:text="${p.tenantName != null ? p.tenantName : 'N/A'}">Jina</b><br>
+                    <small style="color: #64748b;" th:text="${p.tenantPhone != null ? p.tenantPhone : 'N/A'}">0700000000</small>
+                </td>
+                <td th:text="${p.roomTitle}">Chumba</td>
+                <td th:text="${p.landlordName}">Landlord Name</td>
+                <td>
+                    <span class="phone-highlight" th:text="${p.landlordPhone}">0789654321</span>
+                </td>
+                <td th:text="${p.amount != null ? #numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+                <td>
+                    <span th:class="'status ' + ${p.status != null ? p.status.toUpperCase() : 'PENDING'}" th:text="${p.status != null ? p.status : 'PENDING'}">PENDING</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(paymentDetails)}">
+                <td colspan="8" style="text-align: center; color: #94a3b8;">Hakuna malipo yoyote yaliyofanyika mwezi huu bado.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- 2. TABLE: WAPANGAJI (TENANTS) -->
 <div class="table-card">
     <h3 style="color: #0284c7;">👤 Orodha ya Wapangaji (Tenants)</h3>
-    <table class="searchable-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Jina</th>
-            <th>Email</th>
-            <th>Namba ya Simu</th>
-            <th>Password</th>
-            <th>Vitendo</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="t : ${tenants}">
-            <td th:text="${t.id}">1</td>
-            <td th:text="${t.fullName != null ? t.fullName : 'N/A'}">Jina</td>
-            <td th:text="${t.email}">tenant@gmail.com</td>
-            <td th:text="${t.phone != null ? t.phone : 'N/A'}">0712345678</td>
-            <td><span class="pass-text" th:text="${t.password}">**</span></td>
-            <td>
-                <a th:href="@{/admin/users/edit/{id}(id=${t.id})}" class="btn-action btn-edit">Edit</a>
-                <a th:href="@{/admin/users/delete/{id}(id=${t.id})}" class="btn-action btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(tenants)}">
-            <td colspan="6" style="text-align: center; color: #94a3b8;">Hakuna Mpangaji aliyesajiliwa.</td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="searchable-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Jina</th>
+                <th>Email</th>
+                <th>Namba ya Simu</th>
+                <th>Password</th>
+                <th>Vitendo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${tenants}">
+                <td th:text="${t.id}">1</td>
+                <td th:text="${t.fullName != null ? t.fullName : 'N/A'}">Jina</td>
+                <td th:text="${t.email}">tenant@gmail.com</td>
+                <td th:text="${t.phone != null ? t.phone : 'N/A'}">0712345678</td>
+                <td><span class="pass-text" th:text="${t.password}">**</span></td>
+                <td>
+                    <a th:href="@{/admin/users/edit/{id}(id=${t.id})}" class="btn-action btn-edit">Edit</a>
+                    <a th:href="@{/admin/users/delete/{id}(id=${t.id})}" class="btn-action btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(tenants)}">
+                <td colspan="6" style="text-align: center; color: #94a3b8;">Hakuna Mpangaji aliyesajiliwa.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- 3. TABLE: WENYE NYUMBA (LANDLORDS) -->
 <div class="table-card">
     <h3 style="color: #16a34a;">🏠 Orodha ya Wenye Nyumba (Landlords)</h3>
-    <table class="searchable-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Jina</th>
-            <th>Email</th>
-            <th>Namba ya Simu</th>
-            <th>Status</th>
-            <th>Password</th>
-            <th>Vitendo</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="l : ${landlords}">
-            <td th:text="${l.id}">1</td>
-            <td th:text="${l.fullName != null ? l.fullName : 'N/A'}">Jina</td>
-            <td th:text="${l.email}">landlord@gmail.com</td>
-            <td th:text="${l.phone != null ? l.phone : 'N/A'}">0789654321</td>
-            <td>
-                <span th:class="'status ' + ${l.status != null ? l.status.toUpperCase() : 'PENDING'}"
-                      th:text="${l.status != null ? l.status : 'PENDING'}">PENDING</span>
-            </td>
-            <td><span class="pass-text" th:text="${l.password}">**</span></td>
-            <td>
-                <a th:if="${l.status == 'PENDING' or l.status == 'REJECTED' or l.status == null}"
-                   th:href="@{/admin/users/approve/{id}(id=${l.id})}" class="btn-action btn-approve"
-                   onclick="return confirm('Je, una uhakika unataka kumruhusu Landlord huyu?')">Ruhusu</a>
+    <div class="table-responsive">
+        <table class="searchable-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Jina</th>
+                <th>Email</th>
+                <th>Namba ya Simu</th>
+                <th>Status</th>
+                <th>Password</th>
+                <th>Vitendo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="l : ${landlords}">
+                <td th:text="${l.id}">1</td>
+                <td th:text="${l.fullName != null ? l.fullName : 'N/A'}">Jina</td>
+                <td th:text="${l.email}">landlord@gmail.com</td>
+                <td th:text="${l.phone != null ? l.phone : 'N/A'}">0789654321</td>
+                <td>
+                    <span th:class="'status ' + ${l.status != null ? l.status.toUpperCase() : 'PENDING'}"
+                          th:text="${l.status != null ? l.status : 'PENDING'}">PENDING</span>
+                </td>
+                <td><span class="pass-text" th:text="${l.password}">**</span></td>
+                <td>
+                    <a th:if="${l.status == 'PENDING' or l.status == 'REJECTED' or l.status == null}"
+                       th:href="@{/admin/users/approve/{id}(id=${l.id})}" class="btn-action btn-approve"
+                       onclick="return confirm('Je, una uhakika unataka kumruhusu Landlord huyu?')">Ruhusu</a>
 
-                <a th:if="${l.status == 'PENDING' or l.status == 'APPROVED' or l.status == null}"
-                   th:href="@{/admin/users/reject/{id}(id=${l.id})}" class="btn-action btn-reject"
-                   onclick="return confirm('Je, una uhakika unataka kumkataa Landlord huyu?')">Kataa</a>
+                    <a th:if="${l.status == 'PENDING' or l.status == 'APPROVED' or l.status == null}"
+                       th:href="@{/admin/users/reject/{id}(id=${l.id})}" class="btn-action btn-reject"
+                       onclick="return confirm('Je, una uhakika unataka kumkataa Landlord huyu?')">Kataa</a>
 
-                <a th:href="@{/admin/users/edit/{id}(id=${l.id})}" class="btn-action btn-edit">Edit</a>
-                <a th:href="@{/admin/users/delete/{id}(id=${l.id})}" class="btn-action btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(landlords)}">
-            <td colspan="7" style="text-align: center; color: #94a3b8;">Hakuna Mwenye Nyumba aliyesajiliwa.</td>
-        </tr>
-        </tbody>
-    </table>
+                    <a th:href="@{/admin/users/edit/{id}(id=${l.id})}" class="btn-action btn-edit">Edit</a>
+                    <a th:href="@{/admin/users/delete/{id}(id=${l.id})}" class="btn-action btn-delete" onclick="return confirm('Je, una uhakika unataka kufuta mtumiaji huyu?')">Futa</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(landlords)}">
+                <td colspan="7" style="text-align: center; color: #94a3b8;">Hakuna Mwenye Nyumba aliyesajiliwa.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- 4. TABLE: UDHIBITI WA VYUMBA NA MEDIA (IMEHAMISHWA CHINI KABISA) -->
+<!-- 4. TABLE: UDHIBITI WA VYUMBA NA MEDIA -->
 <div class="table-card">
     <h3 style="color: #d97706;">🛋️ Udhibiti wa Vyumba, Picha na Video Sokoni</h3>
-    <table class="searchable-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Aina & Eneo</th>
-            <th>Kodi (TZS)</th>
-            <th>Landlord Email</th>
-            <th>Picha</th>
-            <th>Video</th>
-            <th>Vitendo</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="r : ${rooms}">
-            <td th:text="${r.id}">1</td>
-            <td>
-                <b th:text="${r.title}">Master Room</b><br>
-                <small style="color: #64748b;" th:text="${r.location}">Location</small>
-            </td>
-            <td th:text="${r.price != null ? #numbers.formatDecimal(r.price, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
-            <td th:text="${r.landlordEmail}">landlord@gmail.com</td>
+    <div class="table-responsive">
+        <table class="searchable-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Aina & Eneo</th>
+                <th>Kodi (TZS)</th>
+                <th>Landlord Email</th>
+                <th>Picha</th>
+                <th>Video</th>
+                <th>Vitendo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${rooms}">
+                <td th:text="${r.id}">1</td>
+                <td>
+                    <b th:text="${r.title}">Master Room</b><br>
+                    <small style="color: #64748b;" th:text="${r.location}">Location</small>
+                </td>
+                <td th:text="${r.price != null ? #numbers.formatDecimal(r.price, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+                <td th:text="${r.landlordEmail}">landlord@gmail.com</td>
 
-            <td>
-                <img th:if="${r.imageUrl != null and !#strings.isEmpty(r.imageUrl)}"
-                     th:src="${r.imageUrl}" class="media-img" alt="Picha">
-                <span th:unless="${r.imageUrl != null and !#strings.isEmpty(r.imageUrl)}" style="color: #94a3b8; font-size: 11px;">Haina Picha</span>
-            </td>
+                <td>
+                    <img th:if="${r.imageUrl != null and !#strings.isEmpty(r.imageUrl)}"
+                         th:src="${r.imageUrl}" class="media-img" alt="Picha">
+                    <span th:unless="${r.imageUrl != null and !#strings.isEmpty(r.imageUrl)}" style="color: #94a3b8; font-size: 11px;">Haina Picha</span>
+                </td>
 
-            <td>
-                <video th:if="${r.videoUrl != null and !#strings.isEmpty(r.videoUrl)}"
-                       controls class="media-video">
-                    <source th:src="${r.videoUrl}">
-                </video>
-                <span th:unless="${r.videoUrl != null and !#strings.isEmpty(r.videoUrl)}" style="color: #94a3b8; font-size: 11px;">Haina Video</span>
-            </td>
+                <td>
+                    <video th:if="${r.videoUrl != null and !#strings.isEmpty(r.videoUrl)}"
+                           controls class="media-video">
+                        <source th:src="${r.videoUrl}">
+                    </video>
+                    <span th:unless="${r.videoUrl != null and !#strings.isEmpty(r.videoUrl)}" style="color: #94a3b8; font-size: 11px;">Haina Video</span>
+                </td>
 
-            <td>
-                <a th:href="@{/admin/rooms/delete/{id}(id=${r.id})}" class="btn-action btn-delete"
-                   onclick="return confirm('Je, una uhakika unataka kufuta chumba hiki na media zake zote?')">
-                    🗑️ Futa Chumba
-                </a>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(rooms)}">
-            <td colspan="7" style="text-align: center; color: #94a3b8;">Hakuna chumba kilichosajiliwa sokoni bado.</td>
-        </tr>
-        </tbody>
-    </table>
+                <td>
+                    <a th:href="@{/admin/rooms/delete/{id}(id=${r.id})}" class="btn-action btn-delete"
+                       onclick="return confirm('Je, una uhakika unataka kufuta chumba hiki na media zake zote?')">
+                        🗑️ Futa Chumba
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(rooms)}">
+                <td colspan="7" style="text-align: center; color: #94a3b8;">Hakuna chumba kilichosajiliwa sokoni bado.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- POP-UP YA MSAADA -->
