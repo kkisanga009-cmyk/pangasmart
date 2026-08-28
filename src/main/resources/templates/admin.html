@@ -163,7 +163,7 @@
                 </div>
             </div>
 
-            <!-- 2. JEDWALI LA WALIOWEZA KULIPIA (Payments) -->
+            <!-- 2. JEDWALI LA WALIOWEZA KULIPIA (Payments) - Rangi za Bluu (Complete/Success) na Orange (Pending) -->
             <div class="table-container" id="paymentsSection">
                 <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-money-bill-wave me-2"></i> Orodha ya Waliolipia & Namba za Wenye Nyumba</h5>
                 <div class="table-responsive table-scrollable">
@@ -194,7 +194,7 @@
                             <td class="fw-bold text-success" th:text="${p.amount != null ? #numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT') : '0.0'}">0.0</td>
                             <td>
                                 <span class="badge px-2 py-1"
-                                      th:classappend="${p.status == 'COMPLETE' || p.status == 'SUCCESS' || p.status == 'APPROVED' ? 'bg-success text-white' : 'bg-warning text-dark'}"
+                                      th:classappend="${p.status == 'COMPLETE' || p.status == 'SUCCESS' || p.status == 'APPROVED' ? 'bg-primary text-white' : 'bg-warning text-dark'}"
                                       th:text="${p.status != null ? p.status : 'PENDING'}">PENDING</span>
                             </td>
                         </tr>
@@ -206,7 +206,7 @@
                 </div>
             </div>
 
-            <!-- 3. JEDWALI LA MA-ADMIN WADOGO -->
+            <!-- 3. JEDWALI LA MA-ADMIN WADOGO (Imeongezwa Edit) -->
             <div class="table-container" id="subAdminsSection" th:if="${isSuperAdmin}">
                 <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-shield me-2"></i> Orodha ya Ma-admin Wadogo (Sub-Admins)</h5>
                 <div class="table-responsive table-scrollable">
@@ -232,13 +232,13 @@
                 </div>
             </div>
 
-            <!-- 4. JEDWALI LA WAPANGAJI -->
+            <!-- 4. JEDWALI LA WAPANGAJI (Imeongezwa Edit) -->
             <div class="table-container" id="tenantsSection">
                 <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-users me-2"></i> Orodha ya Wapangaji (Tenants)</h5>
                 <div class="table-responsive table-scrollable">
                     <table class="table table-hover align-middle search-table mb-0">
                         <thead>
-                        <tr><th>ID</th><th>Jina Kamili</th><th>Email</th><th>Simu</th><th>Password</th><th th:if="${isSuperAdmin}">Vitendo</th></tr>
+                        <tr><th>ID</th><th>Jina Kamili</th><th>Email</th><th>Simu</th><th>Password</th><th>Vitendo</th></tr>
                         </thead>
                         <tbody>
                         <tr th:each="tenant : ${tenants}">
@@ -247,8 +247,9 @@
                             <td th:text="${tenant.email}">email</td>
                             <td th:text="${tenant.phone}">simu</td>
                             <td><span class="pass-text" th:text="${tenant.password}">**</span></td>
-                            <td th:if="${isSuperAdmin}">
-                                <a th:href="@{/admin/users/delete/{id}(id=${tenant.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa mpangaji huyu?')"><i class="fa-solid fa-trash"></i> Futa</a>
+                            <td>
+                                <a th:href="@{/admin/users/edit/{id}(id=${tenant.id})}" class="btn btn-sm btn-action-edit px-2 py-1 me-1"><i class="fa-solid fa-pen-to-square"></i> Hariri</a>
+                                <a th:if="${isSuperAdmin}" th:href="@{/admin/users/delete/{id}(id=${tenant.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa mpangaji huyu?')"><i class="fa-solid fa-trash"></i> Futa</a>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(tenants)}"><td colspan="6" class="text-center text-muted py-4">Hakuna wapangaji.</td></tr>
@@ -257,7 +258,7 @@
                 </div>
             </div>
 
-            <!-- 5. JEDWALI LA WENYE NYUMBA -->
+            <!-- 5. JEDWALI LA WENYE NYUMBA (Imeongezwa Edit) -->
             <div class="table-container" id="landlordsSection">
                 <h5 class="text-dark mb-3 fw-bold"><i class="fa-solid fa-user-tie me-2"></i> Orodha ya Wenye Nyumba (Landlords)</h5>
                 <div class="table-responsive table-scrollable">
@@ -276,6 +277,7 @@
                             </td>
                             <td><span class="pass-text" th:text="${landlord.password}">**</span></td>
                             <td>
+                                <a th:href="@{/admin/users/edit/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-edit px-2 py-1 me-1"><i class="fa-solid fa-pen-to-square"></i> Hariri</a>
                                 <a th:if="${isSuperAdmin && landlord.status != 'APPROVED'}" th:href="@{/admin/users/approve/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1"><i class="fa-solid fa-check"></i> Ruhusu</a>
                                 <a th:if="${isSuperAdmin && landlord.status != 'REJECTED'}" th:href="@{/admin/users/reject/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-reject px-2 py-1 me-1"><i class="fa-solid fa-xmark"></i> Kataa</a>
                                 <a th:if="${isSuperAdmin}" th:href="@{/admin/users/delete/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa mwenye nyumba huyu?')"><i class="fa-solid fa-trash"></i> Futa</a>
