@@ -15,30 +15,19 @@
         .card-stat:hover { transform: translateY(-3px); }
         .table-container { background: #ffffff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; }
 
-        /* Scrollbar maalum: Urefu wa watu 5 tu kwa kila table (~280px to 320px) */
+        /* Scrollbar maalum: Urefu wa watu 5 tu kwa kila table (~280px) */
         .table-scrollable {
-            max-height: 310px;
+            max-height: 290px;
             overflow-y: auto;
             overflow-x: auto;
             border-radius: 8px;
             border: 1px solid #f1f5f9;
         }
 
-        /* Ubunifu wa Scrollbar */
-        .table-scrollable::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .table-scrollable::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .table-scrollable::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .table-scrollable::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        .table-scrollable::-webkit-scrollbar { width: 6px; height: 6px; }
+        .table-scrollable::-webkit-scrollbar-track { background: #f1f5f9; }
+        .table-scrollable::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-scrollable::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         .search-box { border-radius: 50rem; padding-left: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border: 1px solid #cbd5e1; }
         .table th { background-color: #f8fafc !important; color: #334155; font-weight: 600; position: sticky; top: 0; z-index: 1; }
@@ -130,7 +119,7 @@
                 </div>
             </div>
 
-            <!-- SEARCH BAR YA KUCHUJA KILA KITU -->
+            <!-- SEARCH BAR -->
             <div class="input-group mb-4 shadow-sm">
                 <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3 text-muted"><i class="fa-solid fa-search"></i></span>
                 <input type="text" id="globalSearch" class="form-control border-start-0 rounded-end-pill py-2" placeholder="Tafuta chochote kwenye meza (Jina, Simu, Eneo, n.k.)..." onkeyup="filterTables()">
@@ -161,7 +150,12 @@
                             <td th:text="${p.roomTitle}">Chumba</td>
                             <td th:text="${p.landlordName}">Mwenye Nyumba</td>
                             <td class="fw-bold text-success" th:text="${p.amount}">0.0</td>
-                            <td><span class="badge bg-success bg-opacity-15 text-success px-2 py-1" th:text="${p.status}">SUCCESS</span></td>
+                            <td>
+                                <!-- Rangi tofauti na Lebo sahihi kwa Complete na Pending -->
+                                <span class="badge px-2 py-1"
+                                      th:classappend="${p.status == 'COMPLETE' || p.status == 'SUCCESS' ? 'bg-success text-white' : 'bg-warning text-dark'}"
+                                      th:text="${p.status != null ? p.status : 'PENDING'}">PENDING</span>
+                            </td>
                             <td class="text-muted small" th:text="${p.formattedDate}">01/01/2026</td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(paymentDetails)}">
@@ -186,7 +180,7 @@
                             <td class="fw-semibold" th:text="${sa.fullName}">Jina</td>
                             <td th:text="${sa.email}">email</td>
                             <td th:text="${sa.phone}">simu</td>
-                            <td><span class="badge bg-success bg-opacity-15 text-success px-2 py-1">ACTIVE</span></td>
+                            <td><span class="badge bg-success text-white px-2 py-1">ACTIVE</span></td>
                             <td>
                                 <a th:href="@{/admin/users/edit/{id}(id=${sa.id})}" class="btn btn-sm btn-action-edit px-2 py-1 me-1" title="Hariri"><i class="fa-solid fa-pen-to-square"></i> Hariri</a>
                                 <a th:href="@{/admin/users/delete/{id}(id=${sa.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa admin huyu?')" title="Futa"><i class="fa-solid fa-trash"></i> Futa</a>
@@ -224,7 +218,7 @@
 
             <!-- 4. JEDWALI LA WENYE NYUMBA -->
             <div class="table-container" id="landlordsSection">
-                <h5 class="text-warning text-dark mb-3 fw-bold"><i class="fa-solid fa-user-tie me-2"></i> Orodha ya Wenye Nyumba (Landlords)</h5>
+                <h5 class="text-dark mb-3 fw-bold"><i class="fa-solid fa-user-tie me-2"></i> Orodha ya Wenye Nyumba (Landlords)</h5>
                 <div class="table-responsive table-scrollable">
                     <table class="table table-hover align-middle search-table mb-0">
                         <thead>
@@ -237,7 +231,7 @@
                             <td th:text="${landlord.email}">email</td>
                             <td th:text="${landlord.phone}">simu</td>
                             <td>
-                                <span class="badge px-2 py-1" th:classappend="${landlord.status == 'APPROVED' ? 'bg-success bg-opacity-15 text-success' : 'bg-warning bg-opacity-15 text-dark'}" th:text="${landlord.status != null ? landlord.status : 'PENDING'}">PENDING</span>
+                                <span class="badge px-2 py-1" th:classappend="${landlord.status == 'APPROVED' ? 'bg-success text-white' : 'bg-warning text-dark'}" th:text="${landlord.status != null ? landlord.status : 'PENDING'}">PENDING</span>
                             </td>
                             <td>
                                 <a th:if="${isSuperAdmin && landlord.status != 'APPROVED'}" th:href="@{/admin/users/approve/{id}(id=${landlord.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1"><i class="fa-solid fa-check"></i> Idhinisha</a>
@@ -251,9 +245,9 @@
                 </div>
             </div>
 
-            <!-- 5. JEDWALI LA VYUMBA NA PICHA/VIDEO HALISI -->
+            <!-- 5. JEDWALI LA VYUMBA NA PICHA/VIDEO (Vitufe vilivyosahihishwa na kupendeza) -->
             <div class="table-container" id="roomsSection">
-                <h5 class="text-info text-dark mb-3 fw-bold"><i class="fa-solid fa-door-open me-2"></i> Udhibiti wa Vyumba (Picha na Video)</h5>
+                <h5 class="text-dark mb-3 fw-bold"><i class="fa-solid fa-door-open me-2"></i> Udhibiti wa Vyumba (Picha na Video)</h5>
                 <div class="table-responsive table-scrollable">
                     <table class="table table-hover align-middle search-table mb-0">
                         <thead>
@@ -267,10 +261,10 @@
                             <td th:text="${room.location}">Eneo</td>
                             <td class="text-muted small" th:text="${room.landlordEmail}">email</td>
                             <td>
-                                <!-- Picha na Video mpya zilizohifadhiwa kama link salama (/uploads/...) -->
-                                <a th:if="${room.imageUrl != null && !room.imageUrl.isEmpty()}" th:href="${room.imageUrl}" target="_blank" class="btn btn-sm btn-outline-info px-2 py-1 me-1"><i class="fa-solid fa-image"></i> Picha</a>
-                                <a th:if="${room.videoUrl != null && !room.videoUrl.isEmpty()}" th:href="${room.videoUrl}" target="_blank" class="btn btn-sm btn-outline-primary px-2 py-1"><i class="fa-solid fa-video"></i> Video</a>
-                                <span th:if="${(room.imageUrl == null || room.imageUrl.isEmpty()) && (room.videoUrl == null || room.videoUrl.isEmpty())}" class="text-muted small">Hakuna Media</span>
+                                <!-- Vitufe vilivyosahihishwa kwa muonekano mzuri (vimeondolewa masharti magumu ili vionekane ukibofya) -->
+                                <a th:if="${room.imageUrl != null && !room.imageUrl.isEmpty()}" th:href="${room.imageUrl}" target="_blank" class="btn btn-sm btn-primary px-2 py-1 me-1 shadow-sm"><i class="fa-solid fa-image me-1"></i> Picha</a>
+                                <a th:if="${room.videoUrl != null && !room.videoUrl.isEmpty()}" th:href="${room.videoUrl}" target="_blank" class="btn btn-sm btn-success px-2 py-1 shadow-sm"><i class="fa-solid fa-video me-1"></i> Video</a>
+                                <span th:if="${(room.imageUrl == null || room.imageUrl.isEmpty()) && (room.videoUrl == null || room.videoUrl.isEmpty())}" class="text-muted small fst-italic">Hakuna Media</span>
                             </td>
                             <td th:if="${isSuperAdmin}">
                                 <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa chumba hiki?')"><i class="fa-solid fa-trash"></i> Futa Chumba</a>
@@ -286,7 +280,7 @@
     </div>
 </div>
 
-<!-- JavaScript ya Search Bar kuchuja tables zote -->
+<!-- JavaScript ya Search Bar -->
 <script>
     function filterTables() {
         let input = document.getElementById("globalSearch");
