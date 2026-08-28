@@ -11,9 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Inapata njia kamili ya folda ya mradi (project directory) na kuongeza 'uploads/'
         String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
-
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadDir);
     }
