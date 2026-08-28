@@ -136,6 +136,7 @@
             <div th:if="${param.roomDeleted}" class="alert alert-danger">🗑️ Chumba na picha/video zake zimefutwa kikamilifu!</div>
             <div th:if="${param.approved}" class="alert alert-success">✅ Landlord ameidhinishwa kikamilifu kuingia kwenye mfumo!</div>
             <div th:if="${param.rejected}" class="alert alert-danger">❌ Ombi la Landlord limekataliwa.</div>
+            <div th:if="${param.subAdminAdded}" class="alert alert-success">✅ Sub-Admin ameongezwa kikamilifu!</div>
 
             <!-- 1. JEDWALI LA MGAWANYO WA MAPATO YA MWAKA KULINGANA NA MIEZI -->
             <div class="table-container" id="monthlyRevenueSection" th:if="${isSuperAdmin}">
@@ -163,7 +164,7 @@
                 </div>
             </div>
 
-            <!-- 2. JEDWALI LA WALIOWEZA KULIPIA (Payments) - Rangi za Bluu (Complete/Success) na Orange (Pending) -->
+            <!-- 2. JEDWALI LA WALIOWEZA KULIPIA (Payments) -->
             <div class="table-container" id="paymentsSection">
                 <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-money-bill-wave me-2"></i> Orodha ya Waliolipia & Namba za Wenye Nyumba</h5>
                 <div class="table-responsive table-scrollable">
@@ -206,9 +207,12 @@
                 </div>
             </div>
 
-            <!-- 3. JEDWALI LA MA-ADMIN WADOGO (Imeongezwa Edit) -->
+            <!-- 3. JEDWALI LA MA-ADMIN WADOGO -->
             <div class="table-container" id="subAdminsSection" th:if="${isSuperAdmin}">
-                <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-shield me-2"></i> Orodha ya Ma-admin Wadogo (Sub-Admins)</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-primary mb-0 fw-bold"><i class="fa-solid fa-user-shield me-2"></i> Orodha ya Ma-admin Wadogo (Sub-Admins)</h5>
+                    <button type="button" class="btn btn-sm btn-primary fw-bold" onclick="openSubAdminModal()"><i class="fa-solid fa-user-plus me-1"></i> Ongeza Sub-Admin</button>
+                </div>
                 <div class="table-responsive table-scrollable">
                     <table class="table table-hover align-middle search-table mb-0">
                         <thead>
@@ -232,7 +236,7 @@
                 </div>
             </div>
 
-            <!-- 4. JEDWALI LA WAPANGAJI (Imeongezwa Edit) -->
+            <!-- 4. JEDWALI LA WAPANGAJI -->
             <div class="table-container" id="tenantsSection">
                 <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-users me-2"></i> Orodha ya Wapangaji (Tenants)</h5>
                 <div class="table-responsive table-scrollable">
@@ -258,7 +262,7 @@
                 </div>
             </div>
 
-            <!-- 5. JEDWALI LA WENYE NYUMBA (Imeongezwa Edit) -->
+            <!-- 5. JEDWALI LA WENYE NYUMBA -->
             <div class="table-container" id="landlordsSection">
                 <h5 class="text-dark mb-3 fw-bold"><i class="fa-solid fa-user-tie me-2"></i> Orodha ya Wenye Nyumba (Landlords)</h5>
                 <div class="table-responsive table-scrollable">
@@ -332,6 +336,29 @@
     </div>
 </div>
 
+<!-- POP-UP YA KUONGEZA SUB-ADMIN (MODAL) -->
+<div id="subAdminModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 12px; max-width: 450px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative;">
+        <span onclick="closeSubAdminModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
+        <h4 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-plus me-2"></i> Teua Sub-Admin</h4>
+        <p class="text-muted small mb-3">Chagua mtumiaji kutoka kwenye orodha ili kumpa mamlaka ya kuwa Sub-Admin kwenye mfumo.</p>
+
+        <form th:action="@{/admin/sub-admins/add}" method="post">
+            <div class="mb-3">
+                <label for="userId" class="form-label fw-semibold">Chagua Mtumiaji:</label>
+                <select name="userId" id="userId" class="form-select" required>
+                    <option value="" disabled selected>-- Chagua Mtumiaji --</option>
+                    <option th:each="u : ${allUsersList}" th:value="${u.id}" th:text="${u.fullName + ' (' + u.email + ') - [' + u.role + ']'}"></option>
+                </select>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeSubAdminModal()">Ghairi</button>
+                <button type="submit" class="btn btn-primary btn-sm">Thibitisha Kuongeza</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- POP-UP YA MSAADA (HELP MODAL) -->
 <div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative;">
@@ -353,7 +380,7 @@
     </div>
 </div>
 
-<!-- JavaScript ya Search na Modal -->
+<!-- JavaScript ya Search na Modals -->
 <script>
     function filterTables() {
         let input = document.getElementById("globalSearch");
@@ -379,6 +406,14 @@
         }
     }
 
+    function openSubAdminModal() {
+        document.getElementById("subAdminModal").style.display = "flex";
+    }
+
+    function closeSubAdminModal() {
+        document.getElementById("subAdminModal").style.display = "none";
+    }
+
     function openHelpModal() {
         document.getElementById("helpModal").style.display = "flex";
     }
@@ -388,9 +423,13 @@
     }
 
     window.addEventListener("click", function(event) {
-        let modal = document.getElementById("helpModal");
-        if (event.target === modal) {
-            modal.style.display = "none";
+        let helpModal = document.getElementById("helpModal");
+        let subAdminModal = document.getElementById("subAdminModal");
+        if (event.target === helpModal) {
+            helpModal.style.display = "none";
+        }
+        if (event.target === subAdminModal) {
+            subAdminModal.style.display = "none";
         }
     });
 </script>

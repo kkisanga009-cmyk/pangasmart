@@ -134,6 +134,18 @@ public class AdminController {
         List<User> tenants = userRepository.findByRole("TENANT");
         List<User> landlords = userRepository.findByRole("LANDLORD");
         List<User> subAdmins = userRepository.findByRole("SUB_ADMIN");
+
+        // Kuchuja orodha ya watumiaji wote wasio Super Admin au Sub Admin ili wapatikane kwenye Modal ya kuongeza
+        List<User> allUsers = userRepository.findAll();
+        List<User> allUsersList = new ArrayList<>();
+        if (allUsers != null) {
+            for (User u : allUsers) {
+                if (u.getRole() == null || (!u.getRole().equalsIgnoreCase("ADMIN") && !u.getRole().equalsIgnoreCase("SUB_ADMIN"))) {
+                    allUsersList.add(u);
+                }
+            }
+        }
+
         List<Room> rooms = roomRepository.findAll();
         List<Payment> allPayments = paymentRepository.findAll();
 
@@ -235,9 +247,25 @@ public class AdminController {
         model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
         model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>());
+        model.addAttribute("allUsersList", allUsersList);
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
 
-        return "admin"; // Hakikisha faili lako la HTML linajulikana kama admin.html kwenye templates
+        return "admin";
+    }
+
+    // Njia mpya ya kushughulikia kuongeza Sub-Admin kupitia Modal
+    @PostMapping("/admin/sub-admins/add")
+    public String addSubAdmin(@RequestParam("userId") Long userId, HttpSession session) {
+        if (!checkIsSuperAdmin(session)) {
+            return "redirect:/admin/dashboard";
+        }
+
+        userRepository.findById(userId).ifPresent(user -> {
+            user.setRole("SUB_ADMIN");
+            userRepository.save(user);
+        });
+
+        return "redirect:/admin/dashboard?subAdminAdded=true";
     }
 
     @GetMapping("/admin/users/approve/{id}")

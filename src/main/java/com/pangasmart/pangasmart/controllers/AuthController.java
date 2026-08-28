@@ -121,6 +121,11 @@ public class AuthController {
             session.setAttribute("userEmail", user.getEmail());
             session.setAttribute("userRole", user.getRole());
 
+            // 🔹 Mwelekezo sahihi kwa Admin na Sub-Admin
+            if ("ADMIN".equalsIgnoreCase(user.getRole()) || "SUB_ADMIN".equalsIgnoreCase(user.getRole()) || "kkisanga009@gmail.com".equalsIgnoreCase(user.getEmail())) {
+                return "redirect:/admin/dashboard";
+            }
+
             return "redirect:/home";
         }
 
