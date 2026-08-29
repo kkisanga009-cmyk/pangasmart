@@ -36,6 +36,13 @@
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; min-width: 450px; }
 
+        /* Mtindo wa Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 25px; flex-wrap: wrap; }
+        .pagination a, .pagination span { padding: 8:px 12px; padding: 8px 14px; font-size: 13px; font-weight: bold; text-decoration: none; border-radius: 5px; border: 1px solid #cbd5e1; color: #334155; background-color: #fff; }
+        .pagination a:hover { background-color: #f1f5f9; border-color: #94a3b8; }
+        .pagination .active { background-color: #2c3e50; color: white; border-color: #2c3e50; }
+        .pagination .disabled { color: #94a3b8; background-color: #f8fafc; border-color: #e2e8f0; cursor: not-allowed; }
+
         @media (min-width: 768px) {
             .navbar { flex-direction: row; justify-content: space-between; text-align: left; }
             .main-container { flex-direction: row; }
@@ -49,22 +56,19 @@
 </head>
 <body>
 
-<!-- NAVBAR (IMEBORESHWA KUZUIA NULL POINTER EXCEPTION) -->
+<!-- NAVBAR -->
 <div class="navbar">
     <h2>🏠 PangaSmart</h2>
     <div class="navbar-links">
-        <!-- Kinga iwapo session au model haina currentUser au loggedInUser -->
         <span th:if="${session.loggedInUser != null}"
               th:text="'Karibu, ' + ${session.loggedInUser.email} + (${userRole != null} ? ' (' + ${userRole} + ')' : '')">User</span>
         <span th:if="${session.loggedInUser == null and currentUser != null}"
               th:text="'Karibu, ' + ${currentUser.email} + (${userRole != null} ? ' (' + ${userRole} + ')' : '')">User</span>
 
-        <!-- KITUFE CHA MSAADA -->
         <button onclick="openHelpModal()" class="nav-btn" style="background-color: #f39c12; border: none; cursor: pointer;">
             ❓ Help / Msaada
         </button>
 
-        <!-- Kitufe cha Admin ikiwa mtumiaji ni Admin -->
         <a th:if="${userRole == 'ADMIN' or (session.loggedInUser != null and session.loggedInUser.role == 'ADMIN') or (currentUser != null and currentUser.role == 'ADMIN')}"
            href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
 
@@ -72,17 +76,17 @@
         <a href="/logout" class="nav-btn nav-btn-logout">Logout</a>
     </div>
 </div>
-<!-- Kitufe cha kuinstall app kitakachofichika kwanza mpaka simu iruhusu -->
+
 <button id="installBtn" style="display: none; background-color: #075985; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
     📲 Weka PangaSmart Kwenye Simu
 </button>
+
 <div class="main-container">
 
     <!-- DASHBOARD YA LANDLORD -->
     <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}" class="card form-section">
         <h3>Sajili Chumba Kipya</h3>
 
-        <!-- TAARIFA ZA MAFANIKIO KWA LANDLORD -->
         <div th:if="${param.roomAdded}" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
             ✅ Chumba kimesajiliwa kikamilifu!
         </div>
@@ -186,8 +190,6 @@
                 <img th:src="${room.imageUrl}" class="media-preview" alt="Room Image">
                 <div>
                     <a th:href="${room.imageUrl}" download="Chumba_PangaSmart.jpg" class="download-btn">📥 Pakua Picha</a>
-
-                    <!-- KITUFE CHA KUFUTA PICHA (LANDLORD PEKEE) -->
                     <a th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}"
                        th:href="@{/landlord/rooms/delete-image/{id}(id=${room.id})}"
                        class="delete-btn"
@@ -204,7 +206,6 @@
                     Browser yako haisajili ku-play video hii.
                 </video>
 
-                <!-- KITUFE CHA KUFUTA VIDEO (LANDLORD PEKEE) -->
                 <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}">
                     <a th:href="@{/landlord/rooms/delete-video/{id}(id=${room.id})}"
                        class="delete-btn"
@@ -216,7 +217,6 @@
 
             <p style="font-size: 13px; color: #555; margin-top: 8px;" th:text="${room.description}">Maelezo</p>
 
-            <!-- KITUFE CHA KUFUTA CHUMBA KIZIMA (LANDLORD PEKEE) -->
             <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}" style="margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 8px;">
                 <a th:href="@{/landlord/rooms/delete/{id}(id=${room.id})}"
                    class="delete-btn" style="background: #c0392b;"
@@ -228,7 +228,6 @@
             <!-- SEHEMU YA TENANT -->
             <div th:if="${userRole == 'TENANT' or (session.loggedInUser != null and session.loggedInUser.role == 'TENANT')}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
 
-                <!-- IKIKUBALIWA NA PARAMETER AU IKIPO KWENYE ORODHA YA PAIDROOMIDS -->
                 <div th:if="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
                      style="background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: 5px;">
                     <p style="font-weight: bold; font-size: 14px;">✅ Malipo Yamekamilika!</p>
@@ -238,13 +237,39 @@
                     </p>
                 </div>
 
-                <!-- KAMA HUJALIPA BADO -->
                 <form th:unless="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
                       th:action="@{/pay-room}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
                     <button type="submit" class="pay-btn">🔒 Lipia TZS 1,000 Kupata Namba ya Mwenyenyumba</button>
                 </form>
             </div>
+        </div>
+
+        <!-- PAGINATION CONTROLS -->
+        <div th:if="${roomPage != null and roomPage.totalPages > 1}" class="pagination">
+            <!-- Kitufe cha Kurudi Nyuma (Previous) -->
+            <a th:if="${roomPage.hasPrevious()}"
+               th:href="@{/home(page=${roomPage.number - 1}, search=${searchKeyword})}">
+                &laquo; Kabla
+            </a>
+            <span th:unless="${roomPage.hasPrevious()}" class="disabled">&laquo; Kabla</span>
+
+            <!-- Namba za Kurasa -->
+            <span th:each="i : ${#numbers.sequence(0, roomPage.totalPages - 1)}">
+                <a th:if="${i != roomPage.number}"
+                   th:href="@{/home(page=${i}, search=${searchKeyword})}"
+                   th:text="${i + 1}">1</a>
+                <span th:if="${i == roomPage.number}"
+                      th:text="${i + 1}"
+                      class="active">1</span>
+            </span>
+
+            <!-- Kitufe cha Kwenda Mbele (Next) -->
+            <a th:if="${roomPage.hasNext()}"
+               th:href="@{/home(page=${roomPage.number + 1}, search=${searchKeyword})}">
+                Baada &raquo;
+            </a>
+            <span th:unless="${roomPage.hasNext()}" class="disabled">Baada &raquo;</span>
         </div>
 
         <div th:if="${rooms == null or #lists.isEmpty(rooms)}" style="text-align: center; padding: 30px 10px;">

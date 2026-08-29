@@ -12,6 +12,9 @@ import com.pangasmart.pangasmart.services.PesapalService;
 import com.pangasmart.pangasmart.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +54,8 @@ public class HomeController {
     public String showHomePage(Model model,
                                HttpSession session,
                                @RequestParam(value = "search", required = false) String search,
-                               @RequestParam(value = "paidRoomId", required = false) Long paidRoomId) {
+                               @RequestParam(value = "paidRoomId", required = false) Long paidRoomId,
+                               @RequestParam(value = "page", defaultValue = "0") int page) {
         try {
             User user = (User) session.getAttribute("loggedInUser");
 
@@ -65,21 +69,23 @@ public class HomeController {
                 session.setAttribute("userRole", userRole);
             }
 
-            List<Room> roomList = new ArrayList<>();
+            // Kuweka vyumba 6 kila kurasa moja ili mfumo uwe mwepesi
+            Pageable pageable = PageRequest.of(page, 6);
+            Page<Room> roomPage;
             List<Booking> bookingList = new ArrayList<>();
 
             if ("LANDLORD".equalsIgnoreCase(userRole)) {
                 if (search != null && !search.trim().isEmpty()) {
-                    roomList = roomRepository.searchLandlordRooms(user.getEmail(), search);
+                    roomPage = roomRepository.searchLandlordRooms(user.getEmail(), search, pageable);
                 } else {
-                    roomList = roomRepository.findByLandlordEmail(user.getEmail());
+                    roomPage = roomRepository.findByLandlordEmail(user.getEmail(), pageable);
                 }
                 bookingList = bookingRepository.findByLandlordEmail(user.getEmail());
             } else {
                 if (search != null && !search.trim().isEmpty()) {
-                    roomList = roomRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(search, search);
+                    roomPage = roomRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(search, search, pageable);
                 } else {
-                    roomList = roomRepository.findAll();
+                    roomPage = roomRepository.findAll(pageable);
                 }
             }
 
@@ -125,7 +131,8 @@ public class HomeController {
 
             model.addAttribute("currentUser", user);
             model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
-            model.addAttribute("rooms", roomList != null ? roomList : new ArrayList<>());
+            model.addAttribute("rooms", roomPage.getContent());
+            model.addAttribute("roomPage", roomPage);
             model.addAttribute("bookings", bookingList != null ? bookingList : new ArrayList<>());
             model.addAttribute("searchKeyword", search);
             model.addAttribute("paidRoomIds", paidRoomIds);
@@ -162,14 +169,12 @@ public class HomeController {
                 Files.createDirectories(uploadPath);
             }
 
-            // Hifadhi picha kama faili halisi
             if (imageFile != null && !imageFile.isEmpty()) {
                 String imgFileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
                 Files.copy(imageFile.getInputStream(), uploadPath.resolve(imgFileName), StandardCopyOption.REPLACE_EXISTING);
                 room.setImageUrl("/uploads/" + imgFileName);
             }
 
-            // Hifadhi video kama faili halisi badala ya Base64
             if (videoFile != null && !videoFile.isEmpty()) {
                 String videoFileName = System.currentTimeMillis() + "_" + videoFile.getOriginalFilename();
                 Files.copy(videoFile.getInputStream(), uploadPath.resolve(videoFileName), StandardCopyOption.REPLACE_EXISTING);
