@@ -10,8 +10,6 @@ import com.pangasmart.pangasmart.repositories.RoomRepository;
 import com.pangasmart.pangasmart.repositories.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 public class AdminController {
@@ -38,9 +35,6 @@ public class AdminController {
 
     @Autowired
     private BookingRepository bookingRepository;
-
-    @Autowired
-    private JavaMailSender mailSender;
 
     private boolean checkIsAnyAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -327,7 +321,7 @@ public class AdminController {
         return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
-    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (IMETENGENEZWA SALAMA) ---
+    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (BILA EMAIL) ---
 
     @GetMapping("/admin/landlord-booking/approve/{id}")
     public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
@@ -338,24 +332,6 @@ public class AdminController {
             landlord.setBookingRequestStatus("APPROVED");
             landlord.setAdminMessage("Ombi lako limekubaliwa! Sasa wapangaji watafanya booking online, na fedha zako zitatumwa na Admin kwako moja kwa moja.");
             userRepository.save(landlord);
-
-            // Kutuma Barua Pepe kwenye Thread tofauti ili kuzuia database connection timeout
-            if (landlord.getEmail() != null && !landlord.getEmail().trim().isEmpty()) {
-                new Thread(() -> {
-                    try {
-                        SimpleMailMessage message = new SimpleMailMessage();
-                        message.setTo(landlord.getEmail());
-                        message.setSubject("Ombi Lako la Online Booking Limeidhinishwa - PangaSmart");
-                        message.setText("Habari " + (landlord.getFullName() != null ? landlord.getFullName() : "Mwenyenyumba") + ",\n\n"
-                                + "Ombi lako la kuwezesha online booking kwenye mfumo wa PangaSmart limeidhinishwa rasmi na Admin.\n"
-                                + "Sasa unaweza kupokea maombi ya booking na wapangaji watafanya malipo moja kwa moja.\n\n"
-                                + "Asante,\nPangaSmart Team");
-                        mailSender.send(message);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }
         });
 
         return "redirect:/admin/dashboard?landlordBookingApproved=true";
