@@ -40,7 +40,7 @@ public class AdminController {
     private BookingRepository bookingRepository;
 
     @Autowired
-    private JavaMailSender mailSender; // Imeongezwa hapa kwa ajili ya kutuma email
+    private JavaMailSender mailSender;
 
     private boolean checkIsAnyAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -327,7 +327,7 @@ public class AdminController {
         return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
-    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (IMETENGENEZWA NA UTUMAJI WA EMAIL) ---
+    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (IMETENGENEZWA SALAMA) ---
 
     @GetMapping("/admin/landlord-booking/approve/{id}")
     public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
@@ -339,20 +339,22 @@ public class AdminController {
             landlord.setAdminMessage("Ombi lako limekubaliwa! Sasa wapangaji watafanya booking online, na fedha zako zitatumwa na Admin kwako moja kwa moja.");
             userRepository.save(landlord);
 
-            // Kutuma Barua Pepe (Email) kwa Mwenyenyumba
+            // Kutuma Barua Pepe kwenye Thread tofauti ili kuzuia database connection timeout
             if (landlord.getEmail() != null && !landlord.getEmail().trim().isEmpty()) {
-                try {
-                    SimpleMailMessage message = new SimpleMailMessage();
-                    message.setTo(landlord.getEmail());
-                    message.setSubject("Ombi Lako la Online Booking Limeidhinishwa - PangaSmart");
-                    message.setText("Habari " + (landlord.getFullName() != null ? landlord.getFullName() : "Mwenyenyumba") + ",\n\n"
-                            + "Ombi lako la kuwezesha online booking kwenye mfumo wa PangaSmart limeidhinishwa rasmi na Admin.\n"
-                            + "Sasa unaweza kupokea maombi ya booking na wapangaji watafanya malipo moja kwa moja.\n\n"
-                            + "Asante,\nPangaSmart Team");
-                    mailSender.send(message);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                new Thread(() -> {
+                    try {
+                        SimpleMailMessage message = new SimpleMailMessage();
+                        message.setTo(landlord.getEmail());
+                        message.setSubject("Ombi Lako la Online Booking Limeidhinishwa - PangaSmart");
+                        message.setText("Habari " + (landlord.getFullName() != null ? landlord.getFullName() : "Mwenyenyumba") + ",\n\n"
+                                + "Ombi lako la kuwezesha online booking kwenye mfumo wa PangaSmart limeidhinishwa rasmi na Admin.\n"
+                                + "Sasa unaweza kupokea maombi ya booking na wapangaji watafanya malipo moja kwa moja.\n\n"
+                                + "Asante,\nPangaSmart Team");
+                        mailSender.send(message);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
             }
         });
 
