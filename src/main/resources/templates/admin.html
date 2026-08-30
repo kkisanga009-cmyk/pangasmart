@@ -341,15 +341,21 @@
     <div style="background: white; padding: 25px; border-radius: 12px; max-width: 450px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative;">
         <span onclick="closeSubAdminModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
         <h4 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-plus me-2"></i> Teua Sub-Admin</h4>
-        <p class="text-muted small mb-3">Chagua mtumiaji kutoka kwenye orodha ili kumpa mamlaka ya kuwa Sub-Admin kwenye mfumo.</p>
+        <p class="text-muted small mb-3">Andika jina au email ya mtumiaji ili kumtafuta na kumpa mamlaka ya kuwa Sub-Admin.</p>
 
         <form th:action="@{/admin/sub-admins/add}" method="post">
             <div class="mb-3">
-                <label for="userId" class="form-label fw-semibold">Chagua Mtumiaji:</label>
-                <select name="userId" id="userId" class="form-select" required>
-                    <option value="" disabled selected>-- Chagua Mtumiaji --</option>
-                    <option th:each="u : ${allUsersList}" th:value="${u.id}" th:text="${u.fullName + ' (' + u.email + ') - [' + u.role + ']'}"></option>
+                <label for="subAdminSearchInput" class="form-label fw-semibold">Tafuta na Chagua Mtumiaji:</label>
+                <input type="text" id="subAdminSearchInput" class="form-control mb-2" placeholder="Anza kuandika jina au email..." onkeyup="filterSubAdminOptions()" autocomplete="off">
+
+                <select name="userId" id="userIdSelect" class="form-select" size="5" required style="cursor: pointer;">
+                    <option th:each="u : ${allUsersList}"
+                            th:value="${u.id}"
+                            th:data-search="${u.fullName + ' ' + u.email + ' ' + u.role}"
+                            th:text="${u.fullName + ' (' + u.email + ') - [' + u.role + ']'}">
+                    </option>
                 </select>
+                <small class="text-muted">Bonyeza kwenye jina la mtumiaji husika kutoka kwenye orodha hapo juu.</small>
             </div>
             <div class="d-flex justify-content-end gap-2">
                 <button type="button" class="btn btn-secondary btn-sm" onclick="closeSubAdminModal()">Ghairi</button>
@@ -402,6 +408,22 @@
                     }
                 }
                 tr[j].style.display = found ? "" : "none";
+            }
+        }
+    }
+
+    // Kazi ya kuchuja watumiaji kwenye Modal ya Sub-Admin wakati wa kuandika
+    function filterSubAdminOptions() {
+        let input = document.getElementById("subAdminSearchInput").value.toLowerCase();
+        let select = document.getElementById("userIdSelect");
+        let options = select.getElementsByTagName("option");
+
+        for (let i = 0; i < options.length; i++) {
+            let searchData = options[i].getAttribute("data-search").toLowerCase();
+            if (searchData.indexOf(input) > -1) {
+                options[i].style.display = "";
+            } else {
+                options[i].style.display = "none";
             }
         }
     }
