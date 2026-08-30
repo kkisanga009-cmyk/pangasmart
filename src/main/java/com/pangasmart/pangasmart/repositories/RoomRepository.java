@@ -8,11 +8,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
     // Kupata vyumba vya Landlord kwa mfumo wa Pageable
     Page<Room> findByLandlordEmail(String landlordEmail, Pageable pageable);
+
+    // Njia salama inayorudisha List ya vyumba bila kuvuruga Pageable iliyopo juu
+    default List<Room> findAllByLandlordEmail(String landlordEmail) {
+        return findByLandlordEmail(landlordEmail, Pageable.unpaged()).getContent();
+    }
 
     // Kutafuta vyumba (Search) kwa Tenants kwa mfumo wa Pageable
     Page<Room> findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(String title, String location, Pageable pageable);

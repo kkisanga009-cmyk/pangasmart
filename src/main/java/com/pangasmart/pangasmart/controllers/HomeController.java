@@ -80,8 +80,31 @@ public class HomeController {
                     model.addAttribute("landlord", landlord);
                     model.addAttribute("adminMessage", landlord.getAdminMessage());
                 }
-                // Kuchota bookings za mwenyenyumba huyu kwa kutumia email yake
-                landlordBookings = bookingRepository.findByLandlordEmail(user.getEmail());
+
+                // 1. Pata vyumba vyote vya huyu mwenyenyumba kwanza
+                List<Room> myRooms = roomRepository.findAllByLandlordEmail(user.getEmail());
+
+                // 2. Chota bookings zote kisha chuja zile zinazohusiana na vyumba vyake AU email yake ili table isomeke vizuri
+                List<Booking> allBookings = bookingRepository.findAll();
+                if (allBookings != null) {
+                    for (Booking b : allBookings) {
+                        boolean matchesEmail = (b.getLandlordEmail() != null && b.getLandlordEmail().equalsIgnoreCase(user.getEmail()));
+                        boolean matchesRoom = false;
+
+                        if (myRooms != null && b.getRoomId() != null) {
+                            for (Room r : myRooms) {
+                                if (r.getId() != null && r.getId().equals(b.getRoomId())) {
+                                    matchesRoom = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (matchesEmail || matchesRoom) {
+                            landlordBookings.add(b);
+                        }
+                    }
+                }
             }
 
             Pageable pageable = PageRequest.of(page, 6);
@@ -89,6 +112,7 @@ public class HomeController {
 
             if ("LANDLORD".equalsIgnoreCase(userRole)) {
                 if (search != null && !search.trim().isEmpty()) {
+                    // Yamewekwa vigezo viwili hapa: email na search ili kuondoa kosa la arguments
                     roomPage = roomRepository.searchLandlordRooms(user.getEmail(), search, pageable);
                 } else {
                     roomPage = roomRepository.findByLandlordEmail(user.getEmail(), pageable);
@@ -374,7 +398,7 @@ public class HomeController {
                     booking.setLandlordName(room.getLandlordName());
                     booking.setLandlordPhone(room.getLandlordPhone());
 
-                    // Hali ya Ombi (Inasubiri uthibitisho wa Admin)
+                    // Hali ya Ombi
                     booking.setStatus("PENDING_PAYMENT");
                     booking.setCreatedAt(LocalDateTime.now());
 
