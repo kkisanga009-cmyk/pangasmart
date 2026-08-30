@@ -117,8 +117,8 @@
             <button type="submit" class="btn" style="background-color: #8e44ad;">Hifadhi Mipangilio ya Booking & Tuma kwa Admin</button>
         </form>
 
-        <!-- TABLE YA KUONYESHA BOOKINGS ZOTE ZA MWENYENYUMBA (Hapa ndipo ilipokuwa inakosekana) -->
-        <div style="margin-bottom: 25px; background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px;">
+        <!-- TABLE YA ORODHA YA BOOKINGS (Inatokea tu ikiwa Admin amemuidhinisha APPROVED na mwenyenyumba kawasha allowBooking) -->
+        <div th:if="${landlord != null and landlord.allowBooking and T(java.util.Objects).equals(landlord.status, 'APPROVED')}" style="margin-bottom: 25px; background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px;">
             <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📋 Orodha ya Maombi ya Booking & Malipo</h4>
             <div class="table-responsive">
                 <table th:if="${bookings != null and not #lists.isEmpty(bookings)}">

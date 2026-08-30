@@ -70,38 +70,44 @@ public class HomeController {
                 session.setAttribute("userRole", userRole);
             }
 
-            // Kuchota taarifa kamili za mtumiaji kama ni LANDLORD ili kupata bookingFee, allowBooking na adminMessage zake
             User landlord = null;
             List<Booking> landlordBookings = new ArrayList<>();
+            boolean isBookingAllowedByAdmin = false;
+
             if ("LANDLORD".equalsIgnoreCase(userRole)) {
                 Optional<User> landlordOpt = userRepository.findByEmail(user.getEmail());
                 if (landlordOpt.isPresent()) {
                     landlord = landlordOpt.get();
                     model.addAttribute("landlord", landlord);
                     model.addAttribute("adminMessage", landlord.getAdminMessage());
+
+                    // Kuhakikisha imewashwa na imepitishwa na Admin (APPROVED)
+                    boolean isApprovedByAdmin = "APPROVED".equalsIgnoreCase(landlord.getStatus());
+                    isBookingAllowedByAdmin = landlord.isAllowBooking() && isApprovedByAdmin;
                 }
 
-                // 1. Pata vyumba vyote vya huyu mwenyenyumba kwanza
-                List<Room> myRooms = roomRepository.findAllByLandlordEmail(user.getEmail());
+                // Chota bookings tu kama Admin ameshamuidhinisha mwenyenyumba kuruhusu booking
+                if (isBookingAllowedByAdmin) {
+                    List<Room> myRooms = roomRepository.findAllByLandlordEmail(user.getEmail());
+                    List<Booking> allBookings = bookingRepository.findAll();
 
-                // 2. Chota bookings zote kisha chuja zile zinazohusiana na vyumba vyake AU email yake ili table isomeke vizuri
-                List<Booking> allBookings = bookingRepository.findAll();
-                if (allBookings != null) {
-                    for (Booking b : allBookings) {
-                        boolean matchesEmail = (b.getLandlordEmail() != null && b.getLandlordEmail().equalsIgnoreCase(user.getEmail()));
-                        boolean matchesRoom = false;
+                    if (allBookings != null) {
+                        for (Booking b : allBookings) {
+                            boolean matchesEmail = (b.getLandlordEmail() != null && b.getLandlordEmail().equalsIgnoreCase(user.getEmail()));
+                            boolean matchesRoom = false;
 
-                        if (myRooms != null && b.getRoomId() != null) {
-                            for (Room r : myRooms) {
-                                if (r.getId() != null && r.getId().equals(b.getRoomId())) {
-                                    matchesRoom = true;
-                                    break;
+                            if (myRooms != null && b.getRoomId() != null) {
+                                for (Room r : myRooms) {
+                                    if (r.getId() != null && r.getId().equals(b.getRoomId())) {
+                                        matchesRoom = true;
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        if (matchesEmail || matchesRoom) {
-                            landlordBookings.add(b);
+                            if (matchesEmail || matchesRoom) {
+                                landlordBookings.add(b);
+                            }
                         }
                     }
                 }
@@ -112,7 +118,6 @@ public class HomeController {
 
             if ("LANDLORD".equalsIgnoreCase(userRole)) {
                 if (search != null && !search.trim().isEmpty()) {
-                    // Yamewekwa vigezo viwili hapa: email na search ili kuondoa kosa la arguments
                     roomPage = roomRepository.searchLandlordRooms(user.getEmail(), search, pageable);
                 } else {
                     roomPage = roomRepository.findByLandlordEmail(user.getEmail(), pageable);
@@ -125,7 +130,6 @@ public class HomeController {
                 }
             }
 
-            // Kukagua vyumba vyote kwenye kurasa na kuhakikisha allowBooking inazingatia idhini ya Admin (APPROVED)
             for (Room room : roomPage.getContent()) {
                 if (room.getLandlordEmail() != null) {
                     Optional<User> ownerOpt = userRepository.findByEmail(room.getLandlordEmail());
@@ -186,7 +190,7 @@ public class HomeController {
             model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
             model.addAttribute("rooms", roomPage.getContent());
             model.addAttribute("roomPage", roomPage);
-            model.addAttribute("bookings", landlordBookings);
+            model.addAttribute("bookings", isBookingAllowedByAdmin ? landlordBookings : null);
             model.addAttribute("searchKeyword", search);
             model.addAttribute("paidRoomIds", paidRoomIds);
 
@@ -198,7 +202,6 @@ public class HomeController {
         }
     }
 
-    // Endpoint inayopokea taarifa kutoka kwenye fomu ya Mipangilio ya Booking ya Landlord
     @PostMapping("/landlord/booking-settings")
     public String updateBookingSettings(@RequestParam(value = "allowBooking", required = false) Boolean allowBooking,
                                         @RequestParam(value = "bookingFee", required = false) Double bookingFee,
@@ -376,29 +379,24 @@ public class HomeController {
                 payment.setStatus("PENDING");
                 paymentRepository.save(payment);
 
-                // --- KUWEKA TAARIFA KAMILI ZA BOOKING ZINAZOHITAJIKA NA LANDLORD ---
                 Optional<Room> roomOpt = roomRepository.findById(roomId);
                 if (roomOpt.isPresent()) {
                     Room room = roomOpt.get();
                     Booking booking = new Booking();
 
-                    // Taarifa za Mpangaji
                     booking.setTenantId(user.getId());
                     booking.setTenantName(user.getFullName());
                     booking.setTenantEmail(user.getEmail());
                     booking.setTenantPhone(user.getPhone());
 
-                    // Taarifa za Chumba
                     booking.setRoomId(roomId);
                     booking.setRoomTitle(room.getTitle());
                     booking.setBookingAmount(amount);
 
-                    // Taarifa za Mwenyenyumba
                     booking.setLandlordEmail(room.getLandlordEmail());
                     booking.setLandlordName(room.getLandlordName());
                     booking.setLandlordPhone(room.getLandlordPhone());
 
-                    // Hali ya Ombi
                     booking.setStatus("PENDING_PAYMENT");
                     booking.setCreatedAt(LocalDateTime.now());
 
