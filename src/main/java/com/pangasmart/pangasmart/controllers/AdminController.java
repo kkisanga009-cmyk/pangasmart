@@ -10,6 +10,8 @@ import com.pangasmart.pangasmart.repositories.RoomRepository;
 import com.pangasmart.pangasmart.repositories.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +38,9 @@ public class AdminController {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private JavaMailSender mailSender; // Imeongezwa hapa kwa ajili ya kutuma email
 
     private boolean checkIsAnyAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -308,11 +313,9 @@ public class AdminController {
             return "redirect:/login";
         }
         bookingRepository.findById(id).ifPresent(booking -> {
-            // Badilisha status iwe APPROVED au COMPLETED ili ionekane moja kwa moja kwenye dashboard ya Mwenyenyumba
             booking.setStatus("APPROVED");
             bookingRepository.save(booking);
 
-            // Kama unahitaji chumba kifutwe baada ya kulipiwa na kudhibitishwa na admin:
             if (booking.getRoomId() != null) {
                 try {
                     roomRepository.deleteById(booking.getRoomId());
@@ -324,17 +327,35 @@ public class AdminController {
         return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
-    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
+    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (IMETENGENEZWA NA UTUMAJI WA EMAIL) ---
 
     @GetMapping("/admin/landlord-booking/approve/{id}")
     public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) { return "redirect:/login"; }
+
         userRepository.findById(id).ifPresent(landlord -> {
             landlord.setAllowBooking(true);
             landlord.setBookingRequestStatus("APPROVED");
             landlord.setAdminMessage("Ombi lako limekubaliwa! Sasa wapangaji watafanya booking online, na fedha zako zitatumwa na Admin kwako moja kwa moja.");
             userRepository.save(landlord);
+
+            // Kutuma Barua Pepe (Email) kwa Mwenyenyumba
+            if (landlord.getEmail() != null && !landlord.getEmail().trim().isEmpty()) {
+                try {
+                    SimpleMailMessage message = new SimpleMailMessage();
+                    message.setTo(landlord.getEmail());
+                    message.setSubject("Ombi Lako la Online Booking Limeidhinishwa - PangaSmart");
+                    message.setText("Habari " + (landlord.getFullName() != null ? landlord.getFullName() : "Mwenyenyumba") + ",\n\n"
+                            + "Ombi lako la kuwezesha online booking kwenye mfumo wa PangaSmart limeidhinishwa rasmi na Admin.\n"
+                            + "Sasa unaweza kupokea maombi ya booking na wapangaji watafanya malipo moja kwa moja.\n\n"
+                            + "Asante,\nPangaSmart Team");
+                    mailSender.send(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         });
+
         return "redirect:/admin/dashboard?landlordBookingApproved=true";
     }
 
@@ -402,7 +423,7 @@ public class AdminController {
     public String deleteUser(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsSuperAdmin(session)) { return "redirect:/admin/dashboard"; }
         userRepository.deleteById(id);
-        return "redirect:/admin/dashboard`?userDeleted=true";
+        return "redirect:/admin/dashboard?userDeleted=true";
     }
 
     @GetMapping("/admin/users/edit/{id}")
