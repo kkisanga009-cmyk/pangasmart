@@ -185,10 +185,19 @@ public class HomeController {
             Optional<User> userOpt = userRepository.findByEmail(user.getEmail());
             if (userOpt.isPresent()) {
                 User landlord = userOpt.get();
-                landlord.setAllowBooking(allowBooking != null && allowBooking);
-                landlord.setBookingFee(bookingFee != null ? bookingFee : 0.0);
-                userRepository.save(landlord);
+                boolean wantsBooking = allowBooking != null && allowBooking;
 
+                landlord.setAllowBooking(wantsBooking);
+                landlord.setBookingFee(bookingFee != null ? bookingFee : 0.0);
+
+                // Hapa tunaweka hali ya PENDING ili Admin aweze kuona ombi hili kwenye Dashibodi yake
+                if (wantsBooking) {
+                    landlord.setBookingRequestStatus("PENDING");
+                } else {
+                    landlord.setBookingRequestStatus("INACTIVE");
+                }
+
+                userRepository.save(landlord);
                 session.setAttribute("loggedInUser", landlord);
             }
         } catch (Exception e) {

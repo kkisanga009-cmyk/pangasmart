@@ -140,6 +140,16 @@ public class AdminController {
         List<User> landlords = userRepository.findByRole("LANDLORD");
         List<User> subAdmins = userRepository.findByRole("SUB_ADMIN");
 
+        // Kuchuja wamiliki wa nyumba waliomba online booking (mfano wenye allowBooking == true au status PENDING)
+        List<User> landlordBookingRequests = new ArrayList<>();
+        if (landlords != null) {
+            for (User l : landlords) {
+                if (l.isAllowBooking() || "PENDING".equalsIgnoreCase(l.getBookingRequestStatus())) {
+                    landlordBookingRequests.add(l);
+                }
+            }
+        }
+
         List<User> allUsers = userRepository.findAll();
         List<User> allUsersList = new ArrayList<>();
         if (allUsers != null) {
@@ -259,6 +269,7 @@ public class AdminController {
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
+        model.addAttribute("landlordBookingRequests", landlordBookingRequests); // Hapa ndipo ilipokuwa inakosekana!
         model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>());
         model.addAttribute("allUsersList", allUsersList);
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
@@ -312,7 +323,7 @@ public class AdminController {
         return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
-    // --- SEHEMU MPYA YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
+    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
 
     @PostMapping("/admin/landlord-booking/approve/{id}")
     public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
