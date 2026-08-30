@@ -141,7 +141,6 @@
             <div th:if="${param.subAdminAdded}" class="alert alert-success">✅ Sub-Admin ameongezwa kikamilifu!</div>
             <div th:if="${param.bookingAccepted}" class="alert alert-success">✅ Ombi la booking limekubaliwa! Lipa namba imetumwa kwa mpangaji.</div>
             <div th:if="${param.bookingCompleted}" class="alert alert-success">✅ Malipo ya booking yamethibitishwa! Chumba kimefutwa na ujumbe umetumwa kwa mwenye nyumba.</div>
-            <!-- Alert mpya za Landlord Online Booking Actions -->
             <div th:if="${param.landlordBookingApproved}" class="alert alert-success">✅ Ombi la mwenye nyumba la online booking limeidhinishwa kikamilifu na ujumbe umetumwa!</div>
             <div th:if="${param.landlordBookingRejected}" class="alert alert-warning">⚠️ Ombi la mwenye nyumba la online booking limekataliwa.</div>
             <div th:if="${param.landlordBookingRemoved}" class="alert alert-danger">🗑️ Ruhusa ya online booking imeondolewa kwa mwenye nyumba huyu.</div>
@@ -169,20 +168,18 @@
                             </td>
                             <td><span class="phone-highlight" th:text="${lb.phone}">0700000000</span></td>
                             <td>
+                                <!-- KUBADILISHWA: onlineBookingStatus imebadilishwa kuwa bookingRequestStatus sahihi -->
                                 <span class="badge px-2 py-1"
-                                      th:classappend="${lb.onlineBookingStatus == 'APPROVED' ? 'bg-success text-white' : (lb.onlineBookingStatus == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark')}"
-                                      th:text="${lb.onlineBookingStatus != null ? lb.onlineBookingStatus : 'PENDING'}">PENDING</span>
+                                      th:classappend="${lb.bookingRequestStatus == 'APPROVED' ? 'bg-success text-white' : (lb.bookingRequestStatus == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark')}"
+                                      th:text="${lb.bookingRequestStatus != null ? lb.bookingRequestStatus : 'PENDING'}">PENDING</span>
                             </td>
                             <td>
-                                <!-- Kitufe cha Approve -->
                                 <a th:href="@{/admin/landlord-booking/approve/{id}(id=${lb.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1 fw-bold">
                                     <i class="fa-solid fa-check"></i> Approve
                                 </a>
-                                <!-- Kitufe cha Reject -->
                                 <a th:href="@{/admin/landlord-booking/reject/{id}(id=${lb.id})}" class="btn btn-sm btn-action-reject px-2 py-1 me-1 fw-bold" onclick="return confirm('Kataa ombi hili la mwenye nyumba?')">
                                     <i class="fa-solid fa-xmark"></i> Reject
                                 </a>
-                                <!-- Kitufe cha Remove (Kufuta/Kusitisha ruhusa) -->
                                 <a th:href="@{/admin/landlord-booking/remove/{id}(id=${lb.id})}" class="btn btn-sm btn-action-delete px-2 py-1 fw-bold" onclick="return confirm('Ondoa ruhusa ya online booking kwa mwenye nyumba huyu?')">
                                     <i class="fa-solid fa-trash"></i> Remove
                                 </a>
@@ -229,15 +226,12 @@
                                       th:text="${b.status != null ? b.status : 'PENDING'}">PENDING</span>
                             </td>
                             <td>
-                                <!-- 1. Admin anapobonyeza ACCEPT (Kutoa Lipa Namba kwa mpangaji) -->
                                 <a th:if="${b.status == 'PENDING'}" th:href="@{/admin/booking/accept/{id}(id=${b.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1 fw-bold">
                                     <i class="fa-solid fa-check"></i> Accept (Tuma Lipa Namba)
                                 </a>
-                                <!-- 2. Admin anapobonyeza REJECT -->
                                 <a th:if="${b.status == 'PENDING'}" th:href="@{/admin/booking/reject/{id}(id=${b.id})}" class="btn btn-sm btn-action-delete px-2 py-1 fw-bold" onclick="return confirm('Kataa booking hii?')">
                                     <i class="fa-solid fa-xmark"></i> Reject
                                 </a>
-                                <!-- 3. Baada ya mpangaji kulipia kupitia Lipa Namba, Admin anabonyeza Hiki Kitufe ili kufuta chumba na kutuma taarifa kwa mwenye nyumba -->
                                 <a th:if="${b.status == 'APPROVED'}" th:href="@{/admin/booking/complete/{id}(id=${b.id})}" class="btn btn-sm btn-primary px-2 py-1 fw-bold" onclick="return confirm('Thibitisha malipo: Je, ufute chumba hiki na kumtumia taarifa mwenye nyumba?')">
                                     <i class="fa-solid fa-circle-check"></i> Thibitisha Malipo & Futa Chumba
                                 </a>
@@ -526,7 +520,6 @@
         }
     }
 
-    // Kazi ya kuchuja watumiaji kwenye Modal ya Sub-Admin wakati wa kuandika
     function filterSubAdminOptions() {
         let input = document.getElementById("subAdminSearchInput").value.toLowerCase();
         let select = document.getElementById("userIdSelect");

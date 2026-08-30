@@ -20,7 +20,7 @@ public class User {
     private boolean allowBooking;
     private double bookingFee;
 
-    // Nyanja mpya kwa ajili ya kusimamia maombi ya online booking na ujumbe wa Admin
+    // Nyanja maalum kwa ajili ya kusimamia maombi ya online booking na ujumbe wa Admin
     private String bookingRequestStatus; // PENDING, APPROVED, REJECTED, REMOVED
     private String adminMessage;
 
