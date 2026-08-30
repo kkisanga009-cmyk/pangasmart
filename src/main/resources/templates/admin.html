@@ -168,7 +168,6 @@
                             </td>
                             <td><span class="phone-highlight" th:text="${lb.phone}">0700000000</span></td>
                             <td>
-                                <!-- KUBADILISHWA: onlineBookingStatus imebadilishwa kuwa bookingRequestStatus sahihi -->
                                 <span class="badge px-2 py-1"
                                       th:classappend="${lb.bookingRequestStatus == 'APPROVED' ? 'bg-success text-white' : (lb.bookingRequestStatus == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark')}"
                                       th:text="${lb.bookingRequestStatus != null ? lb.bookingRequestStatus : 'PENDING'}">PENDING</span>
