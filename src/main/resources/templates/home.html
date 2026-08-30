@@ -100,7 +100,7 @@
             ✅ Mipangilio ya Booking imehifadhiwa na imetumwa kwa Admin Mkuu!
         </div>
 
-        <!-- MPANGILIO WA BOOKING YA MWENYE NYUMBA (Na Ongezo la Validation ya Kuzuia isipite bila tiki) -->
+        <!-- MPANGILIO WA BOOKING YA MWENYE NYUMBA -->
         <form th:action="@{/landlord/booking-settings}" method="post" onsubmit="return validateBookingSettings(this)" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e9ecef;">
             <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📌 Mipangilio ya Booking Mtandaoni</h4>
 
@@ -121,9 +121,16 @@
             <button type="submit" class="btn" style="background-color: #8e44ad;">Hifadhi Mipangilio ya Booking & Tuma kwa Admin</button>
         </form>
 
-        <!-- TABLE YA ORODHA YA BOOKINGS (Inatokea TU KAMA Admin amemuidhinisha APPROVED NA Pia amewasha allowBooking) -->
-        <div th:if="${landlord != null and landlord.allowBooking and landlord.status == 'APPROVED'}" style="margin-bottom: 25px; background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px;">
+        <!-- TABLE YA ORODHA YA BOOKINGS NA UJUMBE WA ADMIN -->
+        <div style="margin-bottom: 25px; background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px;">
             <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📋 Orodha ya Maombi ya Booking & Malipo</h4>
+
+            <!-- Ujumbe utakaotokea mara baada ya Admin ku-approve -->
+            <div th:if="${landlord != null and landlord.adminMessage != null and !#strings.isEmpty(landlord.adminMessage)}"
+                 style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 5px; margin-bottom: 12px; font-size: 13px; font-weight: bold; border: 1px solid #bae6fd;">
+                ℹ️ <span th:text="${landlord.adminMessage}">Ujumbe kutoka kwa Admin</span>
+            </div>
+
             <div class="table-responsive">
                 <table th:if="${bookings != null and not #lists.isEmpty(bookings)}">
                     <thead>
@@ -333,7 +340,6 @@
 </div>
 
 <script>
-    // Sehemu ya kuzuia form isitumwe kama tiki haijawashwa
     function validateBookingSettings(form) {
         let checkbox = document.getElementById("allowBookingCheckbox");
         let alertBox = document.getElementById("bookingAlert");
@@ -341,7 +347,7 @@
         if (!checkbox.checked) {
             alertBox.style.display = "block";
             checkbox.focus();
-            return false; // Inazuia form isiende backend
+            return false;
         }
 
         alertBox.style.display = "none";
