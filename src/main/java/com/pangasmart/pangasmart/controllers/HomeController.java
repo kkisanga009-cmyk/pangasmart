@@ -69,7 +69,6 @@ public class HomeController {
                 session.setAttribute("userRole", userRole);
             }
 
-            // Kuweka vyumba 6 kila kurasa moja ili mfumo uwe mwepesi
             Pageable pageable = PageRequest.of(page, 6);
             Page<Room> roomPage;
             List<Booking> bookingList = new ArrayList<>();
