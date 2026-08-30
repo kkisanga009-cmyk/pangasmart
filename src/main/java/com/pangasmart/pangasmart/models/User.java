@@ -22,6 +22,10 @@ public class User {
 
     // Nyanja maalum kwa ajili ya kusimamia maombi ya online booking na ujumbe wa Admin
     private String bookingRequestStatus; // PENDING, APPROVED, REJECTED, REMOVED
+
+    // Nyanja hii imeongezwa ili kuzuia lile kosa la Thymeleaf kwenye admin.html
+    private String onlineBookingStatus;
+
     private String adminMessage;
 
     public User() {}
@@ -57,6 +61,10 @@ public class User {
 
     public String getBookingRequestStatus() { return bookingRequestStatus; }
     public void setBookingRequestStatus(String bookingRequestStatus) { this.bookingRequestStatus = bookingRequestStatus; }
+
+    // Getter na Setter kwa ajili ya onlineBookingStatus
+    public String getOnlineBookingStatus() { return onlineBookingStatus; }
+    public void setOnlineBookingStatus(String onlineBookingStatus) { this.onlineBookingStatus = onlineBookingStatus; }
 
     public String getAdminMessage() { return adminMessage; }
     public void setAdminMessage(String adminMessage) { this.adminMessage = adminMessage; }
