@@ -171,7 +171,7 @@ public class HomeController {
         }
     }
 
-    // Endpoint inayopokea taarifa kutoka kwenye fomu ya Mipangilio ya Booking ya Landlord kwenye HTML yako
+    // Endpoint inayopokea taarifa kutoka kwenye fomu ya Mipangilio ya Booking ya Landlord
     @PostMapping("/landlord/booking-settings")
     public String updateBookingSettings(@RequestParam(value = "allowBooking", required = false) Boolean allowBooking,
                                         @RequestParam(value = "bookingFee", required = false) Double bookingFee,

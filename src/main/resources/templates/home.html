@@ -208,12 +208,15 @@
 
                     <!-- KAMA MWENYE NYUMBA AMEWEKA RUHUSU BOOKING (ONLINE BOOKING) -->
                     <div th:if="${room.allowBooking}" style="margin-top: 12px; border-top: 1px dashed #a3cfbb; padding-top: 10px;">
-                        <p style="font-size: 13px; font-weight: bold; margin-bottom: 6px;">Unataka kubook chumba hiki? Bonyeza kitufe chini kuwasiliana na Admin:</p>
-                        <a th:href="@{'https://wa.me/255747466962?text=Habari%20Admin,%20Mimi%20' + (${currentUser != null ? currentUser.email : (session.loggedInUser != null ? session.loggedInUser.email : 'Mpangaji')}) + '%20ninahitaji%20kubook%20chumba%20cha%20mwenye%20nyumba%20huyu:%20' + room.landlordName + '%20(Chumba:%20' + room.title + ')'}"
-                           target="_blank"
-                           class="btn" style="background-color: #25D366; text-decoration: none; display: inline-block; text-align: center; font-size: 13px;">
-                            💬 Press Booking (Wasiliana na Admin WhatsApp)
-                        </a>
+                        <p style="font-size: 13px; font-weight: bold; margin-bottom: 6px;">Unataka kubook chumba hiki? Bonyeza kitufe chini kutuma ombi la booking:</p>
+
+                        <!-- Fomu ya Kutuma Ombi la Booking Moja kwa Moja kwenye Backend -->
+                        <form th:action="@{/tenant/book-room}" method="post">
+                            <input type="hidden" name="roomId" th:value="${room.id}">
+                            <button type="submit" class="btn" style="background-color: #25D366; font-size: 13px;">
+                                📝 Tuma Ombi la Booking Sasa
+                            </button>
+                        </form>
                     </div>
                 </div>
 

@@ -57,6 +57,7 @@
             </h4>
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link active" href="/admin/dashboard"><i class="fa-solid fa-chart-line me-2"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="#landlordBookingRequestsSection"><i class="fa-solid fa-user-gear me-2"></i> Maombi ya Online Booking</a></li>
                 <li class="nav-item"><a class="nav-link" href="#bookingRequestsSection"><i class="fa-solid fa-bookmark me-2"></i> Maombi ya Booking</a></li>
                 <li class="nav-item"><a class="nav-link" href="#monthlyRevenueSection"><i class="fa-solid fa-chart-pie me-2"></i> Mapato ya Miezi</a></li>
                 <li class="nav-item"><a class="nav-link" href="#paymentsSection"><i class="fa-solid fa-money-bill-wave me-2"></i> Waliolipia</a></li>
@@ -140,6 +141,60 @@
             <div th:if="${param.subAdminAdded}" class="alert alert-success">✅ Sub-Admin ameongezwa kikamilifu!</div>
             <div th:if="${param.bookingAccepted}" class="alert alert-success">✅ Ombi la booking limekubaliwa! Lipa namba imetumwa kwa mpangaji.</div>
             <div th:if="${param.bookingCompleted}" class="alert alert-success">✅ Malipo ya booking yamethibitishwa! Chumba kimefutwa na ujumbe umetumwa kwa mwenye nyumba.</div>
+            <!-- Alert mpya za Landlord Online Booking Actions -->
+            <div th:if="${param.landlordBookingApproved}" class="alert alert-success">✅ Ombi la mwenye nyumba la online booking limeidhinishwa kikamilifu na ujumbe umetumwa!</div>
+            <div th:if="${param.landlordBookingRejected}" class="alert alert-warning">⚠️ Ombi la mwenye nyumba la online booking limekataliwa.</div>
+            <div th:if="${param.landlordBookingRemoved}" class="alert alert-danger">🗑️ Ruhusa ya online booking imeondolewa kwa mwenye nyumba huyu.</div>
+
+            <!-- JEDWALI JIPYA: USIMAMIZI WA MAOMBI YA ONLINE BOOKING YA WENYE NYUMBA -->
+            <div class="table-container" id="landlordBookingRequestsSection">
+                <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-gear me-2"></i> Maombi ya Wenye Nyumba ya Kufanya Online Booking</h5>
+                <div class="table-responsive table-scrollable">
+                    <table class="table table-hover align-middle search-table mb-0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mwenye Nyumba (Jina & Email)</th>
+                            <th>Simu</th>
+                            <th>Hali ya Ombi</th>
+                            <th>Vitendo vya Admin</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="lb : ${landlordBookingRequests}">
+                            <td th:text="${lb.id}">1</td>
+                            <td>
+                                <span class="fw-semibold" th:text="${lb.fullName}">Jina</span><br>
+                                <small class="text-muted" th:text="${lb.email}">email@gmail.com</small>
+                            </td>
+                            <td><span class="phone-highlight" th:text="${lb.phone}">0700000000</span></td>
+                            <td>
+                                <span class="badge px-2 py-1"
+                                      th:classappend="${lb.onlineBookingStatus == 'APPROVED' ? 'bg-success text-white' : (lb.onlineBookingStatus == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark')}"
+                                      th:text="${lb.onlineBookingStatus != null ? lb.onlineBookingStatus : 'PENDING'}">PENDING</span>
+                            </td>
+                            <td>
+                                <!-- Kitufe cha Approve -->
+                                <a th:href="@{/admin/landlord-booking/approve/{id}(id=${lb.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1 fw-bold">
+                                    <i class="fa-solid fa-check"></i> Approve
+                                </a>
+                                <!-- Kitufe cha Reject -->
+                                <a th:href="@{/admin/landlord-booking/reject/{id}(id=${lb.id})}" class="btn btn-sm btn-action-reject px-2 py-1 me-1 fw-bold" onclick="return confirm('Kataa ombi hili la mwenye nyumba?')">
+                                    <i class="fa-solid fa-xmark"></i> Reject
+                                </a>
+                                <!-- Kitufe cha Remove (Kufuta/Kusitisha ruhusa) -->
+                                <a th:href="@{/admin/landlord-booking/remove/{id}(id=${lb.id})}" class="btn btn-sm btn-action-delete px-2 py-1 fw-bold" onclick="return confirm('Ondoa ruhusa ya online booking kwa mwenye nyumba huyu?')">
+                                    <i class="fa-solid fa-trash"></i> Remove
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${landlordBookingRequests == null || #lists.isEmpty(landlordBookingRequests)}">
+                            <td colspan="5" class="text-center text-muted py-4">Hakuna maombi ya online booking kutoka kwa wenye nyumba kwa sasa.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- 0. JEDWALI LA USIMAMIZI WA MAOMBI YA BOOKING (ADMIN) -->
             <div class="table-container" id="bookingRequestsSection">
@@ -417,7 +472,7 @@
                 <small class="text-muted">Bonyeza kwenye jina la mtumiaji husika kutoka kwenye orodha hapo juu.</small>
             </div>
             <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="closeHelpModal()">Ghairi</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeSubAdminModal()">Ghairi</button>
                 <button type="submit" class="btn btn-primary btn-sm">Thibitisha Kuongeza</button>
             </div>
         </form>

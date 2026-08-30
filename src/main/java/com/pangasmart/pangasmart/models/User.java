@@ -20,6 +20,10 @@ public class User {
     private boolean allowBooking;
     private double bookingFee;
 
+    // Nyanja mpya kwa ajili ya kusimamia maombi ya online booking na ujumbe wa Admin
+    private String bookingRequestStatus; // PENDING, APPROVED, REJECTED, REMOVED
+    private String adminMessage;
+
     public User() {}
 
     // --- GETTERS & SETTERS ---
@@ -50,4 +54,10 @@ public class User {
 
     public double getBookingFee() { return bookingFee; }
     public void setBookingFee(double bookingFee) { this.bookingFee = bookingFee; }
+
+    public String getBookingRequestStatus() { return bookingRequestStatus; }
+    public void setBookingRequestStatus(String bookingRequestStatus) { this.bookingRequestStatus = bookingRequestStatus; }
+
+    public String getAdminMessage() { return adminMessage; }
+    public void setAdminMessage(String adminMessage) { this.adminMessage = adminMessage; }
 }

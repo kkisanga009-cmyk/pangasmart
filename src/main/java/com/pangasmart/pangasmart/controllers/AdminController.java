@@ -140,7 +140,6 @@ public class AdminController {
         List<User> landlords = userRepository.findByRole("LANDLORD");
         List<User> subAdmins = userRepository.findByRole("SUB_ADMIN");
 
-        // Kuchuja orodha ya watumiaji wote wasio Super Admin au Sub Admin ili wapatikane kwenye Modal ya kuongeza
         List<User> allUsers = userRepository.findAll();
         List<User> allUsersList = new ArrayList<>();
         if (allUsers != null) {
@@ -162,7 +161,6 @@ public class AdminController {
             });
         }
 
-        // Kupata na kupanga orodha ya maombi ya Booking
         List<Booking> bookingList = bookingRepository.findAll();
         if (bookingList != null && !bookingList.isEmpty()) {
             bookingList.sort((b1, b2) -> {
@@ -307,11 +305,49 @@ public class AdminController {
                 try {
                     roomRepository.deleteById(booking.getRoomId());
                 } catch (Exception e) {
-                    // Ignore kama chumba kimeshafutwa
+                    // Ignore
                 }
             }
         });
         return "redirect:/admin/dashboard?bookingCompleted=true";
+    }
+
+    // --- SEHEMU MPYA YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
+
+    @PostMapping("/admin/landlord-booking/approve/{id}")
+    public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAnyAdmin(session)) { return "redirect:/login"; }
+        userRepository.findById(id).ifPresent(landlord -> {
+            landlord.setAllowBooking(true);
+            landlord.setBookingRequestStatus("APPROVED");
+            landlord.setAdminMessage("Ombi lako limekubaliwa! Sasa wapangaji watafanya booking online, na fedha zako zitatumwa na Admin kwako moja kwa moja.");
+            userRepository.save(landlord);
+        });
+        return "redirect:/admin/dashboard?landlordApproved=true";
+    }
+
+    @PostMapping("/admin/landlord-booking/reject/{id}")
+    public String rejectLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAnyAdmin(session)) { return "redirect:/login"; }
+        userRepository.findById(id).ifPresent(landlord -> {
+            landlord.setAllowBooking(false);
+            landlord.setBookingRequestStatus("REJECTED");
+            landlord.setAdminMessage("Samahani, hujakidhi vigezo, hivyo ombi lako limekataliwa.");
+            userRepository.save(landlord);
+        });
+        return "redirect:/admin/dashboard?landlordRejected=true";
+    }
+
+    @PostMapping("/admin/landlord-booking/remove/{id}")
+    public String removeLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAnyAdmin(session)) { return "redirect:/login"; }
+        userRepository.findById(id).ifPresent(landlord -> {
+            landlord.setAllowBooking(false);
+            landlord.setBookingRequestStatus("REMOVED");
+            landlord.setAdminMessage("Admin ameondoa booking za online. Wasiliana naye kwa taarifa zaidi.");
+            userRepository.save(landlord);
+        });
+        return "redirect:/admin/dashboard?landlordRemoved=true";
     }
 
     // Njia mpya ya kushughulikia kuongeza Sub-Admin kupitia Modal
