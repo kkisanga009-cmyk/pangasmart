@@ -140,7 +140,6 @@ public class AdminController {
         List<User> landlords = userRepository.findByRole("LANDLORD");
         List<User> subAdmins = userRepository.findByRole("SUB_ADMIN");
 
-        // Kuchuja wamiliki wa nyumba waliomba online booking (mfano wenye allowBooking == true au status PENDING)
         List<User> landlordBookingRequests = new ArrayList<>();
         if (landlords != null) {
             for (User l : landlords) {
@@ -269,7 +268,7 @@ public class AdminController {
         model.addAttribute("paymentDetails", paymentDetails);
         model.addAttribute("tenants", tenants != null ? tenants : new ArrayList<>());
         model.addAttribute("landlords", landlords != null ? landlords : new ArrayList<>());
-        model.addAttribute("landlordBookingRequests", landlordBookingRequests); // Hapa ndipo ilipokuwa inakosekana!
+        model.addAttribute("landlordBookingRequests", landlordBookingRequests);
         model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>());
         model.addAttribute("allUsersList", allUsersList);
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
@@ -323,9 +322,9 @@ public class AdminController {
         return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
-    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
+    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (Zimebadilishwa kuwa GET) ---
 
-    @PostMapping("/admin/landlord-booking/approve/{id}")
+    @GetMapping("/admin/landlord-booking/approve/{id}")
     public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) { return "redirect:/login"; }
         userRepository.findById(id).ifPresent(landlord -> {
@@ -334,10 +333,10 @@ public class AdminController {
             landlord.setAdminMessage("Ombi lako limekubaliwa! Sasa wapangaji watafanya booking online, na fedha zako zitatumwa na Admin kwako moja kwa moja.");
             userRepository.save(landlord);
         });
-        return "redirect:/admin/dashboard?landlordApproved=true";
+        return "redirect:/admin/dashboard?landlordBookingApproved=true";
     }
 
-    @PostMapping("/admin/landlord-booking/reject/{id}")
+    @GetMapping("/admin/landlord-booking/reject/{id}")
     public String rejectLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) { return "redirect:/login"; }
         userRepository.findById(id).ifPresent(landlord -> {
@@ -346,10 +345,10 @@ public class AdminController {
             landlord.setAdminMessage("Samahani, hujakidhi vigezo, hivyo ombi lako limekataliwa.");
             userRepository.save(landlord);
         });
-        return "redirect:/admin/dashboard?landlordRejected=true";
+        return "redirect:/admin/dashboard?landlordBookingRejected=true";
     }
 
-    @PostMapping("/admin/landlord-booking/remove/{id}")
+    @GetMapping("/admin/landlord-booking/remove/{id}")
     public String removeLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) { return "redirect:/login"; }
         userRepository.findById(id).ifPresent(landlord -> {
@@ -358,10 +357,10 @@ public class AdminController {
             landlord.setAdminMessage("Admin ameondoa booking za online. Wasiliana naye kwa taarifa zaidi.");
             userRepository.save(landlord);
         });
-        return "redirect:/admin/dashboard?landlordRemoved=true";
+        return "redirect:/admin/dashboard?landlordBookingRemoved=true";
     }
 
-    // Njia mpya ya kushughulikia kuongeza Sub-Admin kupitia Modal
+    // Njia ya kushughulikia kuongeza Sub-Admin kupitia Modal (Hii inabaki POST kwa sababu inatumia form method="post")
     @PostMapping("/admin/sub-admins/add")
     public String addSubAdmin(@RequestParam("userId") Long userId, HttpSession session) {
         if (!checkIsSuperAdmin(session)) {
