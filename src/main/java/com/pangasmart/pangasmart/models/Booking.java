@@ -22,6 +22,7 @@ public class Booking {
 
     private Long landlordId;
     private String landlordName;
+    private String landlordEmail; // Uwanja mpya ulioongezwa hapa
     private String landlordPhone;
 
     private String status; // PENDING, APPROVED, COMPLETED, REJECTED
@@ -58,6 +59,9 @@ public class Booking {
 
     public String getLandlordName() { return landlordName; }
     public void setLandlordName(String landlordName) { this.landlordName = landlordName; }
+
+    public String getLandlordEmail() { return landlordEmail; }
+    public void setLandlordEmail(String landlordEmail) { this.landlordEmail = landlordEmail; }
 
     public String getLandlordPhone() { return landlordPhone; }
     public void setLandlordPhone(String landlordPhone) { this.landlordPhone = landlordPhone; }
