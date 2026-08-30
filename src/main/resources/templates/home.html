@@ -38,7 +38,6 @@
         th, td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
         th { background-color: #f8f9fa; }
 
-        /* Mtindo wa Pagination */
         .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 25px; flex-wrap: wrap; }
         .pagination a, .pagination span { padding: 8px 14px; font-size: 13px; font-weight: bold; text-decoration: none; border-radius: 5px; border: 1px solid #cbd5e1; color: #334155; background-color: #fff; }
         .pagination a:hover { background-color: #f1f5f9; border-color: #94a3b8; }
@@ -101,12 +100,17 @@
             ✅ Mipangilio ya Booking imehifadhiwa na imetumwa kwa Admin Mkuu!
         </div>
 
-        <!-- MPANGILIO WA BOOKING YA MWENYE NYUMBA -->
-        <form th:action="@{/landlord/booking-settings}" method="post" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+        <!-- MPANGILIO WA BOOKING YA MWENYE NYUMBA (Na Ongezo la Validation ya Kuzuia isipite bila tiki) -->
+        <form th:action="@{/landlord/booking-settings}" method="post" onsubmit="return validateBookingSettings(this)" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e9ecef;">
             <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📌 Mipangilio ya Booking Mtandaoni</h4>
+
+            <div id="bookingAlert" style="display: none; background: #f8d7da; color: #721c24; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 10px; font-weight: bold;">
+                ⚠️ Tafadhali weka tiki (ruhusu wapangaji kufanya booking online) kabla ya kuhifadhi mipangilio!
+            </div>
+
             <div style="margin-bottom: 10px;">
                 <label style="font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" name="allowBooking" value="true" th:checked="${landlord != null and landlord.allowBooking}" style="width: auto; margin: 0;">
+                    <input type="checkbox" id="allowBookingCheckbox" name="allowBooking" value="true" th:checked="${landlord != null and landlord.allowBooking}" style="width: auto; margin: 0;">
                     Ruhusu wapangaji kufanya booking online
                 </label>
             </div>
@@ -117,7 +121,7 @@
             <button type="submit" class="btn" style="background-color: #8e44ad;">Hifadhi Mipangilio ya Booking & Tuma kwa Admin</button>
         </form>
 
-        <!-- TABLE YA ORODHA YA BOOKINGS (Marekebisho yamefanyika hapa kuondoa kosa la java.util.Objects) -->
+        <!-- TABLE YA ORODHA YA BOOKINGS (Inatokea TU KAMA Admin amemuidhinisha APPROVED NA Pia amewasha allowBooking) -->
         <div th:if="${landlord != null and landlord.allowBooking and landlord.status == 'APPROVED'}" style="margin-bottom: 25px; background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px;">
             <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📋 Orodha ya Maombi ya Booking & Malipo</h4>
             <div class="table-responsive">
@@ -188,7 +192,6 @@
             <h4 th:text="${room.title}">Aina ya Chumba</h4>
             <p style="margin-top: 4px; font-size: 14px;">📍 <span th:text="${room.location}">Location</span> | <span class="price">TZS <span th:text="${room.price}">0</span>/Mwezi</span></p>
 
-            <!-- SHOW IMAGE & OPTIONS -->
             <div th:if="${room.imageUrl != null and !#strings.isEmpty(room.imageUrl)}" style="margin-top: 10px;">
                 <img th:src="${room.imageUrl}" class="media-preview" alt="Room Image">
                 <div>
@@ -202,7 +205,6 @@
                 </div>
             </div>
 
-            <!-- SHOW VIDEO & OPTIONS -->
             <div th:if="${room.videoUrl != null and !#strings.isEmpty(room.videoUrl)}" style="margin-top: 10px;">
                 <video controls class="media-preview" style="background: #000;">
                     <source th:src="${room.videoUrl}">
@@ -228,10 +230,7 @@
                 </a>
             </div>
 
-            <!-- SEHEMU YA TENANT -->
             <div th:if="${userRole == 'TENANT' or (session.loggedInUser != null and session.loggedInUser.role == 'TENANT')}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
-
-                <!-- KAMA AMELipia KUONA NAMBA ZA MWENYE NYUMBA -->
                 <div th:if="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
                      style="background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: 5px;">
                     <p style="font-weight: bold; font-size: 14px;">✅ Malipo Yamekamilika!</p>
@@ -240,11 +239,8 @@
                         <strong style="font-size: 16px; color: #0d6efd;" th:text="${paidRoomId == room.id and landlordPhone != null ? landlordPhone : (room.landlordPhone != null ? room.landlordPhone : room.landlordEmail)}">07XXXXXXXX</strong>
                     </p>
 
-                    <!-- KAMA MWENYE NYUMBA AMEWEKA RUHUSU BOOKING (ONLINE BOOKING) -->
                     <div th:if="${room.allowBooking}" style="margin-top: 12px; border-top: 1px dashed #a3cfbb; padding-top: 10px;">
                         <p style="font-size: 13px; font-weight: bold; margin-bottom: 6px;">Unataka kubook chumba hiki? Bonyeza kitufe chini kutuma ombi la booking:</p>
-
-                        <!-- Fomu ya Kutuma Ombi la Booking Moja kwa Moja kwenye Backend -->
                         <form th:action="@{/tenant/book-room}" method="post">
                             <input type="hidden" name="roomId" th:value="${room.id}">
                             <button type="submit" class="btn" style="background-color: #25D366; font-size: 13px;">
@@ -254,7 +250,6 @@
                     </div>
                 </div>
 
-                <!-- KAMA HAJALIDI KULIPIA KUONA NAMBA -->
                 <form th:unless="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
                       th:action="@{/pay-room}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
@@ -263,7 +258,6 @@
             </div>
         </div>
 
-        <!-- PAGINATION CONTROLS -->
         <div th:if="${roomPage != null and roomPage.totalPages > 1}" class="pagination">
             <a th:if="${roomPage.hasPrevious()}"
                th:href="@{/home(page=${roomPage.number - 1}, search=${searchKeyword})}">
@@ -313,7 +307,6 @@
     </div>
 </footer>
 
-<!-- POP-UP YA MSAADA NA SCRIPT -->
 <div id="helpModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
         <span onclick="closeHelpModal()" style="position: absolute; right: 15px; top: 10px; font-size: 24px; font-weight: bold; cursor: pointer; color: #888;">&times;</span>
@@ -340,6 +333,21 @@
 </div>
 
 <script>
+    // Sehemu ya kuzuia form isitumwe kama tiki haijawashwa
+    function validateBookingSettings(form) {
+        let checkbox = document.getElementById("allowBookingCheckbox");
+        let alertBox = document.getElementById("bookingAlert");
+
+        if (!checkbox.checked) {
+            alertBox.style.display = "block";
+            checkbox.focus();
+            return false; // Inazuia form isiende backend
+        }
+
+        alertBox.style.display = "none";
+        return true;
+    }
+
     function openHelpModal() {
         document.getElementById("helpModal").style.display = "flex";
     }
