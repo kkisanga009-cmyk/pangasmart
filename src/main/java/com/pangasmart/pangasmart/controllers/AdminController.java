@@ -1,9 +1,11 @@
 package com.pangasmart.pangasmart.controllers;
 
+import com.pangasmart.pangasmart.models.Booking;
 import com.pangasmart.pangasmart.models.Payment;
 import com.pangasmart.pangasmart.models.Room;
 import com.pangasmart.pangasmart.models.User;
 import com.pangasmart.pangasmart.repository.PaymentRepository;
+import com.pangasmart.pangasmart.repositories.BookingRepository;
 import com.pangasmart.pangasmart.repositories.RoomRepository;
 import com.pangasmart.pangasmart.repositories.UserRepository;
 import jakarta.servlet.http.HttpSession;
@@ -31,6 +33,9 @@ public class AdminController {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     private boolean checkIsAnyAdmin(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -157,6 +162,16 @@ public class AdminController {
             });
         }
 
+        // Kupata na kupanga orodha ya maombi ya Booking
+        List<Booking> bookingList = bookingRepository.findAll();
+        if (bookingList != null && !bookingList.isEmpty()) {
+            bookingList.sort((b1, b2) -> {
+                if (b1.getCreatedAt() == null) return 1;
+                if (b2.getCreatedAt() == null) return -1;
+                return b2.getCreatedAt().compareTo(b1.getCreatedAt());
+            });
+        }
+
         LocalDateTime now = LocalDateTime.now();
         int currentMonth = now.getMonthValue();
         int currentYear = now.getYear();
@@ -249,8 +264,54 @@ public class AdminController {
         model.addAttribute("subAdmins", subAdmins != null ? subAdmins : new ArrayList<>());
         model.addAttribute("allUsersList", allUsersList);
         model.addAttribute("rooms", rooms != null ? rooms : new ArrayList<>());
+        model.addAttribute("bookingList", bookingList != null ? bookingList : new ArrayList<>());
 
         return "admin";
+    }
+
+    // Endpoints za Usimamizi wa Maombi ya Booking
+    @GetMapping("/admin/booking/accept/{id}")
+    public String acceptBooking(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAnyAdmin(session)) {
+            return "redirect:/login";
+        }
+        bookingRepository.findById(id).ifPresent(booking -> {
+            booking.setStatus("APPROVED");
+            bookingRepository.save(booking);
+        });
+        return "redirect:/admin/dashboard?bookingAccepted=true";
+    }
+
+    @GetMapping("/admin/booking/reject/{id}")
+    public String rejectBooking(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAnyAdmin(session)) {
+            return "redirect:/login";
+        }
+        bookingRepository.findById(id).ifPresent(booking -> {
+            booking.setStatus("REJECTED");
+            bookingRepository.save(booking);
+        });
+        return "redirect:/admin/dashboard?bookingRejected=true";
+    }
+
+    @GetMapping("/admin/booking/complete/{id}")
+    public String completeBooking(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAnyAdmin(session)) {
+            return "redirect:/login";
+        }
+        bookingRepository.findById(id).ifPresent(booking -> {
+            booking.setStatus("COMPLETED");
+            bookingRepository.save(booking);
+
+            if (booking.getRoomId() != null) {
+                try {
+                    roomRepository.deleteById(booking.getRoomId());
+                } catch (Exception e) {
+                    // Ignore kama chumba kimeshafutwa
+                }
+            }
+        });
+        return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
     // Njia mpya ya kushughulikia kuongeza Sub-Admin kupitia Modal

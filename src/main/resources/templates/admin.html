@@ -57,6 +57,7 @@
             </h4>
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link active" href="/admin/dashboard"><i class="fa-solid fa-chart-line me-2"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="#bookingRequestsSection"><i class="fa-solid fa-bookmark me-2"></i> Maombi ya Booking</a></li>
                 <li class="nav-item"><a class="nav-link" href="#monthlyRevenueSection"><i class="fa-solid fa-chart-pie me-2"></i> Mapato ya Miezi</a></li>
                 <li class="nav-item"><a class="nav-link" href="#paymentsSection"><i class="fa-solid fa-money-bill-wave me-2"></i> Waliolipia</a></li>
                 <li class="nav-item"><a class="nav-link" href="#tenantsSection"><i class="fa-solid fa-users me-2"></i> Wapangaji</a></li>
@@ -137,6 +138,64 @@
             <div th:if="${param.approved}" class="alert alert-success">✅ Landlord ameidhinishwa kikamilifu kuingia kwenye mfumo!</div>
             <div th:if="${param.rejected}" class="alert alert-danger">❌ Ombi la Landlord limekataliwa.</div>
             <div th:if="${param.subAdminAdded}" class="alert alert-success">✅ Sub-Admin ameongezwa kikamilifu!</div>
+            <div th:if="${param.bookingAccepted}" class="alert alert-success">✅ Ombi la booking limekubaliwa! Lipa namba imetumwa kwa mpangaji.</div>
+            <div th:if="${param.bookingCompleted}" class="alert alert-success">✅ Malipo ya booking yamethibitishwa! Chumba kimefutwa na ujumbe umetumwa kwa mwenye nyumba.</div>
+
+            <!-- 0. JEDWALI LA USIMAMIZI WA MAOMBI YA BOOKING (ADMIN) -->
+            <div class="table-container" id="bookingRequestsSection">
+                <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-bookmark me-2"></i> Usimamizi wa Maombi ya Booking ya Wapangaji</h5>
+                <div class="table-responsive table-scrollable">
+                    <table class="table table-hover align-middle search-table mb-0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mpangaji (Jina & Email)</th>
+                            <th>Chumba & Mwenye Nyumba</th>
+                            <th>Kiasi cha Booking</th>
+                            <th>Hali (Status)</th>
+                            <th>Vitendo / Hatua za Admin</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="b : ${bookingList}">
+                            <td th:text="${b.id}">1</td>
+                            <td>
+                                <span class="fw-semibold" th:text="${b.tenantName}">Mpangaji</span><br>
+                                <small class="text-muted" th:text="${b.tenantEmail}">email@gmail.com</small>
+                            </td>
+                            <td>
+                                <span class="fw-semibold" th:text="${b.roomTitle}">Chumba</span><br>
+                                <small class="text-muted">Landlord: <span th:text="${b.landlordName}"></span></small>
+                            </td>
+                            <td class="fw-bold text-success" th:text="${b.bookingAmount != null ? 'TZS ' + #numbers.formatDecimal(b.bookingAmount, 1, 'COMMA', 2, 'POINT') : 'TZS 0'}">0</td>
+                            <td>
+                                <span class="badge px-2 py-1"
+                                      th:classappend="${b.status == 'APPROVED' ? 'bg-success text-white' : (b.status == 'COMPLETED' ? 'bg-primary text-white' : (b.status == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark'))}"
+                                      th:text="${b.status != null ? b.status : 'PENDING'}">PENDING</span>
+                            </td>
+                            <td>
+                                <!-- 1. Admin anapobonyeza ACCEPT (Kutoa Lipa Namba kwa mpangaji) -->
+                                <a th:if="${b.status == 'PENDING'}" th:href="@{/admin/booking/accept/{id}(id=${b.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1 fw-bold">
+                                    <i class="fa-solid fa-check"></i> Accept (Tuma Lipa Namba)
+                                </a>
+                                <!-- 2. Admin anapobonyeza REJECT -->
+                                <a th:if="${b.status == 'PENDING'}" th:href="@{/admin/booking/reject/{id}(id=${b.id})}" class="btn btn-sm btn-action-delete px-2 py-1 fw-bold" onclick="return confirm('Kataa booking hii?')">
+                                    <i class="fa-solid fa-xmark"></i> Reject
+                                </a>
+                                <!-- 3. Baada ya mpangaji kulipia kupitia Lipa Namba, Admin anabonyeza Hiki Kitufe ili kufuta chumba na kutuma taarifa kwa mwenye nyumba -->
+                                <a th:if="${b.status == 'APPROVED'}" th:href="@{/admin/booking/complete/{id}(id=${b.id})}" class="btn btn-sm btn-primary px-2 py-1 fw-bold" onclick="return confirm('Thibitisha malipo: Je, ufute chumba hiki na kumtumia taarifa mwenye nyumba?')">
+                                    <i class="fa-solid fa-circle-check"></i> Thibitisha Malipo & Futa Chumba
+                                </a>
+                                <span th:if="${b.status == 'COMPLETED'}" class="text-success small fw-bold"><i class="fa-solid fa-check-double"></i> Imekamilika</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${bookingList == null || #lists.isEmpty(bookingList)}">
+                            <td colspan="6" class="text-center text-muted py-4">Hakuna maombi ya booking kwa sasa.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- 1. JEDWALI LA MGAWANYO WA MAPATO YA MWAKA KULINGANA NA MIEZI -->
             <div class="table-container" id="monthlyRevenueSection" th:if="${isSuperAdmin}">
@@ -358,7 +417,7 @@
                 <small class="text-muted">Bonyeza kwenye jina la mtumiaji husika kutoka kwenye orodha hapo juu.</small>
             </div>
             <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="closeSubAdminModal()">Ghairi</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeHelpModal()">Ghairi</button>
                 <button type="submit" class="btn btn-primary btn-sm">Thibitisha Kuongeza</button>
             </div>
         </form>

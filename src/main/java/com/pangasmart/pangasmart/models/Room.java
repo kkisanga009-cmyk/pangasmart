@@ -29,6 +29,8 @@ public class Room {
 
     private String landlordEmail;
     private String landlordPhone;
+    private String landlordName;
+    private boolean allowBooking;
 
     public Room() {}
 
@@ -62,4 +64,10 @@ public class Room {
 
     public String getLandlordPhone() { return landlordPhone; }
     public void setLandlordPhone(String landlordPhone) { this.landlordPhone = landlordPhone; }
+
+    public String getLandlordName() { return landlordName; }
+    public void setLandlordName(String landlordName) { this.landlordName = landlordName; }
+
+    public boolean isAllowBooking() { return allowBooking; }
+    public void setAllowBooking(boolean allowBooking) { this.allowBooking = allowBooking; }
 }

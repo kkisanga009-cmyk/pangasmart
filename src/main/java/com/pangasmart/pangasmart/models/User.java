@@ -17,6 +17,9 @@ public class User {
     private String role;  // LANDLORD, TENANT, ADMIN
     private String status; // PENDING, APPROVED, REJECTED
 
+    private boolean allowBooking;
+    private double bookingFee;
+
     public User() {}
 
     // --- GETTERS & SETTERS ---
@@ -41,4 +44,10 @@ public class User {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public boolean isAllowBooking() { return allowBooking; }
+    public void setAllowBooking(boolean allowBooking) { this.allowBooking = allowBooking; }
+
+    public double getBookingFee() { return bookingFee; }
+    public void setBookingFee(double bookingFee) { this.bookingFee = bookingFee; }
 }

@@ -77,10 +77,6 @@
     </div>
 </div>
 
-<button id="installBtn" style="display: none; background-color: #075985; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
-    📲 Weka PangaSmart Kwenye Simu
-</button>
-
 <div class="main-container">
 
     <!-- DASHBOARD YA LANDLORD -->
@@ -99,6 +95,25 @@
         <div th:if="${param.roomDeleted}" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
             🗑️ Chumba kimefutwa kikamilifu!
         </div>
+        <div th:if="${param.bookingSettingsUpdated}" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
+            ✅ Mipangilio ya Booking imehifadhiwa na imetumwa kwa Admin Mkuu!
+        </div>
+
+        <!-- MPANGILIO WA BOOKING YA MWENYE NYUMBA -->
+        <form th:action="@{/landlord/booking-settings}" method="post" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+            <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📌 Mipangilio ya Booking Mtandaoni</h4>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="allowBooking" value="true" th:checked="${landlord != null and landlord.allowBooking}" style="width: auto; margin: 0;">
+                    Ruhusu wapangaji kufanya booking online
+                </label>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 13px; font-weight: bold;">Kiasi cha Kubook (TZS):</label>
+                <input type="number" step="any" name="bookingFee" th:value="${landlord != null ? landlord.bookingFee : ''}" placeholder="Mfano: 10000">
+            </div>
+            <button type="submit" class="btn" style="background-color: #8e44ad;">Hifadhi Mipangilio ya Booking & Tuma kwa Admin</button>
+        </form>
 
         <form th:action="@{/add-room}" method="post" enctype="multipart/form-data">
             <label style="font-size: 13px; font-weight: bold;">Aina ya Chumba:</label>
@@ -121,52 +136,6 @@
 
             <button type="submit" class="btn">Hifadhi Chumba</button>
         </form>
-
-        <!-- MAOMBI YA BOOKING -->
-        <div style="margin-top: 30px;">
-            <h3>📋 Maombi ya Booking</h3>
-            <div class="table-responsive" th:if="${bookings != null and not #lists.isEmpty(bookings)}">
-                <table>
-                    <thead>
-                    <tr style="background: #2c3e50; color: white; text-align: left;">
-                        <th style="padding: 10px;">Chumba</th>
-                        <th style="padding: 10px;">Simu</th>
-                        <th style="padding: 10px;">Hali</th>
-                        <th style="padding: 10px;">Hatua</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="b : ${bookings}" style="border-bottom: 1px solid #ddd;">
-                        <td style="padding: 10px;" th:text="${b.roomTitle}">Chumba</td>
-                        <td style="padding: 10px; font-weight: bold;" th:text="${b.tenantPhone}">07...</td>
-                        <td style="padding: 10px;">
-                            <span th:if="${b.status == 'PENDING'}" style="background: #f39c12; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">PENDING</span>
-                            <span th:if="${b.status == 'APPROVED'}" style="background: #27ae60; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">APPROVED</span>
-                            <span th:if="${b.status == 'REJECTED'}" style="background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">REJECTED</span>
-                        </td>
-                        <td style="padding: 10px;">
-                            <div style="display: flex; gap: 5px;">
-                                <form th:action="@{/approve-booking}" method="post" th:if="${b.status == 'PENDING'}">
-                                    <input type="hidden" name="bookingId" th:value="${b.id}">
-                                    <button type="submit" style="background: #27ae60; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Kubali</button>
-                                </form>
-                                <form th:action="@{/reject-booking}" method="post" th:if="${b.status == 'PENDING'}">
-                                    <input type="hidden" name="bookingId" th:value="${b.id}">
-                                    <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Kataa</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div th:if="${bookings == null or #lists.isEmpty(bookings)}">
-                <p style="color: #7f8c8d; font-size: 13px; background: #f8f9fa; padding: 12px; border-radius: 5px; margin-top: 10px;">
-                    ℹ️ Bado hakuna maombi ya booking kwenye vyumba vyako.
-                </p>
-            </div>
-        </div>
     </div>
 
     <!-- ORODHA YA VYUMBA -->
@@ -228,6 +197,7 @@
             <!-- SEHEMU YA TENANT -->
             <div th:if="${userRole == 'TENANT' or (session.loggedInUser != null and session.loggedInUser.role == 'TENANT')}" style="margin-top: 12px; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef;">
 
+                <!-- KAMA AMELipia KUONA NAMBA ZA MWENYE NYUMBA -->
                 <div th:if="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
                      style="background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: 5px;">
                     <p style="font-weight: bold; font-size: 14px;">✅ Malipo Yamekamilika!</p>
@@ -235,8 +205,19 @@
                         📞 Namba ya Simu ya Landlord:
                         <strong style="font-size: 16px; color: #0d6efd;" th:text="${paidRoomId == room.id and landlordPhone != null ? landlordPhone : (room.landlordPhone != null ? room.landlordPhone : room.landlordEmail)}">07XXXXXXXX</strong>
                     </p>
+
+                    <!-- KAMA MWENYE NYUMBA AMEWEKA RUHUSU BOOKING (ONLINE BOOKING) -->
+                    <div th:if="${room.allowBooking}" style="margin-top: 12px; border-top: 1px dashed #a3cfbb; padding-top: 10px;">
+                        <p style="font-size: 13px; font-weight: bold; margin-bottom: 6px;">Unataka kubook chumba hiki? Bonyeza kitufe chini kuwasiliana na Admin:</p>
+                        <a th:href="@{'https://wa.me/255747466962?text=Habari%20Admin,%20Mimi%20' + (${currentUser != null ? currentUser.email : (session.loggedInUser != null ? session.loggedInUser.email : 'Mpangaji')}) + '%20ninahitaji%20kubook%20chumba%20cha%20mwenye%20nyumba%20huyu:%20' + room.landlordName + '%20(Chumba:%20' + room.title + ')'}"
+                           target="_blank"
+                           class="btn" style="background-color: #25D366; text-decoration: none; display: inline-block; text-align: center; font-size: 13px;">
+                            💬 Press Booking (Wasiliana na Admin WhatsApp)
+                        </a>
+                    </div>
                 </div>
 
+                <!-- KAMA HAJALIDI KULIPIA KUONA NAMBA -->
                 <form th:unless="${(param.paidRoomId != null and param.paidRoomId[0] == #strings.toString(room.id)) or (paidRoomIds != null and #lists.contains(paidRoomIds, room.id))}"
                       th:action="@{/pay-room}" method="post">
                     <input type="hidden" name="roomId" th:value="${room.id}">
@@ -247,14 +228,12 @@
 
         <!-- PAGINATION CONTROLS -->
         <div th:if="${roomPage != null and roomPage.totalPages > 1}" class="pagination">
-            <!-- Kitufe cha Kurudi Nyuma (Previous) -->
             <a th:if="${roomPage.hasPrevious()}"
                th:href="@{/home(page=${roomPage.number - 1}, search=${searchKeyword})}">
                 &laquo; Kabla
             </a>
             <span th:unless="${roomPage.hasPrevious()}" class="disabled">&laquo; Kabla</span>
 
-            <!-- Namba za Kurasa -->
             <span th:each="i : ${#numbers.sequence(0, roomPage.totalPages - 1)}">
                 <a th:if="${i != roomPage.number}"
                    th:href="@{/home(page=${i}, search=${searchKeyword})}"
@@ -264,7 +243,6 @@
                       class="active">1</span>
             </span>
 
-            <!-- Kitufe cha Kwenda Mbele (Next) -->
             <a th:if="${roomPage.hasNext()}"
                th:href="@{/home(page=${roomPage.number + 1}, search=${searchKeyword})}">
                 Baada &raquo;

@@ -69,6 +69,16 @@ public class HomeController {
                 session.setAttribute("userRole", userRole);
             }
 
+            // Kuchota taarifa kamili za mtumiaji kama ni LANDLORD ili kupata bookingFee na allowBooking zake
+            User landlord = null;
+            if ("LANDLORD".equalsIgnoreCase(userRole)) {
+                Optional<User> landlordOpt = userRepository.findByEmail(user.getEmail());
+                if (landlordOpt.isPresent()) {
+                    landlord = landlordOpt.get();
+                    model.addAttribute("landlord", landlord);
+                }
+            }
+
             Pageable pageable = PageRequest.of(page, 6);
             Page<Room> roomPage;
             List<Booking> bookingList = new ArrayList<>();
@@ -85,6 +95,23 @@ public class HomeController {
                     roomPage = roomRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(search, search, pageable);
                 } else {
                     roomPage = roomRepository.findAll(pageable);
+                }
+            }
+
+            // Kukagua vyumba vyote kwenye kurasa na kuhakikisha allowBooking inazingatia idhini ya Admin (APPROVED)
+            for (Room room : roomPage.getContent()) {
+                if (room.getLandlordEmail() != null) {
+                    Optional<User> ownerOpt = userRepository.findByEmail(room.getLandlordEmail());
+                    if (ownerOpt.isPresent()) {
+                        User owner = ownerOpt.get();
+                        boolean isApprovedByAdmin = "APPROVED".equalsIgnoreCase(owner.getStatus());
+                        room.setAllowBooking(owner.isAllowBooking() && isApprovedByAdmin);
+                        if (room.getLandlordName() == null || room.getLandlordName().isEmpty()) {
+                            room.setLandlordName(owner.getFullName());
+                        }
+                    } else {
+                        room.setAllowBooking(false);
+                    }
                 }
             }
 
@@ -144,6 +171,34 @@ public class HomeController {
         }
     }
 
+    // Endpoint inayopokea taarifa kutoka kwenye fomu ya Mipangilio ya Booking ya Landlord kwenye HTML yako
+    @PostMapping("/landlord/booking-settings")
+    public String updateBookingSettings(@RequestParam(value = "allowBooking", required = false) Boolean allowBooking,
+                                        @RequestParam(value = "bookingFee", required = false) Double bookingFee,
+                                        HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || !"LANDLORD".equalsIgnoreCase(user.getRole())) {
+            return "redirect:/login";
+        }
+
+        try {
+            Optional<User> userOpt = userRepository.findByEmail(user.getEmail());
+            if (userOpt.isPresent()) {
+                User landlord = userOpt.get();
+                landlord.setAllowBooking(allowBooking != null && allowBooking);
+                landlord.setBookingFee(bookingFee != null ? bookingFee : 0.0);
+                userRepository.save(landlord);
+
+                session.setAttribute("loggedInUser", landlord);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/home?error=settings_failed";
+        }
+
+        return "redirect:/home?bookingSettingsUpdated=true";
+    }
+
     @PostMapping("/add-room")
     public String addRoom(@ModelAttribute Room room,
                           @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
@@ -157,6 +212,7 @@ public class HomeController {
 
         try {
             room.setLandlordEmail(user.getEmail());
+            room.setLandlordName(user.getFullName());
 
             if (user.getPhone() != null && !user.getPhone().isEmpty()) {
                 room.setLandlordPhone(user.getPhone());
@@ -292,82 +348,5 @@ public class HomeController {
         }
 
         return "redirect:/home?error=payment_failed";
-    }
-
-    @PostMapping("/book-room")
-    public String bookRoom(@RequestParam Long roomId,
-                           @RequestParam String roomTitle,
-                           @RequestParam String tenantPhone) {
-        try {
-            Booking booking = new Booking();
-            booking.setRoomId(roomId);
-            booking.setRoomTitle(roomTitle);
-            booking.setTenantPhone(tenantPhone);
-            booking.setStatus("PENDING");
-
-            roomRepository.findById(roomId).ifPresent(room -> {
-                booking.setLandlordEmail(room.getLandlordEmail());
-            });
-
-            bookingRepository.save(booking);
-
-            if (smsService != null) {
-                try {
-                    String msg = "PangaSmart: Ombi lako la chumba '" + roomTitle + "' limepokelewa. Mwenye nyumba atakujibu hivi karibuni.";
-                    smsService.sendSms(tenantPhone, msg);
-                } catch (Exception e) {
-                    System.out.println("SMS error: " + e.getMessage());
-                }
-            }
-            return "redirect:/home?booked=true";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "redirect:/home?error=booking_failed";
-        }
-    }
-
-    @PostMapping("/approve-booking")
-    public String approveBooking(@RequestParam Long bookingId) {
-        try {
-            bookingRepository.findById(bookingId).ifPresent(b -> {
-                b.setStatus("APPROVED");
-                bookingRepository.save(b);
-
-                if (smsService != null) {
-                    try {
-                        String msg = "PangaSmart: Hongera! Ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKUBALIWA na mwenye nyumba.";
-                        smsService.sendSms(b.getTenantPhone(), msg);
-                    } catch (Exception e) {
-                        System.out.println("SMS error: " + e.getMessage());
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "redirect:/home";
-    }
-
-    @PostMapping("/reject-booking")
-    public String rejectBooking(@RequestParam Long bookingId) {
-        try {
-            bookingRepository.findById(bookingId).ifPresent(b -> {
-                b.setStatus("REJECTED");
-                bookingRepository.save(b);
-
-                if (smsService != null) {
-                    try {
-                        String msg = "PangaSmart: Samahani, ombi lako la chumba '" + b.getRoomTitle() + "' LIMEKATALIWA.";
-                        smsService.sendSms(b.getTenantPhone(), msg);
-                    } catch (Exception e) {
-                        System.out.println("SMS error: " + e.getMessage());
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "redirect:/home";
     }
 }
