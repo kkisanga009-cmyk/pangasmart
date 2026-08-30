@@ -35,6 +35,8 @@
         .pay-btn:hover { background-color: #0369a1; }
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
+        th { background-color: #f8f9fa; }
 
         /* Mtindo wa Pagination */
         .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 25px; flex-wrap: wrap; }
@@ -114,6 +116,38 @@
             </div>
             <button type="submit" class="btn" style="background-color: #8e44ad;">Hifadhi Mipangilio ya Booking & Tuma kwa Admin</button>
         </form>
+
+        <!-- TABLE YA KUONYESHA BOOKINGS ZOTE ZA MWENYENYUMBA (Hapa ndipo ilipokuwa inakosekana) -->
+        <div style="margin-bottom: 25px; background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px;">
+            <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📋 Orodha ya Maombi ya Booking & Malipo</h4>
+            <div class="table-responsive">
+                <table th:if="${bookings != null and not #lists.isEmpty(bookings)}">
+                    <thead>
+                    <tr>
+                        <th>Mpangaji</th>
+                        <th>Simu</th>
+                        <th>Chumba</th>
+                        <th>Kiasi</th>
+                        <th>Hali</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="b : ${bookings}">
+                        <td th:text="${b.tenantName}">Jina</td>
+                        <td th:text="${b.tenantPhone}">Simu</td>
+                        <td th:text="${b.roomTitle}">Chumba</td>
+                        <td th:text="${b.bookingAmount}">Kiasi</td>
+                        <td>
+                            <span style="padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #e0f2fe; color: #0369a1;" th:text="${b.status}">STATUS</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div th:if="${bookings == null or #lists.isEmpty(bookings)}" style="text-align: center; padding: 15px; color: #666; font-size: 13px;">
+                    ℹ️ Hakuna maombi ya booking au malipo yaliyopokelewa bado.
+                </div>
+            </div>
+        </div>
 
         <form th:action="@{/add-room}" method="post" enctype="multipart/form-data">
             <label style="font-size: 13px; font-weight: bold;">Aina ya Chumba:</label>
