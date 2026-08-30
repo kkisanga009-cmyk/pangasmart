@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,19 +70,22 @@ public class HomeController {
                 session.setAttribute("userRole", userRole);
             }
 
-            // Kuchota taarifa kamili za mtumiaji kama ni LANDLORD ili kupata bookingFee na allowBooking zake
+            // Kuchota taarifa kamili za mtumiaji kama ni LANDLORD ili kupata bookingFee, allowBooking na adminMessage zake
             User landlord = null;
+            List<Booking> landlordBookings = new ArrayList<>();
             if ("LANDLORD".equalsIgnoreCase(userRole)) {
                 Optional<User> landlordOpt = userRepository.findByEmail(user.getEmail());
                 if (landlordOpt.isPresent()) {
                     landlord = landlordOpt.get();
                     model.addAttribute("landlord", landlord);
+                    model.addAttribute("adminMessage", landlord.getAdminMessage());
                 }
+                // Kuchota bookings za mwenyenyumba huyu kwa kutumia email yake
+                landlordBookings = bookingRepository.findByLandlordEmail(user.getEmail());
             }
 
             Pageable pageable = PageRequest.of(page, 6);
             Page<Room> roomPage;
-            List<Booking> bookingList = new ArrayList<>();
 
             if ("LANDLORD".equalsIgnoreCase(userRole)) {
                 if (search != null && !search.trim().isEmpty()) {
@@ -89,7 +93,6 @@ public class HomeController {
                 } else {
                     roomPage = roomRepository.findByLandlordEmail(user.getEmail(), pageable);
                 }
-                bookingList = bookingRepository.findByLandlordEmail(user.getEmail());
             } else {
                 if (search != null && !search.trim().isEmpty()) {
                     roomPage = roomRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(search, search, pageable);
@@ -159,7 +162,7 @@ public class HomeController {
             model.addAttribute("userRole", userRole != null ? userRole : "TENANT");
             model.addAttribute("rooms", roomPage.getContent());
             model.addAttribute("roomPage", roomPage);
-            model.addAttribute("bookings", bookingList != null ? bookingList : new ArrayList<>());
+            model.addAttribute("bookings", landlordBookings);
             model.addAttribute("searchKeyword", search);
             model.addAttribute("paidRoomIds", paidRoomIds);
 
@@ -190,7 +193,6 @@ public class HomeController {
                 landlord.setAllowBooking(wantsBooking);
                 landlord.setBookingFee(bookingFee != null ? bookingFee : 0.0);
 
-                // Hapa tunaweka hali ya PENDING ili Admin aweze kuona ombi hili kwenye Dashibodi yake
                 if (wantsBooking) {
                     landlord.setBookingRequestStatus("PENDING");
                 } else {
@@ -349,6 +351,35 @@ public class HomeController {
                 payment.setMerchantReference(merchantRef);
                 payment.setStatus("PENDING");
                 paymentRepository.save(payment);
+
+                // --- KUWEKA TAARIFA KAMILI ZA BOOKING ZINAZOHITAJIKA NA LANDLORD ---
+                Optional<Room> roomOpt = roomRepository.findById(roomId);
+                if (roomOpt.isPresent()) {
+                    Room room = roomOpt.get();
+                    Booking booking = new Booking();
+
+                    // Taarifa za Mpangaji
+                    booking.setTenantId(user.getId());
+                    booking.setTenantName(user.getFullName());
+                    booking.setTenantEmail(user.getEmail());
+                    booking.setTenantPhone(user.getPhone());
+
+                    // Taarifa za Chumba
+                    booking.setRoomId(roomId);
+                    booking.setRoomTitle(room.getTitle());
+                    booking.setBookingAmount(amount);
+
+                    // Taarifa za Mwenyenyumba
+                    booking.setLandlordEmail(room.getLandlordEmail());
+                    booking.setLandlordName(room.getLandlordName());
+                    booking.setLandlordPhone(room.getLandlordPhone());
+
+                    // Hali ya Ombi (Inasubiri uthibitisho wa Admin)
+                    booking.setStatus("PENDING_PAYMENT");
+                    booking.setCreatedAt(LocalDateTime.now());
+
+                    bookingRepository.save(booking);
+                }
 
                 return "redirect:" + redirectUrl;
             }

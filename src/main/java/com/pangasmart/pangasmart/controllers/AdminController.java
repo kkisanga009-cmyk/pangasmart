@@ -308,21 +308,23 @@ public class AdminController {
             return "redirect:/login";
         }
         bookingRepository.findById(id).ifPresent(booking -> {
-            booking.setStatus("COMPLETED");
+            // Badilisha status iwe APPROVED au COMPLETED ili ionekane moja kwa moja kwenye dashboard ya Mwenyenyumba
+            booking.setStatus("APPROVED");
             bookingRepository.save(booking);
 
+            // Kama unahitaji chumba kifutwe baada ya kulipiwa na kudhibitishwa na admin:
             if (booking.getRoomId() != null) {
                 try {
                     roomRepository.deleteById(booking.getRoomId());
                 } catch (Exception e) {
-                    // Ignore
+                    // Ignore kama chumba hakipo
                 }
             }
         });
         return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
-    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (Zimebadilishwa kuwa GET) ---
+    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
 
     @GetMapping("/admin/landlord-booking/approve/{id}")
     public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
@@ -360,7 +362,7 @@ public class AdminController {
         return "redirect:/admin/dashboard?landlordBookingRemoved=true";
     }
 
-    // Njia ya kushughulikia kuongeza Sub-Admin kupitia Modal (Hii inabaki POST kwa sababu inatumia form method="post")
+    // Njia ya kushughulikia kuongeza Sub-Admin kupitia Modal
     @PostMapping("/admin/sub-admins/add")
     public String addSubAdmin(@RequestParam("userId") Long userId, HttpSession session) {
         if (!checkIsSuperAdmin(session)) {
@@ -400,7 +402,7 @@ public class AdminController {
     public String deleteUser(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsSuperAdmin(session)) { return "redirect:/admin/dashboard"; }
         userRepository.deleteById(id);
-        return "redirect:/admin/dashboard?userDeleted=true";
+        return "redirect:/admin/dashboard`?userDeleted=true";
     }
 
     @GetMapping("/admin/users/edit/{id}")
