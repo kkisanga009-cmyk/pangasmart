@@ -15,7 +15,6 @@
         .card-stat:hover { transform: translateY(-3px); }
         .table-container { background: #ffffff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; }
 
-        /* Scrollbar maalum: Urefu wa mistari 5 tu kwa kila table (~290px) */
         .table-scrollable {
             max-height: 290px;
             overflow-y: auto;
@@ -39,7 +38,6 @@
         .btn-action-delete { background-color: #fee2e2; color: #dc2626; border: none; }
         .btn-action-delete:hover { background-color: #fecaca; color: #b91c1c; }
 
-        /* Media Controls & Badges maalum */
         .media-img { width: 65px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
         .media-video { width: 110px; height: 55px; background: #000; border-radius: 6px; }
         .phone-highlight { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; }
@@ -139,13 +137,13 @@
             <div th:if="${param.approved}" class="alert alert-success">✅ Landlord ameidhinishwa kikamilifu kuingia kwenye mfumo!</div>
             <div th:if="${param.rejected}" class="alert alert-danger">❌ Ombi la Landlord limekataliwa.</div>
             <div th:if="${param.subAdminAdded}" class="alert alert-success">✅ Sub-Admin ameongezwa kikamilifu!</div>
-            <div th:if="${param.bookingAccepted}" class="alert alert-success">✅ Ombi la booking limekubaliwa! Lipa namba imetumwa kwa mpangaji.</div>
-            <div th:if="${param.bookingCompleted}" class="alert alert-success">✅ Malipo ya booking yamethibitishwa! Chumba kimefutwa na ujumbe umetumwa kwa mwenye nyumba.</div>
+            <div th:if="${param.paymentConfirmed}" class="alert alert-success">✅ Malipo yamethibitishwa na taarifa zimesogezwa kwa mwenye nyumba!</div>
+            <div th:if="${param.roomLocked}" class="alert alert-success">✅ Chumba kimefungwa kikamilifu na taarifa imetumwa kwa mwenye nyumba!</div>
             <div th:if="${param.landlordBookingApproved}" class="alert alert-success">✅ Ombi la mwenye nyumba la online booking limeidhinishwa kikamilifu na ujumbe umetumwa!</div>
             <div th:if="${param.landlordBookingRejected}" class="alert alert-warning">⚠️ Ombi la mwenye nyumba la online booking limekataliwa.</div>
             <div th:if="${param.landlordBookingRemoved}" class="alert alert-danger">🗑️ Ruhusa ya online booking imeondolewa kwa mwenye nyumba huyu.</div>
 
-            <!-- JEDWALI JIPYA: USIMAMIZI WA MAOMBI YA ONLINE BOOKING YA WENYE NYUMBA -->
+            <!-- 1. JEDWALI LA MAOMBI YA ONLINE BOOKING YA WENYE NYUMBA -->
             <div class="table-container" id="landlordBookingRequestsSection">
                 <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-gear me-2"></i> Maombi ya Wenye Nyumba ya Kufanya Online Booking</h5>
                 <div class="table-responsive table-scrollable">
@@ -192,7 +190,7 @@
                 </div>
             </div>
 
-            <!-- 0. JEDWALI LA USIMAMIZI WA MAOMBI YA BOOKING (ADMIN) -->
+            <!-- 2. JEDWALI LA USIMAMIZI WA MAOMBI YA BOOKING -->
             <div class="table-container" id="bookingRequestsSection">
                 <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-bookmark me-2"></i> Usimamizi wa Maombi ya Booking ya Wapangaji</h5>
                 <div class="table-responsive table-scrollable">
@@ -221,20 +219,29 @@
                             <td class="fw-bold text-success" th:text="${b.bookingAmount != null ? 'TZS ' + #numbers.formatDecimal(b.bookingAmount, 1, 'COMMA', 2, 'POINT') : 'TZS 0'}">0</td>
                             <td>
                                 <span class="badge px-2 py-1"
-                                      th:classappend="${b.status == 'APPROVED' ? 'bg-success text-white' : (b.status == 'COMPLETED' ? 'bg-primary text-white' : (b.status == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark'))}"
+                                      th:classappend="${b.status == 'ROOM_LOCKED' ? 'bg-success text-white' : (b.status == 'PAYMENT_CONFIRMED' ? 'bg-primary text-white' : 'bg-warning text-dark')}"
                                       th:text="${b.status != null ? b.status : 'PENDING'}">PENDING</span>
                             </td>
                             <td>
-                                <a th:if="${b.status == 'PENDING'}" th:href="@{/admin/booking/accept/{id}(id=${b.id})}" class="btn btn-sm btn-action-approve px-2 py-1 me-1 fw-bold">
-                                    <i class="fa-solid fa-check"></i> Accept (Tuma Lipa Namba)
+                                <!-- Hatua ya 1: Ikiwa Hali ni PENDING -->
+                                <a th:if="${b.status == null || b.status == 'PENDING'}"
+                                   th:href="@{/admin/booking/confirm-payment/{id}(id=${b.id})}"
+                                   class="btn btn-sm btn-warning px-2 py-1 fw-bold text-dark">
+                                    <i class="fa-solid fa-check"></i> Thibitisha Malipo
                                 </a>
-                                <a th:if="${b.status == 'PENDING'}" th:href="@{/admin/booking/reject/{id}(id=${b.id})}" class="btn btn-sm btn-action-delete px-2 py-1 fw-bold" onclick="return confirm('Kataa booking hii?')">
-                                    <i class="fa-solid fa-xmark"></i> Reject
+
+                                <!-- Hatua ya 2: Ikiwa Hali ni PAYMENT_CONFIRMED -->
+                                <a th:if="${b.status == 'PAYMENT_CONFIRMED'}"
+                                   th:href="@{/admin/booking/lock-room/{id}(id=${b.id})}"
+                                   class="btn btn-sm btn-primary px-2 py-1 fw-bold"
+                                   onclick="return confirm('Je, una uhakika unataka kufunga chumba hiki na kutuma taarifa kwa mwenye nyumba?')">
+                                    <i class="fa-solid fa-lock"></i> Funga Chumba (Lock Room)
                                 </a>
-                                <a th:if="${b.status == 'APPROVED'}" th:href="@{/admin/booking/complete/{id}(id=${b.id})}" class="btn btn-sm btn-primary px-2 py-1 fw-bold" onclick="return confirm('Thibitisha malipo: Je, ufute chumba hiki na kumtumia taarifa mwenye nyumba?')">
-                                    <i class="fa-solid fa-circle-check"></i> Thibitisha Malipo & Futa Chumba
-                                </a>
-                                <span th:if="${b.status == 'COMPLETED'}" class="text-success small fw-bold"><i class="fa-solid fa-check-double"></i> Imekamilika</span>
+
+                                <!-- Hatua ya 3: Ikiwa Hali ni ROOM_LOCKED -->
+                                <span th:if="${b.status == 'ROOM_LOCKED'}" class="text-success small fw-bold">
+                                    <i class="fa-solid fa-lock"></i> Chumba kimefungwa kikamilifu
+                                </span>
                             </td>
                         </tr>
                         <tr th:if="${bookingList == null || #lists.isEmpty(bookingList)}">
@@ -245,7 +252,7 @@
                 </div>
             </div>
 
-            <!-- 1. JEDWALI LA MGAWANYO WA MAPATO YA MWAKA KULINGANA NA MIEZI -->
+            <!-- 3. JEDWALI LA MGAWANYO WA MAPATO YA MWAKA -->
             <div class="table-container" id="monthlyRevenueSection" th:if="${isSuperAdmin}">
                 <h5 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-chart-line me-2"></i> Mgawanyo wa Mapato ya Mwaka Kulingana na Miezi</h5>
                 <div class="table-responsive table-scrollable">
@@ -271,7 +278,7 @@
                 </div>
             </div>
 
-            <!-- 2. JEDWALI LA WALIOWEZA KULIPIA (Payments) -->
+            <!-- 4. JEDWALI LA WALIOWEZA KULIPIA (Payments) -->
             <div class="table-container" id="paymentsSection">
                 <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-money-bill-wave me-2"></i> Orodha ya Waliolipia & Namba za Wenye Nyumba</h5>
                 <div class="table-responsive table-scrollable">
@@ -314,7 +321,7 @@
                 </div>
             </div>
 
-            <!-- 3. JEDWALI LA MA-ADMIN WADOGO -->
+            <!-- 5. JEDWALI LA MA-ADMIN WADOGO -->
             <div class="table-container" id="subAdminsSection" th:if="${isSuperAdmin}">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="text-primary mb-0 fw-bold"><i class="fa-solid fa-user-shield me-2"></i> Orodha ya Ma-admin Wadogo (Sub-Admins)</h5>
@@ -343,7 +350,7 @@
                 </div>
             </div>
 
-            <!-- 4. JEDWALI LA WAPANGAJI -->
+            <!-- 6. JEDWALI LA WAPANGAJI -->
             <div class="table-container" id="tenantsSection">
                 <h5 class="text-success mb-3 fw-bold"><i class="fa-solid fa-users me-2"></i> Orodha ya Wapangaji (Tenants)</h5>
                 <div class="table-responsive table-scrollable">
@@ -369,7 +376,7 @@
                 </div>
             </div>
 
-            <!-- 5. JEDWALI LA WENYE NYUMBA -->
+            <!-- 7. JEDWALI LA WENYE NYUMBA -->
             <div class="table-container" id="landlordsSection">
                 <h5 class="text-dark mb-3 fw-bold"><i class="fa-solid fa-user-tie me-2"></i> Orodha ya Wenye Nyumba (Landlords)</h5>
                 <div class="table-responsive table-scrollable">
@@ -400,7 +407,7 @@
                 </div>
             </div>
 
-            <!-- 6. JEDWALI LA VYUMBA NA PICHA/VIDEO -->
+            <!-- 8. JEDWALI LA VYUMBA NA PICHA/VIDEO -->
             <div class="table-container" id="roomsSection">
                 <h5 class="text-dark mb-3 fw-bold"><i class="fa-solid fa-door-open me-2"></i> Udhibiti wa Vyumba (Picha na Video)</h5>
                 <div class="table-responsive table-scrollable">

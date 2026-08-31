@@ -136,7 +136,6 @@ public class HomeController {
                         boolean isApprovedByAdmin = "APPROVED".equalsIgnoreCase(owner.getStatus());
                         room.setAllowBooking(owner.isAllowBooking() && isApprovedByAdmin);
 
-                        // [MB] Weka kiasi cha booking kilichowekwa na mwenyenyumba kwenye chumba
                         room.setBookingFee(owner.getBookingFee());
 
                         if (room.getLandlordName() == null || room.getLandlordName().isEmpty()) {
@@ -350,7 +349,6 @@ public class HomeController {
         return "redirect:/home?roomDeleted=true";
     }
 
-    // [MB] Malipo ya TZS 1,000 kupitia Pesapal mahususi kwa ajili ya kuona namba za simu za mwenyenyumba
     @PostMapping("/pay-room")
     public String payForRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
@@ -391,7 +389,6 @@ public class HomeController {
         return "redirect:/home?error=payment_failed";
     }
 
-    // [MB] Endpoint maalum ya mpangaji kutuma ombi la Booking kwa kutumia kiasi cha mwenyenyumba na maelekezo ya Lipa Namba 350213373
     @PostMapping("/tenant/book-room")
     public String bookRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");

@@ -25,7 +25,7 @@ public class Booking {
     private String landlordEmail; // Uwanja mpya ulioongezwa hapa
     private String landlordPhone;
 
-    private String status; // PENDING, APPROVED, COMPLETED, REJECTED
+    private String status; // PENDING, PAYMENT_CONFIRMED, ROOM_LOCKED, REJECTED
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Booking() {}

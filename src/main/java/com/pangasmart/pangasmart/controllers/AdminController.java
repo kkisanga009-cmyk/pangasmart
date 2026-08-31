@@ -1,4 +1,5 @@
 package com.pangasmart.pangasmart.controllers;
+
 import com.pangasmart.pangasmart.models.Booking;
 import com.pangasmart.pangasmart.models.Payment;
 import com.pangasmart.pangasmart.models.Room;
@@ -275,25 +276,41 @@ public class AdminController {
         return "admin";
     }
 
-    // [MB] Endpoints za Usimamizi wa Maombi ya Booking ya Wapangaji (Tenant Bookings)
-    @GetMapping("/admin/booking/accept/{id}")
-    public String acceptBooking(@PathVariable("id") Long id, HttpSession session) {
+    // [MB] Endpoints zilizoboreshwa kwa ajili ya Hatua 2 za Admin (Kuthibitisha Malipo kwanzaisha kwenda kwa Mwenyenyumba, kisha Kufunga Chumba)
+
+    @GetMapping("/admin/booking/verify-payment/{id}")
+    public String verifyPaymentAndNotifyLandlord(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) {
             return "redirect:/login";
         }
+
         bookingRepository.findById(id).ifPresent(booking -> {
-            booking.setStatus("APPROVED");
+            booking.setStatus("PAYMENT_VERIFIED"); // Hali inayomwezesha mwenyenyumba kuona taarifa kwenye table yake
+            bookingRepository.save(booking);
+        });
+
+        return "redirect:/admin/dashboard?paymentVerified=true";
+    }
+
+    @GetMapping("/admin/booking/lock-room/{id}")
+    public String lockRoomCompletely(@PathVariable("id") Long id, HttpSession session) {
+        if (!checkIsAnyAdmin(session)) {
+            return "redirect:/login";
+        }
+
+        bookingRepository.findById(id).ifPresent(booking -> {
+            booking.setStatus("CLOSED_COMPLETELY"); // Hali ya kukamilisha kufunga kabisa
             bookingRepository.save(booking);
 
-            // [MB] Kitendo cha ku-approve kinapofanyika, chumba kinapigwa kufuli (Locked) au alama yake inabadilishwa kuwa booked
             if (booking.getRoomId() != null) {
                 roomRepository.findById(booking.getRoomId()).ifPresent(room -> {
-                    room.setBooked(true);
+                    room.setBooked(true); // Inafunga chumba ili picha/video zionyeshe ujumbe wa "Chumba kimefungwa kikamilifu"
                     roomRepository.save(room);
                 });
             }
         });
-        return "redirect:/admin/dashboard?bookingAccepted=true";
+
+        return "redirect:/admin/dashboard?roomLockedSuccessfully=true";
     }
 
     @GetMapping("/admin/booking/reject/{id}")
@@ -306,26 +323,6 @@ public class AdminController {
             bookingRepository.save(booking);
         });
         return "redirect:/admin/dashboard?bookingRejected=true";
-    }
-
-    @GetMapping("/admin/booking/complete/{id}")
-    public String completeBooking(@PathVariable("id") Long id, HttpSession session) {
-        if (!checkIsAnyAdmin(session)) {
-            return "redirect:/login";
-        }
-        bookingRepository.findById(id).ifPresent(booking -> {
-            booking.setStatus("APPROVED");
-            bookingRepository.save(booking);
-
-            if (booking.getRoomId() != null) {
-                try {
-                    roomRepository.deleteById(booking.getRoomId());
-                } catch (Exception e) {
-                    // Ignore kama chumba hakipo
-                }
-            }
-        });
-        return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
     // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
