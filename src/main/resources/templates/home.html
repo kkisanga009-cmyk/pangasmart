@@ -71,10 +71,10 @@
         </button>
 
         <a th:if="${userRole == 'ADMIN' or (session.loggedInUser != null and session.loggedInUser.role == 'ADMIN') or (currentUser != null and currentUser.role == 'ADMIN')}"
-           href="/admin/dashboard" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
+           th:href="@{/admin/dashboard}" class="nav-btn nav-btn-admin">📊 Admin Dashboard</a>
 
-        <a href="/profile" class="nav-btn nav-btn-profile">👤 Profile</a>
-        <a href="/logout" class="nav-btn nav-btn-logout">Logout</a>
+        <a th:href="@{/profile}" class="nav-btn nav-btn-profile">👤 Profile</a>
+        <a th:href="@{/logout}" class="nav-btn nav-btn-logout">Logout</a>
     </div>
 </div>
 
