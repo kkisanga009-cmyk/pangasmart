@@ -276,16 +276,16 @@ public class AdminController {
         return "admin";
     }
 
-    // [MB] Endpoints zilizoboreshwa kwa ajili ya Hatua 2 za Admin (Kuthibitisha Malipo kwanzaisha kwenda kwa Mwenyenyumba, kisha Kufunga Chumba)
+    // Endpoints zilizosahihishwa kwa ajili ya Hatua za Admin (Uthibitishaji wa Malipo na Booking)
 
-    @GetMapping("/admin/booking/verify-payment/{id}")
+    @GetMapping({"/admin/booking/confirm-payment/{id}", "/admin/booking/verify-payment/{id}"})
     public String verifyPaymentAndNotifyLandlord(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) {
             return "redirect:/login";
         }
 
         bookingRepository.findById(id).ifPresent(booking -> {
-            booking.setStatus("PAYMENT_VERIFIED"); // Hali inayomwezesha mwenyenyumba kuona taarifa kwenye table yake
+            booking.setStatus("PAYMENT_VERIFIED");
             bookingRepository.save(booking);
         });
 
@@ -299,12 +299,12 @@ public class AdminController {
         }
 
         bookingRepository.findById(id).ifPresent(booking -> {
-            booking.setStatus("CLOSED_COMPLETELY"); // Hali ya kukamilisha kufunga kabisa
+            booking.setStatus("CLOSED_COMPLETELY");
             bookingRepository.save(booking);
 
             if (booking.getRoomId() != null) {
                 roomRepository.findById(booking.getRoomId()).ifPresent(room -> {
-                    room.setBooked(true); // Inafunga chumba ili picha/video zionyeshe ujumbe wa "Chumba kimefungwa kikamilifu"
+                    room.setBooked(true);
                     roomRepository.save(room);
                 });
             }
@@ -365,7 +365,6 @@ public class AdminController {
         return "redirect:/admin/dashboard?landlordBookingRemoved=true";
     }
 
-    // Njia ya kushughulikia kuongeza Sub-Admin kupitia Modal
     @PostMapping("/admin/sub-admins/add")
     public String addSubAdmin(@RequestParam("userId") Long userId, HttpSession session) {
         if (!checkIsSuperAdmin(session)) {
