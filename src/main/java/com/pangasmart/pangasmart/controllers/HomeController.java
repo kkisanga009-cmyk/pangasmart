@@ -81,12 +81,10 @@ public class HomeController {
                     model.addAttribute("landlord", landlord);
                     model.addAttribute("adminMessage", landlord.getAdminMessage());
 
-                    // Kuhakikisha imewashwa na imepitishwa na Admin (APPROVED)
                     boolean isApprovedByAdmin = "APPROVED".equalsIgnoreCase(landlord.getStatus());
                     isBookingAllowedByAdmin = landlord.isAllowBooking() && isApprovedByAdmin;
                 }
 
-                // Chota bookings tu kama Admin ameshamuidhinisha mwenyenyumba kuruhusu booking
                 if (isBookingAllowedByAdmin) {
                     List<Room> myRooms = roomRepository.findAllByLandlordEmail(user.getEmail());
                     List<Booking> allBookings = bookingRepository.findAll();
@@ -137,6 +135,10 @@ public class HomeController {
                         User owner = ownerOpt.get();
                         boolean isApprovedByAdmin = "APPROVED".equalsIgnoreCase(owner.getStatus());
                         room.setAllowBooking(owner.isAllowBooking() && isApprovedByAdmin);
+
+                        // [MB] Weka kiasi cha booking kilichowekwa na mwenyenyumba kwenye chumba
+                        room.setBookingFee(owner.getBookingFee());
+
                         if (room.getLandlordName() == null || room.getLandlordName().isEmpty()) {
                             room.setLandlordName(owner.getFullName());
                         }
@@ -348,6 +350,7 @@ public class HomeController {
         return "redirect:/home?roomDeleted=true";
     }
 
+    // [MB] Malipo ya TZS 1,000 kupitia Pesapal mahususi kwa ajili ya kuona namba za simu za mwenyenyumba
     @PostMapping("/pay-room")
     public String payForRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
@@ -379,30 +382,6 @@ public class HomeController {
                 payment.setStatus("PENDING");
                 paymentRepository.save(payment);
 
-                Optional<Room> roomOpt = roomRepository.findById(roomId);
-                if (roomOpt.isPresent()) {
-                    Room room = roomOpt.get();
-                    Booking booking = new Booking();
-
-                    booking.setTenantId(user.getId());
-                    booking.setTenantName(user.getFullName());
-                    booking.setTenantEmail(user.getEmail());
-                    booking.setTenantPhone(user.getPhone());
-
-                    booking.setRoomId(roomId);
-                    booking.setRoomTitle(room.getTitle());
-                    booking.setBookingAmount(amount);
-
-                    booking.setLandlordEmail(room.getLandlordEmail());
-                    booking.setLandlordName(room.getLandlordName());
-                    booking.setLandlordPhone(room.getLandlordPhone());
-
-                    booking.setStatus("PENDING_PAYMENT");
-                    booking.setCreatedAt(LocalDateTime.now());
-
-                    bookingRepository.save(booking);
-                }
-
                 return "redirect:" + redirectUrl;
             }
         } catch (Exception e) {
@@ -410,5 +389,53 @@ public class HomeController {
         }
 
         return "redirect:/home?error=payment_failed";
+    }
+
+    // [MB] Endpoint maalum ya mpangaji kutuma ombi la Booking kwa kutumia kiasi cha mwenyenyumba na maelekezo ya Lipa Namba 350213373
+    @PostMapping("/tenant/book-room")
+    public String bookRoom(@RequestParam("roomId") Long roomId, HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            Optional<Room> roomOpt = roomRepository.findById(roomId);
+            if (roomOpt.isPresent()) {
+                Room room = roomOpt.get();
+
+                double fee = 0.0;
+                Optional<User> landlordOpt = userRepository.findByEmail(room.getLandlordEmail());
+                if (landlordOpt.isPresent()) {
+                    fee = landlordOpt.get().getBookingFee();
+                }
+
+                Booking booking = new Booking();
+                booking.setTenantId(user.getId());
+                booking.setTenantName(user.getFullName());
+                booking.setTenantEmail(user.getEmail());
+                booking.setTenantPhone(user.getPhone());
+
+                booking.setRoomId(roomId);
+                booking.setRoomTitle(room.getTitle());
+                booking.setBookingAmount(fee);
+
+                booking.setLandlordId(landlordOpt.map(User::getId).orElse(null));
+                booking.setLandlordName(room.getLandlordName());
+                booking.setLandlordEmail(room.getLandlordEmail());
+                booking.setLandlordPhone(room.getLandlordPhone());
+
+                booking.setStatus("PENDING");
+                booking.setCreatedAt(LocalDateTime.now());
+
+                bookingRepository.save(booking);
+
+                return "redirect:/home?bookingSubmitted=true";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "redirect:/home?error=booking_failed";
     }
 }

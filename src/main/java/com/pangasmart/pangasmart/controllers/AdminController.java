@@ -1,5 +1,4 @@
 package com.pangasmart.pangasmart.controllers;
-
 import com.pangasmart.pangasmart.models.Booking;
 import com.pangasmart.pangasmart.models.Payment;
 import com.pangasmart.pangasmart.models.Room;
@@ -276,7 +275,7 @@ public class AdminController {
         return "admin";
     }
 
-    // Endpoints za Usimamizi wa Maombi ya Booking
+    // [MB] Endpoints za Usimamizi wa Maombi ya Booking ya Wapangaji (Tenant Bookings)
     @GetMapping("/admin/booking/accept/{id}")
     public String acceptBooking(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) {
@@ -285,6 +284,14 @@ public class AdminController {
         bookingRepository.findById(id).ifPresent(booking -> {
             booking.setStatus("APPROVED");
             bookingRepository.save(booking);
+
+            // [MB] Kitendo cha ku-approve kinapofanyika, chumba kinapigwa kufuli (Locked) au alama yake inabadilishwa kuwa booked
+            if (booking.getRoomId() != null) {
+                roomRepository.findById(booking.getRoomId()).ifPresent(room -> {
+                    room.setBooked(true);
+                    roomRepository.save(room);
+                });
+            }
         });
         return "redirect:/admin/dashboard?bookingAccepted=true";
     }
@@ -321,7 +328,7 @@ public class AdminController {
         return "redirect:/admin/dashboard?bookingCompleted=true";
     }
 
-    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA (BILA EMAIL) ---
+    // --- SEHEMU YA KUSIMAMIA MAOMBI YA ONLINE BOOKING YA WENYENYUMBA ---
 
     @GetMapping("/admin/landlord-booking/approve/{id}")
     public String approveLandlordBooking(@PathVariable("id") Long id, HttpSession session) {
@@ -330,7 +337,7 @@ public class AdminController {
         userRepository.findById(id).ifPresent(landlord -> {
             landlord.setAllowBooking(true);
             landlord.setBookingRequestStatus("APPROVED");
-            landlord.setAdminMessage("Ombi lako limekubaliwa! Sasa wapangaji watafanya booking online, na fedha zako zitatumwa na Admin kwako moja kwa moja.");
+            landlord.setAdminMessage("Ombi lako limekubaliwa! Sasa wapangaji watafanya booking online kupitia Lipa Namba 350213373, na fedha zako zitatumwa na Admin kwako moja kwa moja.");
             userRepository.save(landlord);
         });
 

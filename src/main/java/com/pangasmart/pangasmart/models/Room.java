@@ -32,6 +32,12 @@ public class Room {
     private String landlordName;
     private boolean allowBooking;
 
+    // [MB] Sehemu ya kuhifadhi kiasi cha fedha cha booking kilichowekwa na mwenyenyumba
+    private Double bookingFee;
+
+    // [MB] Alama ya kuonyesha kama chumba kimeshachukuliwa / kimefungwa
+    private boolean booked;
+
     public Room() {}
 
     // Getters & Setters
@@ -70,4 +76,11 @@ public class Room {
 
     public boolean isAllowBooking() { return allowBooking; }
     public void setAllowBooking(boolean allowBooking) { this.allowBooking = allowBooking; }
+
+    // [MB] Getters na Setters kwa ajili ya bookingFee na booked
+    public Double getBookingFee() { return bookingFee; }
+    public void setBookingFee(Double bookingFee) { this.bookingFee = bookingFee; }
+
+    public boolean isBooked() { return booked; }
+    public void setBooked(boolean booked) { this.booked = booked; }
 }
