@@ -294,6 +294,7 @@ public class AdminController {
         return "redirect:/admin/dashboard";
     }
 
+    // Hapa ndipo tumeboresha: Admin akibonyeza verify, booking inabadilishwa na chumba kinafungwa (locked = true) automatically
     @GetMapping({"/admin/booking/confirm-payment/{id}", "/admin/booking/verify-payment/{id}"})
     public String verifyPaymentAndNotifyLandlord(@PathVariable("id") Long id, HttpSession session) {
         if (!checkIsAnyAdmin(session)) {
@@ -301,8 +302,17 @@ public class AdminController {
         }
 
         bookingRepository.findById(id).ifPresent(booking -> {
+            // 1. Badilisha status ya booking kuwa PAYMENT_VERIFIED
             booking.setStatus("PAYMENT_VERIFIED");
             bookingRepository.save(booking);
+
+            // 2. Tafuta chumba husika kupitia roomId na ukifunge automatically (isLocked = true)
+            if (booking.getRoomId() != null) {
+                roomRepository.findById(booking.getRoomId()).ifPresent(room -> {
+                    room.setLocked(true);
+                    roomRepository.save(room);
+                });
+            }
         });
 
         return "redirect:/admin/dashboard?paymentVerified=true";
@@ -321,6 +331,7 @@ public class AdminController {
             if (booking.getRoomId() != null) {
                 roomRepository.findById(booking.getRoomId()).ifPresent(room -> {
                     room.setBooked(true);
+                    room.setLocked(true);
                     roomRepository.save(room);
                 });
             }
