@@ -116,7 +116,7 @@
             </div>
             <div style="margin-bottom: 10px;">
                 <label style="font-size: 13px; font-weight: bold;">Kiasi cha Kubook (TZS):</label>
-                <input type="number" step="any" name="bookingFee" th:value="${landlord != null ? landlord.bookingFee : ''}" placeholder="Mfano: 10000">
+                <input type="number" step="any" name="bookingFee" id="landlordBookingFeeInput" th:value="${landlord != null ? landlord.bookingFee : ''}" placeholder="Mfano: 10000">
             </div>
             <button type="submit" class="btn" style="background-color: #8e44ad;">Hifadhi Mipangilio ya Booking & Tuma kwa Admin</button>
         </form>
@@ -248,11 +248,26 @@
 
                     <div th:if="${room.allowBooking}" style="margin-top: 12px; border-top: 1px dashed #a3cfbb; padding-top: 10px;">
                         <p style="font-size: 13px; font-weight: bold; margin-bottom: 6px;">Unataka kubook chumba hiki? Bonyeza kitufe chini kutuma ombi la booking:</p>
-                        <form th:action="@{/tenant/book-room}" method="post">
+
+                        <!-- Kitufe cha Booking kilichobadilishwa kufanya kazi kwa JavaScript -->
+                        <button type="button" th:id="'bookingBtn-' + ${room.id}" class="btn" style="background-color: #25D366; font-size: 13px;" th:onclick="'toggleBookingMessage(' + ${room.id} + ', \'' + (${room.bookingFee} != null ? ${room.bookingFee} : 'Kiasi Hakijawekwa') + '\')'">
+                            <i class="fa fa-file-text"></i> Tuma Ombi la Booking Sasa
+                        </button>
+
+                        <!-- Sehemu ya Ujumbe itakayotokea baada ya kubonyeza (Iwe Hidden mwanzo) -->
+                        <div th:id="'bookingMessageCard-' + ${room.id}" class="card mt-3 p-3 border-success" style="display: none; background-color: #f8f9fa; margin-top: 10px; border: 1px solid #28a745; border-radius: 5px;">
+                            <div class="card-body">
+                                <h5 class="text-success fw-bold" style="color: #28a745; font-size: 14px; font-weight: bold; margin-bottom: 6px;"><i class="fa fa-check-circle"></i> Ombi lako la booking limefika kwa Admin!</h5>
+                                <p class="mb-2" style="font-size: 13px; margin-bottom: 6px;">Kiasi cha Booking kilichowekwa na Mwenye Nyumba ni: <strong th:id="'kiasiBookingText-' + ${room.id}" class="text-danger" style="color: #dc3545;">TZS XXXXX</strong></p>
+                                <p class="mb-2" style="font-size: 13px; margin-bottom: 6px;">Unaweza kuwasiliana na Admin kwa malipo au tuma malipo kwenye <strong>Lipa Namba: 350213373 (Jina: Benard Joseph Kisanga)</strong>.</p>
+                                <p class="text-muted small mb-0" style="font-size: 12px; color: #6c757d; margin-top: 4px;">Fanya hivi ili kulock chumba watu wengine wasije wakachukua.</p>
+                            </div>
+                        </div>
+
+                        <!-- Form ya zamani imefichwa au kuondolewa ili kutoa nafasi kwa AJAX/JavaScript tuliyoiweka -->
+                        <form th:action="@{/tenant/book-room}" method="post" style="display:none;">
                             <input type="hidden" name="roomId" th:value="${room.id}">
-                            <button type="submit" class="btn" style="background-color: #25D366; font-size: 13px;">
-                                📝 Tuma Ombi la Booking Sasa
-                            </button>
+                            <button type="submit">Tuma</button>
                         </form>
                     </div>
                 </div>
@@ -352,6 +367,24 @@
 
         alertBox.style.display = "none";
         return true;
+    }
+
+    // Function ya kuonyesha ujumbe wa booking kwa kila chumba husika
+    function toggleBookingMessage(roomId, bookingFee) {
+        let kiasiTextElement = document.getElementById('kiasiBookingText-' + roomId);
+        let messageCard = document.getElementById('bookingMessageCard-' + roomId);
+        let bookingBtn = document.getElementById('bookingBtn-' + roomId);
+
+        // Weka kiasi cha booking kilichowekwa na mwenye nyumba kwenye ujumbe
+        kiasiTextElement.innerText = "TZS " + bookingFee;
+
+        // Onyesha kadi ya ujumbe
+        messageCard.style.display = 'block';
+
+        // Badilisha muonekano wa kitufe ili kuzuia asibonyeze mara kwa mara
+        bookingBtn.disabled = true;
+        bookingBtn.style.backgroundColor = "#6c757d";
+        bookingBtn.innerHTML = "✅ Ombi Limetumwa";
     }
 
     function openHelpModal() {
