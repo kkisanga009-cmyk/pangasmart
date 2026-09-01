@@ -125,7 +125,6 @@
         <div style="margin-bottom: 25px; background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px;">
             <h4 style="font-size: 15px; margin-bottom: 10px; color: #2c3e50;">📋 Orodha ya Maombi ya Booking & Malipo</h4>
 
-            <!-- Ujumbe utakaotokea mara baada ya Admin ku-approve -->
             <div th:if="${landlord != null and landlord.adminMessage != null and !#strings.isEmpty(landlord.adminMessage)}"
                  style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 5px; margin-bottom: 12px; font-size: 13px; font-weight: bold; border: 1px solid #bae6fd;">
                 ℹ️ <span th:text="${landlord.adminMessage}">Ujumbe kutoka kwa Admin</span>
@@ -199,31 +198,39 @@
             <h4 th:text="${room.title}">Aina ya Chumba</h4>
             <p style="margin-top: 4px; font-size: 14px;">📍 <span th:text="${room.location}">Location</span> | <span class="price">TZS <span th:text="${room.price}">0</span>/Mwezi</span></p>
 
-            <div th:if="${room.imageUrl != null and !#strings.isEmpty(room.imageUrl)}" style="margin-top: 10px;">
-                <img th:src="${room.imageUrl}" class="media-preview" alt="Room Image">
-                <div>
-                    <a th:href="${room.imageUrl}" download="Chumba_PangaSmart.jpg" class="download-btn">📥 Pakua Picha</a>
-                    <a th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}"
-                       th:href="@{/landlord/rooms/delete-image/{id}(id=${room.id})}"
-                       class="delete-btn"
-                       onclick="return confirm('Je, una uhakika unataka kufuta picha hii?')">
-                        🗑️ Futa Picha
-                    </a>
-                </div>
+            <!-- KAMA CHUMBA KIMEFUNGWA (LOCKED) -->
+            <div th:if="${room.isLocked}" style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 14px; border: 1px solid #f5c6cb; margin-top: 10px;">
+                ❌ Chumba hiki kimeshafanyiwa booking, tafuta kingine.
             </div>
 
-            <div th:if="${room.videoUrl != null and !#strings.isEmpty(room.videoUrl)}" style="margin-top: 10px;">
-                <video controls class="media-preview" style="background: #000;">
-                    <source th:src="${room.videoUrl}">
-                    Browser yako haisajili ku-play video hii.
-                </video>
+            <!-- KAMA CHUMBA KIKO WAZI (UNLOCKED) - Onyesha picha na video kama kawaida -->
+            <div th:unless="${room.isLocked}">
+                <div th:if="${room.imageUrl != null and !#strings.isEmpty(room.imageUrl)}" style="margin-top: 10px;">
+                    <img th:src="${room.imageUrl}" class="media-preview" alt="Room Image">
+                    <div>
+                        <a th:href="${room.imageUrl}" download="Chumba_PangaSmart.jpg" class="download-btn">📥 Pakua Picha</a>
+                        <a th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}"
+                           th:href="@{/landlord/rooms/delete-image/{id}(id=${room.id})}"
+                           class="delete-btn"
+                           onclick="return confirm('Je, una uhakika unataka kufuta picha hii?')">
+                            🗑️ Futa Picha
+                        </a>
+                    </div>
+                </div>
 
-                <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}">
-                    <a th:href="@{/landlord/rooms/delete-video/{id}(id=${room.id})}"
-                       class="delete-btn"
-                       onclick="return confirm('Je, una uhakika unataka kufuta video hii?')">
-                        🗑️ Futa Video
-                    </a>
+                <div th:if="${room.videoUrl != null and !#strings.isEmpty(room.videoUrl)}" style="margin-top: 10px;">
+                    <video controls class="media-preview" style="background: #000;">
+                        <source th:src="${room.videoUrl}">
+                        Browser yako haisajili ku-play video hii.
+                    </video>
+
+                    <div th:if="${userRole == 'LANDLORD' or (session.loggedInUser != null and session.loggedInUser.role == 'LANDLORD')}">
+                        <a th:href="@{/landlord/rooms/delete-video/{id}(id=${room.id})}"
+                           class="delete-btn"
+                           onclick="return confirm('Je, una uhakika unataka kufuta video hii?')">
+                            🗑️ Futa Video
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -249,22 +256,19 @@
                     <div th:if="${room.allowBooking}" style="margin-top: 12px; border-top: 1px dashed #a3cfbb; padding-top: 10px;">
                         <p style="font-size: 13px; font-weight: bold; margin-bottom: 6px;">Unataka kubook chumba hiki? Bonyeza kitufe chini kutuma ombi la booking:</p>
 
-                        <!-- Kitufe cha Booking kilichobadilishwa kufanya kazi kwa JavaScript -->
                         <button type="button" th:id="'bookingBtn-' + ${room.id}" class="btn" style="background-color: #25D366; font-size: 13px;" th:onclick="'toggleBookingMessage(' + ${room.id} + ', \'' + (${room.bookingFee} != null ? ${room.bookingFee} : 'Kiasi Hakijawekwa') + '\')'">
                             <i class="fa fa-file-text"></i> Tuma Ombi la Booking Sasa
                         </button>
 
-                        <!-- Sehemu ya Ujumbe itakayotokea baada ya kubonyeza (Iwe Hidden mwanzo) -->
                         <div th:id="'bookingMessageCard-' + ${room.id}" class="card mt-3 p-3 border-success" style="display: none; background-color: #f8f9fa; margin-top: 10px; border: 1px solid #28a745; border-radius: 5px;">
                             <div class="card-body">
                                 <h5 class="text-success fw-bold" style="color: #28a745; font-size: 14px; font-weight: bold; margin-bottom: 6px;"><i class="fa fa-check-circle"></i> Ombi lako la booking limefika kwa Admin!</h5>
                                 <p class="mb-2" style="font-size: 13px; margin-bottom: 6px;">Kiasi cha Booking kilichowekwa na Mwenye Nyumba ni: <strong th:id="'kiasiBookingText-' + ${room.id}" class="text-danger" style="color: #dc3545;">TZS XXXXX</strong></p>
-                                <p class="mb-2" style="font-size: 13px; margin-bottom: 6px;">Unaweza kuwasiliana na Admin 0747466962  kwa malipo au tuma malipo kwenye <strong>Lipa Namba: 350213373 (Jina: Benard Joseph Kisanga) kisha tuma tarifa zako kwa admin</strong>.</p>
+                                <p class="mb-2" style="font-size: 13px; margin-bottom: 6px;">Unaweza kuwasiliana na Admin 0747466962 kwa malipo au tuma malipo kwenye <strong>Lipa Namba: 350213373 (Jina: Benard Joseph Kisanga) kisha tuma tarifa zako kwa admin</strong>.</p>
                                 <p class="text-muted small mb-0" style="font-size: 12px; color: #6c757d; margin-top: 4px;">Fanya hivi ili kulock chumba watu wengine wasije wakachukua.</p>
                             </div>
                         </div>
 
-                        <!-- Form ya zamani imefichwa au kuondolewa ili kutoa nafasi kwa AJAX/JavaScript tuliyoiweka -->
                         <form th:action="@{/tenant/book-room}" method="post" style="display:none;">
                             <input type="hidden" name="roomId" th:value="${room.id}">
                             <button type="submit">Tuma</button>
@@ -369,19 +373,14 @@
         return true;
     }
 
-    // Function ya kuonyesha ujumbe wa booking kwa kila chumba husika
     function toggleBookingMessage(roomId, bookingFee) {
         let kiasiTextElement = document.getElementById('kiasiBookingText-' + roomId);
         let messageCard = document.getElementById('bookingMessageCard-' + roomId);
         let bookingBtn = document.getElementById('bookingBtn-' + roomId);
 
-        // Weka kiasi cha booking kilichowekwa na mwenye nyumba kwenye ujumbe
         kiasiTextElement.innerText = "TZS " + bookingFee;
-
-        // Onyesha kadi ya ujumbe
         messageCard.style.display = 'block';
 
-        // Badilisha muonekano wa kitufe ili kuzuia asibonyeze mara kwa mara
         bookingBtn.disabled = true;
         bookingBtn.style.backgroundColor = "#6c757d";
         bookingBtn.innerHTML = "✅ Ombi Limetumwa";

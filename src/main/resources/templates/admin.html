@@ -437,7 +437,16 @@
                                 <span th:unless="${room.videoUrl != null && !#strings.isEmpty(room.videoUrl)}" class="text-muted small fst-italic">Haina Video</span>
                             </td>
                             <td th:if="${isSuperAdmin}">
-                                <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" class="btn btn-sm btn-action-delete px-2 py-1" onclick="return confirm('Futa chumba hiki na media zake?')"><i class="fa-solid fa-trash"></i> Futa</a>
+                                <!-- Kitufe cha Futa kilichopo tayari -->
+                                <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" class="btn btn-sm btn-action-delete px-2 py-1 me-1" onclick="return confirm('Futa chumba hiki na media zake?')"><i class="fa-solid fa-trash"></i> Futa</a>
+
+                                <!-- Kitufe kipya cha Lock / Unlock -->
+                                <a th:href="@{/admin/rooms/toggle-lock/{id}(id=${room.id})}"
+                                   th:style="${room.isLocked} ? 'background-color: #e67e22;' : 'background-color: #27ae60;'"
+                                   style="display: inline-block; margin-top: 5px; padding: 4px 10px; color: white; text-decoration: none; border-radius: 4px; font-size: 11px; font-weight: bold;"
+                                   th:text="${room.isLocked} ? '🔓 Unlock' : '🔒 Lock'">
+                                    Lock/Unlock
+                                </a>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(rooms)}"><td colspan="7" class="text-center text-muted py-4">Hakuna vyumba vilivyosajiliwa.</td></tr>

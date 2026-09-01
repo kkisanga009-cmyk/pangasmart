@@ -38,6 +38,9 @@ public class Room {
     // [MB] Alama ya kuonyesha kama chumba kimeshachukuliwa / kimefungwa
     private boolean booked;
 
+    // Sehemu ya Lock / Unlock ya chumba (By default kiko wazi / false)
+    private boolean isLocked = false;
+
     public Room() {}
 
     // Getters & Setters
@@ -83,4 +86,8 @@ public class Room {
 
     public boolean isBooked() { return booked; }
     public void setBooked(boolean booked) { this.booked = booked; }
+
+    // Getters na Setters kwa ajili ya isLocked
+    public boolean isLocked() { return isLocked; }
+    public void setLocked(boolean locked) { isLocked = locked; }
 }
