@@ -145,9 +145,22 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public String processForgotPassword(@RequestParam("email") String email, Model model) {
+        // 🛑 ZUIE ADMIN ASITUMIE HUDUMA HII YA KUSAHAU NENOSIRI KWENYE UKURASA WA KAWAIDA
+        if ("kkisanga009@gmail.com".equalsIgnoreCase(email)) {
+            model.addAttribute("error", "⚠️ Samahani, huwezi kubadilisha nenosiri la Admin kupitia ukurasa huu wa kawaida!");
+            return "forgot-password";
+        }
+
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            // Zuia pia kama akaunti kwenye database ina role ya ADMIN
+            if ("ADMIN".equalsIgnoreCase(user.getRole()) || "SUB_ADMIN".equalsIgnoreCase(user.getRole())) {
+                model.addAttribute("error", "⚠️ Samahani, akaunti za wasimamizi (Admin) haziwezi kurejeshewa nenosiri hapa.");
+                return "forgot-password";
+            }
+
             model.addAttribute("email", email);
             return "reset-password";
         } else {
@@ -160,6 +173,12 @@ public class AuthController {
     public String processResetPassword(@RequestParam("email") String email,
                                        @RequestParam("newPassword") String newPassword,
                                        Model model) {
+
+        if ("kkisanga009@gmail.com".equalsIgnoreCase(email)) {
+            model.addAttribute("error", "⚠️ Hairuhusiwi kubadili nenosiri la Admin kwa njia hii.");
+            return "forgot-password";
+        }
+
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isPresent()) {
